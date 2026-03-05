@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3 class="mb-4">Historial de Cotizaciones</h3>
+
+<div class="card shadow p-4">
+
+<table class="table table-bordered table-hover">
+
+<thead class="table-dark">
+<tr>
+<th>ID</th>
+<th>Código</th>
+<th>Cliente</th>
+<th>Fecha</th>
+<th>Total</th>
+<th>Estado</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for cotizacion in cotizaciones %}
+
+<tr>
+
+<td>{{ cotizacion.id }}</td>
+<td>{{ cotizacion.codigo }}</td>
+<td>{{ cotizacion.cliente }}</td>
+<td>{{ cotizacion.fecha }}</td>
+<td>RD$ {{ cotizacion.total }}</td>
+<td>{{ cotizacion.estado }}</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% endblock %}

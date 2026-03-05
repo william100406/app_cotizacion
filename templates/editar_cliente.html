@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2 class="mb-4">Editar Cliente</h2>
+
+<div class="card shadow p-4">
+
+<form method="POST">
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+<label class="form-label">Nombre</label>
+<input type="text" name="nombre" class="form-control" value="{{ cliente['nombre'] }}" required>
+</div>
+
+<div class="col-md-6 mb-3">
+<label class="form-label">RNC</label>
+<input type="text" name="rnc" class="form-control" value="{{ cliente['rnc'] }}">
+</div>
+
+<div class="col-md-6 mb-3">
+<label class="form-label">Teléfono</label>
+<input type="text" name="telefono" class="form-control" value="{{ cliente['telefono'] }}">
+</div>
+
+<div class="col-md-6 mb-3">
+<label class="form-label">Dirección</label>
+<input type="text" name="direccion" class="form-control" value="{{ cliente['direccion'] }}">
+</div>
+
+</div>
+
+<button class="btn btn-primary">Guardar cambios</button>
+<a href="/clientes" class="btn btn-secondary">Volver</a>
+
+</form>
+
+</div>
+
+</div>
+
+{% endblock %}

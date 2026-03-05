@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3 class="mb-4">Nueva Cotización</h3>
+
+<div class="card shadow p-4">
+
+<form method="POST">
+
+    <div class="mb-3">
+<label class="form-label">Nombre del cliente</label>
+<input type="text" class="form-control" name="cliente" required>
+</div>
+
+<div class="mb-3">
+<label class="form-label">RNC / Cédula</label>
+<input type="text" class="form-control" name="rnc">
+</div>
+
+<div class="mb-3">
+<label class="form-label">Teléfono</label>
+<input type="text" class="form-control" name="telefono">
+</div>
+
+<div class="mb-3">
+<label class="form-label">Correo</label>
+<input type="email" class="form-control" name="correo">
+</div>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" class="form-control" name="descripcion[]" required></td>
+                    <td><input type="number" step="any" class="form-control" name="cantidad[]" required></td>
+                    <td><input type="number" step="any" class="form-control" name="precio[]" required></td>
+                    <td><input type="number" step="any" class="form-control" name="total_linea[]" readonly></td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="eliminarFila(this)">X</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <button type="button" class="btn btn-outline-secondary mb-3" onclick="agregarFila()">
+        + Agregar Producto
+    </button>
+
+    <div class="row">
+        <div class="col-md-4">
+            <label>Subtotal</label>
+            <input type="number" class="form-control" name="subtotal" readonly>
+        </div>
+        <div class="col-md-4">
+            <label>ITBIS (18%)</label>
+            <input type="number" class="form-control" name="itbis" readonly>
+        </div>
+        <div class="col-md-4">
+            <label>Total</label>
+            <input type="number" class="form-control fw-bold" name="total" readonly>
+        </div>
+    </div>
+
+    <br>
+
+    <button type="submit" class="btn btn-primary btn-lg">
+        Guardar Cotización
+    </button>
+
+</form>
+
+</div>
+
+<script>
+
+function agregarFila() {
+    const tabla = document.querySelector("#tabla tbody");
+
+    const nuevaFila = document.createElement("tr");
+
+    nuevaFila.innerHTML = `
+        <td><input type="text" class="form-control" name="descripcion[]" required></td>
+        <td><input type="number" step="any" class="form-control" name="cantidad[]" required></td>
+        <td><input type="number" step="any" class="form-control" name="precio[]" required></td>
+        <td><input type="number" step="any" class="form-control" name="total_linea[]" readonly></td>
+        <td class="text-center">
+            <button type="button" class="btn btn-danger btn-sm" onclick="eliminarFila(this)">X</button>
+        </td>
+    `;
+
+    tabla.appendChild(nuevaFila);
+}
+
+function eliminarFila(boton) {
+    const fila = boton.closest("tr");
+    fila.remove();
+    calcularTodo();
+}
+
+function calcularTodo() {
+    let subtotal = 0;
+
+    const filas = document.querySelectorAll("#tabla tbody tr");
+
+    filas.forEach(fila => {
+        const cantidad = fila.querySelector('input[name="cantidad[]"]').value;
+        const precio = fila.querySelector('input[name="precio[]"]').value;
+        const totalLinea = fila.querySelector('input[name="total_linea[]"]');
+
+        const total = (cantidad * precio) || 0;
+        totalLinea.value = total.toFixed(2);
+
+        subtotal += total;
+    });
+
+    const itbis = subtotal * 0.18;
+    const totalFinal = subtotal + itbis;
+
+    document.querySelector('input[name="subtotal"]').value = subtotal.toFixed(2);
+    document.querySelector('input[name="itbis"]').value = itbis.toFixed(2);
+    document.querySelector('input[name="total"]').value = totalFinal.toFixed(2);
+}
+
+document.addEventListener("input", function(e) {
+    if (e.target.name === "cantidad[]" || e.target.name === "precio[]") {
+        calcularTodo();
+    }
+});
+
+</script>
+
+{% endblock %}

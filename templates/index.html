@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3 class="mb-4">Dashboard</h3>
+
+<div class="d-flex justify-content-between mb-4">
+
+    <div>
+        <a href="/nueva" class="btn btn-primary">
+            Nueva Cotización
+        </a>
+
+        <a href="/historial" class="btn btn-secondary">
+            Historial
+        </a>
+    </div>
+
+    <form method="GET" action="/" class="d-flex">
+
+        <input
+            type="text"
+            name="buscar"
+            class="form-control me-2"
+            placeholder="Buscar cliente..."
+        >
+
+        <button class="btn btn-dark">
+            Buscar
+        </button>
+
+    </form>
+
+</div>
+
+
+<div class="row mb-4">
+
+    <div class="col-md-3">
+        <div class="card shadow text-center p-3">
+            <h6>Cotizaciones Pendientes</h6>
+            <h2>{{ pendientes }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow text-center p-3">
+            <h6>Cotizaciones Aprobadas</h6>
+            <h2>{{ aprobadas }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow text-center p-3">
+            <h6>Facturas Emitidas</h6>
+            <h2>{{ facturadas }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow text-center p-3">
+            <h6>Total Facturado</h6>
+            <h2>RD$ {{ total_facturado }}</h2>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="card shadow p-4">
+
+<div class="table-responsive">
+
+<table class="table table-bordered table-hover align-middle">
+
+<thead class="table-dark">
+
+<tr>
+<th>ID</th>
+<th>Código</th>
+<th>Cliente</th>
+<th>Fecha</th>
+<th>Total</th>
+<th>Estado</th>
+<th width="360">Acciones</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for cotizacion in cotizaciones %}
+
+<tr>
+
+<td>{{ cotizacion.id }}</td>
+<td>{{ cotizacion.codigo }}</td>
+<td>{{ cotizacion.cliente }}</td>
+<td>{{ cotizacion.fecha }}</td>
+
+<td>
+RD$ {{ cotizacion.total }}
+</td>
+
+<td>
+
+{% if cotizacion.estado == "Pendiente" %}
+<span class="badge bg-warning text-dark">
+Pendiente
+</span>
+
+{% elif cotizacion.estado == "Aprobada" %}
+<span class="badge bg-primary">
+Aprobada
+</span>
+
+{% elif cotizacion.estado == "Facturada" %}
+<span class="badge bg-success">
+Facturada
+</span>
+{% endif %}
+
+</td>
+
+<td>
+
+<a href="/detalle/{{ cotizacion.id }}" class="btn btn-sm btn-info">
+Ver
+</a>
+
+{% if cotizacion.estado == "Pendiente" %}
+<a href="/aprobar/{{ cotizacion.id }}" class="btn btn-sm btn-primary">
+Aprobar
+</a>
+{% endif %}
+
+{% if cotizacion.estado != "Facturada" %}
+<a href="/facturar/{{ cotizacion.id }}" class="btn btn-sm btn-success">
+Facturar
+</a>
+{% endif %}
+
+<a href="/cotizacion_pdf/{{ cotizacion.id }}"
+class="btn btn-sm btn-dark">
+PDF
+</a>
+
+{% if cotizacion.estado == "Facturada" %}
+<a href="/factura_pdf/{{ cotizacion.id }}"
+class="btn btn-sm btn-secondary">
+Factura
+</a>
+{% endif %}
+
+<a href="/eliminar/{{ cotizacion.id }}"
+class="btn btn-sm btn-danger"
+onclick="return confirm('¿Seguro que deseas eliminar esta cotización?')">
+Eliminar
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+{% endblock %}

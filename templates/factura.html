@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Factura</h2>
+
+<p><strong>Cliente:</strong> {{ cotizacion.cliente }}</p>
+<p><strong>Total:</strong> RD$ {{ cotizacion.total }}</p>
+
+<h4>Items</h4>
+
+<table border="1">
+
+<tr>
+<th>Descripción</th>
+<th>Cantidad</th>
+<th>Precio</th>
+<th>Total</th>
+</tr>
+
+{% for item in items %}
+
+<tr>
+<td>{{ item.descripcion }}</td>
+<td>{{ item.cantidad }}</td>
+<td>{{ item.precio }}</td>
+<td>{{ item.total }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+<br>
+
+<form method="POST">
+
+<label>RNC del cliente</label>
+<input type="text" name="rnc" required>
+
+<br><br>
+
+<button type="submit">
+Generar Factura
+</button>
+
+</form>
+
+{% endblock %}

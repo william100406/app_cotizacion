@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detalle Factura</title>
+</head>
+<body>
+
+<h2>Detalle de Factura</h2>
+
+<p><strong>Número:</strong> {{ factura[1] }}</p>
+<p><strong>Cliente:</strong> {{ factura[2] }}</p>
+<p><strong>Total:</strong> RD$ {{ factura[3] }}</p>
+<p><strong>Fecha:</strong> {{ factura[4] }}</p>
+
+<button onclick="window.print()">Imprimir</button>
+
+<br><br>
+<a href="/historial">Volver</a>
+
+</body>
+</html>
