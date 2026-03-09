@@ -1,63 +1,89 @@
 <!DOCTYPE html>
-<html>
-<head>
+<html lang="es">
 
+<head>
+<meta charset="UTF-8">
 <title>Login</title>
 
-<style>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
-body{
-font-family:Arial;
-background:#f4f6f9;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
-
-.login{
-background:white;
-padding:40px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-width:300px;
-}
-
-input{
-width:100%;
-padding:10px;
-margin-bottom:15px;
-}
-
-button{
-width:100%;
-padding:10px;
-background:#2c3e50;
-color:white;
-border:none;
-}
-
-</style>
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
 
 <body>
 
-<div class="login">
+<div class="login-wrapper">
 
-<h2>Login</h2>
+<div class="login-card">
+
+<h2>Iniciar Sesión</h2>
 
 <form method="POST">
 
-<input type="text" name="usuario" placeholder="Usuario">
+<div class="input-group">
 
-<input type="password" name="password" placeholder="Contraseña">
-
-<button>Entrar</button>
-
-</form>
+<i class="fa fa-user"></i>
+<input type="text" name="usuario" placeholder="Usuario" required>
 
 </div>
 
+<div class="input-group password">
+
+<i class="fa fa-lock"></i>
+<input type="password" id="password" name="password" placeholder="Contraseña" required>
+
+<span class="toggle-password" onclick="togglePassword()">
+<i class="fa fa-eye"></i>
+</span>
+
+</div>
+
+<button type="submit" class="login-btn">Entrar</button>
+
+</form>
+
+<div class="divider">
+<span>o iniciar sesión con</span>
+</div>
+
+<div class="social-login">
+
+<button class="google">
+<i class="fab fa-google"></i>
+</button>
+
+<button class="facebook">
+<i class="fab fa-facebook-f"></i>
+</button>
+
+<button class="x">
+<i class="fab fa-x-twitter"></i>
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function togglePassword() {
+
+const password = document.getElementById("password");
+
+if(password.type === "password"){
+password.type = "text";
+}else{
+password.type = "password";
+}
+
+}
+
+</script>
+
 </body>
+
 </html>

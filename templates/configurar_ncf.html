@@ -2,27 +2,30 @@
 
 {% block content %}
 
-<h2>Configurar NCF</h2>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
-<form method="POST">
+<div class="main-content">
 
-    <label>Tipo de NCF</label>
-    <input type="text" name="tipo" value="{{ config.tipo if config else '' }}" required>
+    <div class="form-card">
 
-    <br><br>
+        <h1>Configurar NCF</h1>
 
-    <label>Desde</label>
-    <input type="number" name="desde" value="{{ config.desde if config else '' }}" required>
+        <form>
 
-    <br><br>
+            <label>Tipo de NCF</label>
+            <input type="text">
 
-    <label>Hasta</label>
-    <input type="number" name="hasta" value="{{ config.hasta if config else '' }}" required>
+            <label>Desde</label>
+            <input type="text">
 
-    <br><br>
+            <label>Hasta</label>
+            <input type="text">
 
-    <button type="submit">Guardar Configuración</button>
+            <button>Guardar Configuración</button>
 
-</form>
+        </form>
 
+    </div>
+
+</div>
 {% endblock %}
