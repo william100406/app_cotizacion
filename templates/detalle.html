@@ -1,21 +1,40 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Detalle Factura</title>
-</head>
-<body>
+<h2>Detalle de Cotización</h2>
 
-<h2>Detalle de Factura</h2>
+<p><strong>Número:</strong> {{ cotizacion.id }}</p>
+<p><strong>Cliente:</strong> {{ cotizacion.cliente }}</p>
+<p><strong>Total:</strong> RD$ {{ cotizacion.total }}</p>
+<p><strong>Fecha:</strong> {{ cotizacion.fecha }}</p>
 
-<p><strong>Número:</strong> {{ factura[1] }}</p>
-<p><strong>Cliente:</strong> {{ factura[2] }}</p>
-<p><strong>Total:</strong> RD$ {{ factura[3] }}</p>
-<p><strong>Fecha:</strong> {{ factura[4] }}</p>
+<hr>
+
+<h3>Servicios</h3>
+
+<table border="1" width="100%">
+
+<tr>
+<th>Servicio</th>
+<th>Cantidad</th>
+<th>Precio</th>
+<th>Total</th>
+</tr>
+
+{% for s in servicios %}
+
+<tr>
+<td>{{ s.servicio }}</td>
+<td>{{ s.cantidad }}</td>
+<td>{{ s.precio }}</td>
+<td>{{ s.total }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+<br>
 
 <button onclick="window.print()">Imprimir</button>
 
 <br><br>
-<a href="/historial">Volver</a>
 
-</body>
-</html>
+<a href="/historial">Volver</a>

@@ -5,27 +5,26 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 <div class="main-content">
-
     <div class="form-card">
 
         <h1>Configurar NCF</h1>
 
-        <form>
+        <form method="POST">
 
             <label>Tipo de NCF</label>
-            <input type="text">
+            <input type="text" name="tipo" required>
 
             <label>Desde</label>
-            <input type="text">
+            <input type="number" name="desde" required>
 
             <label>Hasta</label>
-            <input type="text">
+            <input type="number" name="hasta" required>
 
-            <button>Guardar Configuración</button>
+            <button type="submit">Guardar Configuración</button>
 
         </form>
 
     </div>
-
 </div>
+
 {% endblock %}

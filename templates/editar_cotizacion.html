@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Editar Cotización</h3>
+
+<form method="POST">
+
+<label>Cliente</label>
+<input type="text" name="cliente" value="{{ cotizacion.cliente }}" class="form-control">
+
+<label>RNC</label>
+<input type="text" name="rnc" value="{{ cotizacion.rnc }}" class="form-control">
+
+<label>Teléfono</label>
+<input type="text" name="telefono" value="{{ cotizacion.telefono }}" class="form-control">
+
+<label>Correo</label>
+<input type="text" name="correo" value="{{ cotizacion.correo }}" class="form-control">
+
+<br>
+
+<button class="btn btn-success">
+Guardar cambios
+</button>
+
+</form>
+
+{% endblock %}
