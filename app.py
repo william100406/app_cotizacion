@@ -1,24 +1,35 @@
 from utils.database import *
-from flask import Flask, render_template, request, redirect, url_for, send_file, session
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Flask, render_template, request, redirect, url_for, send_file, session,make_response
+from flask import flash
 import sqlite3
+from datetime import timedelta
 from datetime import datetime
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
+from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
 import io
 
 app = Flask(__name__)
 
 app.secret_key = "g7@9d#s1!Sistema_cotización"
 
+app.permanent_session_lifetime = timedelta(days=7)
+
 def get_db():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     return conn
 
-
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
+
+     
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS cotizaciones (
@@ -43,6 +54,179 @@ def init_db():
         total REAL
     )
     """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS servicios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT,
+    precio_a REAL,
+    precio_b REAL,
+    precio_c REAL
+    )
+    """)
+
+    servicios = [
+
+    ("Hora de Trabajo",24,24,24),
+    ("Nueva Identidad Corporativa",1480,890,520),
+    ("Nuevo logotipo / isotipo / imagotipo / isologo",0,0,300),
+    ("Rediseño Identidad Corporativa",1480,890,520),
+    ("Rediseño logotipo / isotipo / imagotipo / isologo",0,0,360),
+    ("Restyling Identidad Corporativa",1030,660,370),
+    ("Restyling logotipo / isotipo / imagotipo / isologo",0,0,210),
+    ("Manual de normas / uso",320,220,150),
+    ("Identidad efímera",540,410,270),
+    ("Identidad de un producto",1030,810,520),
+    ("Naming corporativo / institucional",370,260,150),
+    ("Naming producto / evento",370,260,150),
+    ("Slogan / Lema",240,180,120),
+    ("Claim",240,180,120),
+    ("Prenda única",160,120,80),
+    ("Sistema de uniformes / vestuario",890,660,450),
+
+    ("Papelería básica",450,290,190),
+    ("Papelería comercial",120,90,60),
+    ("Tarjetas personales",80,60,40),
+    ("Hojas membretadas",80,60,40),
+    ("Sobres",80,60,40),
+    ("Firma o encabezado de e-mail",80,60,40),
+    ("Carpeta empresarial / institucional",140,110,80),
+    ("Tarjetas para eventos",120,90,60),
+    ("Invitaciones empresariales",150,120,90),
+    ("Postal",130,80,50),
+
+    ("Volante / Flyer solo frente",140,100,60),
+    ("Volante / Flyer frente y dorso",210,150,110),
+    ("Folleto díptico",270,210,150),
+    ("Folleto tríptico",320,250,190),
+    ("Brochure",690,480,240),
+    ("Aviso institucional diario / revista",130,70,50),
+    ("Aviso institucional doble página",160,110,70),
+    ("Aviso publicitario diario / revista",180,120,70),
+    ("Aviso publicitario doble página",210,150,110),
+    ("Key Visual",240,150,100),
+    ("Redes sociales avatar + portada",130,100,60),
+    ("Redes sociales placa posteo",100,70,50),
+    ("Redes sociales gif animado",140,100,70),
+    ("Concurso en muro",280,240,190),
+    ("Social Media Plan",260,220,190),
+    ("Creación perfil o fanpage",170,130,90),
+    ("Creación de álbum",40,30,20),
+    ("Posteo publicación de enlace",20,15,10),
+    ("Gestión de Comunidad 1",180,160,130),
+    ("Gestión de Comunidad 2",280,240,200),
+    ("Monitoreo de redes",90,60,40),
+    ("Creatividad aviso institucional",110,70,50),
+    ("Creatividad folleto díptico",130,90,60),
+    ("Creatividad flyer frente/dorso",110,70,50),
+    ("Redacción gacetilla de prensa",90,70,60),
+    ("Nota para redes sociales corta",30,25,20),
+    ("Nota para redes sociales larga",50,40,30),
+
+    ("Merchandising",350,270,210),
+    ("Remeras",90,70,50),
+    ("Calcos",70,50,30),
+    ("Lapicera / pin / llavero",70,50,30),
+    ("Pad / funda celulares / taza",70,50,30),
+    ("Bandera",70,50,30),
+    ("Bolsas / Envoltorios",90,70,50),
+    ("Almanaque pared poster",190,140,80),
+    ("Almanaque pared revista",430,240,140),
+    ("Almanaque escritorio simple",140,90,60),
+    ("Almanaque escritorio móvil",150,100,80),
+
+    ("Arte de tapa",280,210,140),
+    ("Armado página simple",20,15,10),
+    ("Armado página compuesta",30,20,13),
+    ("Libro cuerpo y puesta en página",1220,910,610),
+    ("Revista",550,460,360),
+    ("Catálogo de productos",810,590,370),
+    ("Menú / carta restaurante",310,240,180),
+    ("Manual de instrucciones",60,55,50),
+    ("Folleto instructivo",330,280,240),
+
+    ("Ploteado vehicular",280,210,160),
+    ("Ploteado vidriera simple",140,100,70),
+    ("Ploteado vidriera complejo",340,250,160),
+    ("Cenefa / saltarín / llamador",170,140,100),
+    ("Afiche",170,140,100),
+    ("Banner",170,140,100),
+    ("Cartel de fachada",250,190,150),
+    ("Cartel para exteriores",270,210,160),
+    ("Sistema señalético y soporte",1030,770,520),
+    ("Aplicación señalética simple",290,220,150),
+    ("Aplicación señalética compleja",520,370,260),
+    ("Señalética efímera",740,510,360),
+    ("Stand gráfico",520,370,220),
+    ("Stand diseño completo",890,660,450),
+    ("Modelado 3D stand baja",120,90,60),
+    ("Modelado 3D stand alta",290,220,150),
+
+    ("Digitalización",50,30,20),
+    ("Ilustración mano alzada",340,220,150),
+    ("Ilustración vectorial",340,220,150),
+    ("Ilustración modelado 3D",590,450,290),
+    ("Animación personaje",680,510,350),
+    ("Sistema de signos",890,520,290),
+    ("Infografía",1030,660,370),
+
+    ("CD Pack",770,560,390),
+    ("Etiqueta simple",260,150,90),
+    ("Etiqueta compuesta",850,660,510),
+    ("Envase",1000,820,0),
+    ("Modelado 3D envase",70,60,50),
+    ("Renderizado modelo 3D",20,15,10),
+    ("Animación modelo 3D",450,290,150),
+
+    ("Modificaciones sitio HTML/CSS",220,170,120),
+    ("Diseño landing page",200,140,100),
+    ("Maquetación landing page",200,140,100),
+    ("Implementación Wordpress",550,400,280),
+    ("Diseño sitio HTML5 CSS3",710,610,510),
+    ("Maquetación sitio HTML5 CSS3",710,610,510),
+    ("Diseño sitio responsive",1030,880,740),
+    ("Maquetación sitio responsive",1030,880,740),
+    ("Programación PHP autogestión",480,410,340),
+    ("Diseño sitio móvil",480,410,340),
+    ("Maquetación sitio móvil",480,410,340),
+    ("Diseño APP UX",680,510,340),
+    ("Diseño APP UI",680,510,340),
+    ("Maquetación APP híbrida",680,510,340),
+    ("Maquetación APP nativa",1020,760,510),
+    ("SEO básico",120,90,50),
+    ("SEO avanzado",240,180,120),
+    ("Banner publicitario animado",160,120,100),
+    ("Mailing / Newsletter",150,130,90),
+    ("Presentación digital / CD interactivo",820,580,400),
+
+    ("Presentaciones dinámicas",150,100,70),
+    ("Placa animada 2D",240,210,170),
+    ("Spot publicitario baja",550,460,390),
+    ("Spot publicitario media",860,740,620),
+    ("Spot publicitario alta",1490,1280,1070),
+    ("Títulos apertura",240,210,170),
+    ("Zócalo TV",150,120,90),
+    ("Spot radial",130,90,50),
+    ("Composición música original",340,290,240),
+    ("Locución",120,80,30),
+    ("Armado de set estudio",60,50,30),
+    ("Sesión fotográfica estudio",13,10,7),
+    ("Sesión fotográfica locación",450,290,220),
+    ("Escaneo digital",8,5,3),
+    ("Filmación",210,180,150),
+    ("Supervisión tomas",40,30,20),
+    ("Retoque digital",50,40,30)
+
+    ]
+
+    for servicio in servicios:
+        cursor.execute("""
+        INSERT INTO servicios (nombre, 
+        precio_a, precio_b, precio_c)
+        VALUES (?, ?, ?, ?)
+        """, servicio)
+
+
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS facturas (
@@ -80,26 +264,33 @@ def init_db():
     """)
 
     cursor.execute("""
-CREATE TABLE IF NOT EXISTS usuarios (
+    CREATE TABLE IF NOT EXISTS usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    usuario TEXT,
+    password TEXT
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS usuarios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     usuario TEXT UNIQUE,
     password TEXT
-)
-""")
+    )
+    """)
 
-    cursor.execute("""
-INSERT OR IGNORE INTO usuarios (usuario, password)
-VALUES ('admin', '1234')
-""")
+    cursor.execute("SELECT * FROM usuarios")
 
-    user = cursor.execute("SELECT * FROM usuarios").fetchone()
+    if not cursor.fetchone():
 
-    if not user:
-        cursor.execute("""
-    INSERT INTO usuarios (usuario, password)
-    VALUES (?, ?)
-    """, ("admin", "1234"))
-        
+        password_hash = generate_password_hash("1234")
+
+
+        cursor.execute(
+        "INSERT INTO usuarios (usuario, password) VALUES (?, ?)",
+        ("admin", password_hash)
+    )
+
     cursor.execute("""
 CREATE TABLE IF NOT EXISTS clientes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -174,6 +365,9 @@ def index():
 @app.route("/historial")
 def historial():
 
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
     conn = get_db()
 
     cotizaciones = conn.execute("""
@@ -190,6 +384,9 @@ def historial():
 
 @app.route("/facturas")
 def facturas():
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
 
     conn = get_db()
 
@@ -208,23 +405,53 @@ def facturas():
 @app.route("/nueva", methods=["GET", "POST"])
 def nueva_cotizacion():
 
+    conn = get_db()
+    cursor = conn.cursor()
+
+    clientes = conn.execute("SELECT nombre FROM clientes").fetchall()
+    servicios_db = conn.execute("SELECT nombre, precio_a, precio_b, precio_c" \
+    " FROM servicios").fetchall()
+
+    servicios = []
+
+
+    for s in servicios_db:
+        servicios.append({
+            "nombre": s[0],
+            "precio_a": s[1],
+            "precio_b": s[2],
+            "precio_c": s[3]
+        })
+
     if request.method == "POST":
 
+        print("SE ENVIO EL FORMULARIO")
+        print(request.form)
+
+
         cliente = request.form["cliente"]
+        rnc = request.form["rnc"]
+        telefono = request.form["telefono"]
+        if not telefono.isdigit():
+            flash("El teléfono debe contener solo números", "danger")
+            return render_template("nueva_cotizacion.html", data=request.form)
+        correo = request.form["correo"]
+
         subtotal = float(request.form["subtotal"])
         itbis = float(request.form["itbis"])
         total = float(request.form["total"])
+        
 
-        codigo = "COT-" + datetime.now().strftime("%Y%m%d%H%M%S")
+        cursor.execute("SELECT COUNT(*) FROM cotizaciones")
+        numero = cursor.fetchone()[0] + 1
+
+        codigo = f"COT-{datetime.now().year}-{numero:04d}"
         fecha = datetime.now().strftime("%d/%m/%Y")
 
-        conn = get_db()
-        cursor = conn.cursor()
-
         cursor.execute("""
-        INSERT INTO cotizaciones (codigo, cliente, fecha, subtotal, itbis, total, estado)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (codigo, cliente, fecha, subtotal, itbis, total, "Pendiente"))
+        INSERT INTO cotizaciones (codigo, cliente, rnc, telefono, correo, fecha, subtotal, itbis, total, estado)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (codigo, cliente, rnc, telefono, correo, fecha, subtotal, itbis, total, "Pendiente"))
 
         cotizacion_id = cursor.lastrowid
 
@@ -232,6 +459,7 @@ def nueva_cotizacion():
         cantidades = request.form.getlist("cantidad[]")
         precios = request.form.getlist("precio[]")
         totales = request.form.getlist("total_linea[]")
+
 
         for i in range(len(descripciones)):
 
@@ -251,7 +479,48 @@ def nueva_cotizacion():
 
         return redirect(url_for("index"))
 
-    return render_template("nueva_cotizacion.html")
+    conn.close()
+
+    return render_template(
+        "nueva_cotizacion.html",
+        clientes=clientes, servicios = servicios
+    )
+
+@app.route("/editar_cotizacion/<int:id>", methods=["GET","POST"])
+def editar_cotizacion(id):
+
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    if request.method == "POST":
+
+        cliente = request.form["cliente"]
+        rnc = request.form["rnc"]
+        telefono = request.form["telefono"]
+        correo = request.form["correo"]
+
+        subtotal = float(request.form["subtotal"])
+        itbis = float(request.form["itbis"])
+        total = float(request.form["total"])
+    
+        cursor.execute("""
+        UPDATE cotizaciones
+        SET cliente=?, rnc=?, telefono=?, correo=?
+        WHERE id=?
+        """,(cliente, rnc, telefono, correo,id))
+
+        conn.commit()
+        conn.close()
+
+        return redirect("/historial")
+
+    cursor.execute("SELECT * FROM cotizaciones WHERE id=?",(id,))
+    cotizacion = cursor.fetchone()
+
+    conn.close()
+
+    return render_template("editar_cotizacion.html", cotizacion=cotizacion)
 
 
 @app.route("/aprobar/<int:id>")
@@ -261,22 +530,6 @@ def aprobar(id):
 
     conn.execute(
         "UPDATE cotizaciones SET estado='Aprobada' WHERE id=?",
-        (id,)
-    )
-
-    conn.commit()
-    conn.close()
-
-    return redirect(url_for("index"))
-
-
-@app.route("/eliminar/<int:id>")
-def eliminar_cotizacion(id):
-
-    conn = get_db()
-
-    conn.execute(
-        "UPDATE cotizaciones SET estado='Eliminada' WHERE id=?",
         (id,)
     )
 
@@ -428,6 +681,9 @@ def factura_pdf(id):
         (id,)
     ).fetchone()
 
+    if not factura:
+        return "Factura no encontrada"
+
     items = conn.execute(
         "SELECT * FROM factura_items WHERE factura_id=?",
         (factura["id"],)
@@ -440,13 +696,11 @@ def factura_pdf(id):
 
     y = 750
 
-    # TITULO
     p.setFont("Helvetica-Bold", 18)
     p.drawString(50, y, "FACTURA")
 
     y -= 40
 
-    # INFO EMPRESA
     p.setFont("Helvetica", 12)
     p.drawString(50, y, "Empresa: Mi Empresa SRL")
     y -= 20
@@ -454,7 +708,6 @@ def factura_pdf(id):
 
     y -= 30
 
-    # INFO CLIENTE
     p.drawString(50, y, f"NCF: {factura['ncf']}")
     y -= 20
     p.drawString(50, y, f"Cliente: {factura['cliente']}")
@@ -465,7 +718,6 @@ def factura_pdf(id):
 
     y -= 40
 
-    # ENCABEZADO TABLA
     p.setFont("Helvetica-Bold", 12)
     p.drawString(50, y, "Descripción")
     p.drawString(300, y, "Cantidad")
@@ -477,7 +729,6 @@ def factura_pdf(id):
 
     y -= 20
 
-    # ITEMS
     p.setFont("Helvetica", 11)
 
     for item in items:
@@ -491,7 +742,6 @@ def factura_pdf(id):
 
     y -= 20
 
-    # TOTALES
     p.setFont("Helvetica-Bold", 12)
 
     p.drawString(380, y, f"Subtotal: RD$ {factura['subtotal']}")
@@ -516,7 +766,6 @@ def eliminar_factura(id):
 
     conn = get_db()
 
-    # buscar la factura
     factura = conn.execute(
         "SELECT * FROM facturas WHERE id=?",
         (id,)
@@ -524,19 +773,16 @@ def eliminar_factura(id):
 
     if factura:
 
-        # devolver cotización a aprobada
         conn.execute(
             "UPDATE cotizaciones SET estado='Aprobada' WHERE id=?",
             (factura["cotizacion_id"],)
         )
 
-        # borrar items
         conn.execute(
             "DELETE FROM factura_items WHERE factura_id=?",
             (id,)
         )
 
-        # borrar factura
         conn.execute(
             "DELETE FROM facturas WHERE id=?",
             (id,)
@@ -549,6 +795,9 @@ def eliminar_factura(id):
 
 @app.route("/reset_facturas")
 def reset_facturas():
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
 
     conn = get_db()
 
@@ -566,84 +815,158 @@ def cotizacion_pdf(id):
     conn = get_db()
 
     cotizacion = conn.execute(
-        "SELECT * FROM cotizaciones WHERE id=?",
-        (id,)
+        "SELECT * FROM cotizaciones WHERE id=?", (id,)
     ).fetchone()
 
     items = conn.execute(
-        "SELECT * FROM cotizacion_items WHERE cotizacion_id=?",
-        (id,)
+        "SELECT * FROM cotizacion_items WHERE cotizacion_id=?", (id,)
     ).fetchall()
 
-    conn.close()
-
     buffer = io.BytesIO()
-    p = canvas.Canvas(buffer, pagesize=letter)
+    pdf = canvas.Canvas(buffer, pagesize=letter)
 
-    y = 750
+    width, height = letter
 
-    p.setFont("Helvetica-Bold", 16)
-    p.drawString(50, y, "COTIZACIÓN")
 
-    y -= 40
+    pdf.setFont("Helvetica-Bold",26)
+    pdf.drawString(40,760,"D.V.D")
 
-    p.drawString(50, y, f"Código: {cotizacion['codigo']}")
-    y -= 20
-    p.drawString(50, y, f"Cliente: {cotizacion['cliente']}")
-    y -= 20
-    p.drawString(50, y, f"Fecha: {cotizacion['fecha']}")
+    pdf.setFont("Helvetica",12)
+    pdf.drawString(40,740,"PUBLICITYSTUDIO")
 
-    y -= 40
+    pdf.setFont("Helvetica",10)
+
+    pdf.drawRightString(570,760,f"Fecha: {cotizacion['fecha']}")
+    pdf.drawRightString(570,745,"Santo Domingo D.N. Rep.Dom.")
+    pdf.drawRightString(570,730,"T. 829-874-1003")
+    pdf.drawRightString(570,715,"Email: delvallepublicity@gmail.com")
+    pdf.drawRightString(570,700,"RNC: 132357604")
+
+
+    pdf.setFont("Helvetica-Bold",16)
+    pdf.drawCentredString(width/2,670,"COTIZACIÓN")
+
+
+    pdf.setFont("Helvetica",11)
+
+    pdf.drawString(40,640,f"Codigo: {cotizacion['codigo']}")
+    pdf.drawString(40,625,f"Nombre: {cotizacion['cliente']}")
+    pdf.drawString(40,610,"Direccion: -")
+    pdf.drawString(40,595,f"Contacto: {cotizacion['cliente']}")
+
+    pdf.drawRightString(570,640,f"No. Cotizacion: {cotizacion['id']}")
+    pdf.drawRightString(570,625,f"Fecha: {cotizacion['fecha']}")
+    pdf.drawRightString(570,610,"Atendido: Radhames Del Valle")
+    pdf.drawRightString(570,595,"pag: 1")
+
+
+    pdf.line(40,575,570,575)
+
+
+    pdf.setFont("Helvetica-Bold",11)
+
+    pdf.drawString(50,555,"Cantidad")
+    pdf.drawString(150,555,"Descripción")
+    pdf.drawString(420,555,"Precio")
+    pdf.drawString(500,555,"Valor")
+
+    pdf.line(40,545,570,545)
+
+
+    y = 520
+
+    pdf.setFont("Helvetica",10)
 
     for item in items:
-        p.drawString(50, y, item["descripcion"])
-        p.drawString(300, y, str(item["cantidad"]))
-        p.drawString(380, y, str(item["precio"]))
-        p.drawString(460, y, str(item["total"]))
+
+        pdf.drawString(60,y,str(item["cantidad"]))
+        pdf.drawString(150,y,item["descripcion"])
+
+        precio = float(item["precio"])
+        total = float(item["total"])
+
+        pdf.drawRightString(470,y,f"{precio:,.2f}")
+        pdf.drawRightString(560,y,f"{total:,.2f}")
+
         y -= 20
 
-    y -= 20
+    pdf.line(40,200,570,200)
 
-    p.drawString(380, y, f"Subtotal: {cotizacion['subtotal']}")
-    y -= 20
-    p.drawString(380, y, f"ITBIS: {cotizacion['itbis']}")
-    y -= 20
-    p.drawString(380, y, f"Total: {cotizacion['total']}")
 
-    p.save()
+    pdf.setFont("Helvetica",9)
+
+    pdf.drawString(40,180,"*Esta factura es válida dentro de los siguientes 15 días.")
+    pdf.drawString(40,165,"**Se requiere el 50% de avance y 50% contra entrega.")
+    pdf.drawString(40,150,"***Tiempo de producción: 2 semanas luego de aprobada la factura.")
+
+
+    subtotal = float(cotizacion["subtotal"])
+    itbis = float(cotizacion["itbis"])
+    total = float(cotizacion["total"])
+
+    pdf.setFont("Helvetica",11)
+
+    pdf.drawRightString(520,170,"Sub-total:")
+    pdf.drawRightString(560,170,f"{subtotal:,.2f}")
+
+    pdf.drawRightString(520,150,"ITBIS:")
+    pdf.drawRightString(560,150,f"{itbis:,.2f}")
+
+    pdf.setFont("Helvetica-Bold",12)
+
+    pdf.drawRightString(520,120,"Total:")
+    pdf.drawRightString(560,120,f"{total:,.2f}")
+
+
+    pdf.line(200,80,360,80)
+
+    pdf.setFont("Helvetica",9)
+    pdf.drawCentredString(280,65,"Firma y Sello")
+
+    pdf.save()
 
     buffer.seek(0)
+
+    conn.close()
 
     return send_file(
         buffer,
         as_attachment=True,
-        download_name="cotizacion.pdf",
+        download_name=f"cotizacion_{cotizacion['codigo']}.pdf",
         mimetype="application/pdf"
     )
-
 
 @app.route("/detalle/<int:id>")
 def detalle(id):
 
-    conn = get_db()
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
 
-    cotizacion = conn.execute(
+    cursor.execute("SELECT * FROM cotizacion_servicios")
+    print(cursor.fetchall())
+
+
+    cursor.execute(
         "SELECT * FROM cotizaciones WHERE id=?",
         (id,)
-    ).fetchone()
+    )
+    cotizacion = cursor.fetchone()
 
-    items = conn.execute(
-        "SELECT * FROM cotizacion_items WHERE cotizacion_id=?",
-        (id,)
-    ).fetchall()
+    cursor.execute("SELECT * FROM cotizacion_servicios WHERE cotizacion_id=?",
+    (id,)           
+    )
+
+    servicios = cursor.fetchall()
 
     conn.close()
 
     return render_template(
         "detalle.html",
         cotizacion=cotizacion,
-        items=items
+        servicios= servicios
     )
+    
 
 @app.route("/login", methods=["GET","POST"])
 def login():
@@ -652,25 +975,33 @@ def login():
 
         usuario = request.form["usuario"]
         password = request.form["password"]
+        recordar = request.form.get("recordar")
 
         conn = get_db()
+        cursor = conn.cursor()
 
-        user = conn.execute(
-            "SELECT * FROM usuarios WHERE usuario=? AND password=?",
-            (usuario, password)
-        ).fetchone()
+        cursor.execute(
+            "SELECT * FROM usuarios WHERE usuario=?",
+            (usuario,)
+        )
 
-        conn.close()
+        user = cursor.fetchone()
 
-        if user:
-            session ["usuario"] = usuario
+        if user and check_password_hash(user["password"], password):
+
+            session["usuario"] = usuario
             return redirect(url_for("index"))
+
+        if recordar:
+            session.permanent = True
+
+            return redirect(url_for("index"))
+
         else:
             return "Usuario o contraseña incorrectos"
 
     return render_template("login.html")
 
-from flask import session, redirect, url_for
 
 @app.route("/logout")
 def logout():
@@ -741,6 +1072,30 @@ def clientes():
 
     return render_template("clientes.html", clientes=clientes)
 
+
+@app.route("/buscar_clientes")
+def buscar_clientes():
+
+    termino = request.args.get("q")
+
+    conn = get_db()
+
+    clientes = conn.execute("""
+    SELECT nombre FROM clientes
+    WHERE nombre LIKE ?
+    LIMIT 10
+    """, ("%" + termino + "%",)).fetchall()
+
+    conn.close()
+
+    resultados = []
+
+    for cliente in clientes:
+        resultados.append(cliente["nombre"])
+
+    return {"clientes": resultados}
+
+
 @app.route("/eliminar_cliente/<int:id>")
 def eliminar_cliente(id):
 
@@ -771,16 +1126,16 @@ def editar_cliente(id):
 
     if request.method == "POST":
 
-        nombre = request.form["nombre"]
+        cliente = request.form["cliente"]
         rnc = request.form["rnc"]
         telefono = request.form["telefono"]
-        direccion = request.form["direccion"]
+        correo = request.form["correo"]
 
         conn.execute("""
         UPDATE clientes
         SET nombre=?, rnc=?, telefono=?, direccion=?
         WHERE id=?
-        """, (nombre, rnc, telefono, direccion, id))
+        """, (cliente, rnc, telefono, correo,id))
 
         conn.commit()
         conn.close()
@@ -794,8 +1149,49 @@ def editar_cliente(id):
         cliente=cliente
     )
 
+@app.route("/arreglar_db")
+def arreglar_db():
+
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("ALTER TABLE cotizaciones ADD COLUMN rnc TEXT")
+    except:
+        pass
+
+    try:
+        cursor.execute("ALTER TABLE cotizaciones ADD COLUMN telefono TEXT")
+    except:
+        pass
+
+    try:
+        cursor.execute("ALTER TABLE cotizaciones ADD COLUMN correo TEXT")
+    except:
+        pass
+
+    conn.commit()
+    conn.close()
+
+    return "Base de datos actualizada correctamente"
+
+@app.route("/eliminar_cotizacion/<int:id>")
+def eliminar_cotizacion(id):
+
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM cotizacion_servicios WHERE cotizacion_id=?", (id,))
+    cursor.execute("DELETE FROM cotizaciones WHERE id=?", (id,))
+    
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("index"))
+
+    
 if __name__ == "__main__":
 
     init_db()
 
-    app.run(debug=True)
+    app.run(host= "0.0.0.0", port= 5000, debug=True)

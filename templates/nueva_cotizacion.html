@@ -4,68 +4,93 @@
 
 <h3 class="mb-4">Nueva Cotización</h3>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert {{ category }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
 <div class="card shadow p-4">
 
 <form method="POST">
 
-    <div class="mb-3">
+<div class="mb-3">
 <label class="form-label">Nombre del cliente</label>
-<input type="text" class="form-control" name="cliente" required>
+
+<input type="text" class="form-control" name="cliente" list="lista_clientes" required>
+
+<datalist id="lista_clientes">
+{% for cliente in clientes %}
+<option value="{{ cliente.nombre }}"></option>
+{% endfor %}
+</datalist>
 </div>
 
 <div class="mb-3">
 <label class="form-label">RNC / Cédula</label>
-<input type="text" class="form-control" name="rnc">
+<input type="text" class="form-control" name="rnc" value=" {{ data.rnc if data else '' }}" >
 </div>
 
 <div class="mb-3">
 <label class="form-label">Teléfono</label>
-<input type="text" class="form-control" name="telefono">
+<input type="text" class="form-control" name="telefono" value= "{{ data.telefono if data else '' }}">
 </div>
 
 <div class="mb-3">
 <label class="form-label">Correo</label>
-<input type="email" class="form-control" name="correo">
+<input type="email" class="form-control" name="correo" value=" {{ data.correo if data else '' }}">
 </div>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><input type="text" class="form-control" name="descripcion[]" required></td>
-                    <td><input type="number" step="any" class="form-control" name="cantidad[]" required></td>
-                    <td><input type="number" step="any" class="form-control" name="precio[]" required></td>
-                    <td><input type="number" step="any" class="form-control" name="total_linea[]" readonly></td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-danger btn-sm" onclick="eliminarFila(this)">X</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
 
-    <button type="button" class="btn btn-outline-secondary mb-3" onclick="agregarFila()">
-        + Agregar Producto
-    </button>
+<button type="button" class="btn btn-outline-secondary mb-3" onclick="agregarFila()">
+Agregar servicio
+</button>
 
-    <div class="row">
-        <div class="col-md-4">
-            <label>Subtotal</label>
-            <input type="number" class="form-control" name="subtotal" readonly>
-        </div>
-        <div class="col-md-4">
-            <label>ITBIS (18%)</label>
-            <input type="number" class="form-control" name="itbis" readonly>
-        </div>
-        <div class="col-md-4">
-            <label>Total</label>
-            <input type="number" class="form-control fw-bold" name="total" readonly>
-        </div>
-    </div>
+<table class="table" id="tabla">
 
-    <br>
+<thead>
+<tr>
+<th>Servicio</th>
+<th>Tipo precio</th>
+<th>Cantidad</th>
+<th>Precio</th>
+<th>Total</th>
+<th></th>
+</tr>
+</thead>
 
-    <button type="submit" class="btn btn-primary btn-lg">
-        Guardar Cotización
-    </button>
+<tbody>
+</tbody>
+
+</table>
+
+<div class="row">
+
+<div class="col-md-4">
+<label>Subtotal</label>
+<input type="number" step="0.01" class="form-control" name="subtotal" readonly>
+</div>
+
+<div class="col-md-4">
+<label>ITBIS (18%)</label>
+<input type="number" step="0.01" class="form-control" name="itbis" readonly>
+</div>
+
+<div class="col-md-4">
+<label>Total</label>
+<input type="number" step="0.01" class="form-control fw-bold" name="total" readonly>
+</div>
+
+</div>
+
+<br>
+
+<button type="submit" class="btn btn-primary btn-lg">
+Guardar Cotización
+</button>
 
 </form>
 
@@ -73,59 +98,121 @@
 
 <script>
 
-function agregarFila() {
-    const tabla = document.querySelector("#tabla tbody");
+const servicios = {{ servicios | tojson | safe }};
 
-    const nuevaFila = document.createElement("tr");
+function agregarFila(){
 
-    nuevaFila.innerHTML = `
-        <td><input type="text" class="form-control" name="descripcion[]" required></td>
-        <td><input type="number" step="any" class="form-control" name="cantidad[]" required></td>
-        <td><input type="number" step="any" class="form-control" name="precio[]" required></td>
-        <td><input type="number" step="any" class="form-control" name="total_linea[]" readonly></td>
-        <td class="text-center">
-            <button type="button" class="btn btn-danger btn-sm" onclick="eliminarFila(this)">X</button>
-        </td>
-    `;
+const tabla = document.querySelector("#tabla tbody");
 
-    tabla.appendChild(nuevaFila);
-}
+let opciones = '<option value="">Seleccionar servicio</option>';
 
-function eliminarFila(boton) {
-    const fila = boton.closest("tr");
-    fila.remove();
-    calcularTodo();
-}
-
-function calcularTodo() {
-    let subtotal = 0;
-
-    const filas = document.querySelectorAll("#tabla tbody tr");
-
-    filas.forEach(fila => {
-        const cantidad = fila.querySelector('input[name="cantidad[]"]').value;
-        const precio = fila.querySelector('input[name="precio[]"]').value;
-        const totalLinea = fila.querySelector('input[name="total_linea[]"]');
-
-        const total = (cantidad * precio) || 0;
-        totalLinea.value = total.toFixed(2);
-
-        subtotal += total;
-    });
-
-    const itbis = subtotal * 0.18;
-    const totalFinal = subtotal + itbis;
-
-    document.querySelector('input[name="subtotal"]').value = subtotal.toFixed(2);
-    document.querySelector('input[name="itbis"]').value = itbis.toFixed(2);
-    document.querySelector('input[name="total"]').value = totalFinal.toFixed(2);
-}
-
-document.addEventListener("input", function(e) {
-    if (e.target.name === "cantidad[]" || e.target.name === "precio[]") {
-        calcularTodo();
-    }
+servicios.forEach((s,i)=>{
+opciones += `<option value="${s.nombre}" data-index="${i}">${s.nombre}</option>`;
 });
+
+const fila = document.createElement("tr");
+
+fila.innerHTML = `
+
+<td>
+<select class="form-control servicio" name="descripcion[]">
+${opciones}
+</select>
+</td>
+
+<td>
+<select class="form-control tipo_precio">
+<option value="a">A</option>
+<option value="b">B</option>
+<option value="c">C</option>
+</select>
+</td>
+
+<td>
+<input type="number" class="form-control cantidad" name="cantidad[]" value="1">
+</td>
+
+<td>
+<input type="number" class="form-control precio" name="precio[]" value="0" readonly>
+</td>
+
+<td>
+<input type="number" class="form-control total_linea" name="total_linea[]" readonly>
+</td>
+
+<td>
+<button type="button" class="btn btn-danger btn-sm" onclick="eliminarFila(this)">X</button>
+</td>
+
+`;
+
+tabla.appendChild(fila);
+
+}
+
+function eliminarFila(btn){
+btn.closest("tr").remove();
+calcular();
+}
+
+document.addEventListener("change", function(e){
+
+if(e.target.classList.contains("servicio") || e.target.classList.contains("tipo_precio")){
+
+const fila = e.target.closest("tr");
+
+const servicioNombre = fila.querySelector(".servicio").value;
+const tipo = fila.querySelector(".tipo_precio").value;
+
+const servicio = servicios.find(s => s.nombre === servicioNombre);
+
+if(!servicio) return;
+
+let precio = 0;
+
+if(tipo === "a") precio = servicio.precio_a || 0;
+if(tipo === "b") precio = servicio.precio_b || 0;
+if(tipo === "c") precio = servicio.precio_c || 0;
+
+fila.querySelector(".precio").value = precio;
+
+calcular();
+
+}
+
+});
+
+document.addEventListener("input", function(e){
+if(e.target.classList.contains("cantidad")){
+calcular();
+}
+});
+
+function calcular(){
+
+let subtotal = 0;
+
+document.querySelectorAll("#tabla tbody tr").forEach(fila=>{
+
+const cantidad = parseFloat(fila.querySelector(".cantidad").value) || 0;
+const precio = parseFloat(fila.querySelector(".precio").value) || 0;
+
+const total = cantidad * precio;
+
+fila.querySelector(".total_linea").value = total.toFixed(2);
+
+subtotal += total;
+
+});
+
+const itbis = subtotal * 0.18;
+const total = subtotal + itbis;
+
+document.querySelector('[name="subtotal"]').value = subtotal.toFixed(2);
+document.querySelector('[name="itbis"]').value = itbis.toFixed(2);
+document.querySelector('[name="total"]').value = total.toFixed(2);
+
+}
 
 </script>
 

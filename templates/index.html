@@ -128,6 +128,10 @@ Facturada
 Ver
 </a>
 
+<a href="/editar_cotizacion/{{ cotizacion.id }}" class="btn btn-sm btn-warning">
+Editar
+</a>
+
 {% if cotizacion.estado == "Pendiente" %}
 <a href="/aprobar/{{ cotizacion.id }}" class="btn btn-sm btn-primary">
 Aprobar
@@ -152,11 +156,12 @@ Factura
 </a>
 {% endif %}
 
-<a href="/eliminar/{{ cotizacion.id }}"
+<a href="/eliminar_cotizacion/{{ cotizacion.id }}"
 class="btn btn-sm btn-danger"
 onclick="return confirm('¿Seguro que deseas eliminar esta cotización?')">
 Eliminar
 </a>
+
 
 </td>
 
