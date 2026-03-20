@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, request, redirect, url_for, send_file, session,make_response
 from flask import flash
 import sqlite3
+import os
 from datetime import timedelta
 from datetime import datetime
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
@@ -21,7 +22,9 @@ app.secret_key = "g7@9d#s1!Sistema_cotización"
 app.permanent_session_lifetime = timedelta(days=7)
 
 def get_db():
-    conn = sqlite3.connect("database.db")
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(BASE_DIR, "database.db")
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -260,14 +263,6 @@ def init_db():
         desde INTEGER,
         hasta INTEGER,
         actual INTEGER
-    )
-    """)
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS usuarios (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    usuario TEXT,
-    password TEXT
     )
     """)
 
@@ -973,35 +968,43 @@ def login():
 
     if request.method == "POST":
 
-        usuario = request.form["usuario"]
-        password = request.form["password"]
-        recordar = request.form.get("recordar")
+        usuario = request.form["usuario"].strip()
+        password = request.form["password"].strip()
 
         conn = get_db()
-        cursor = conn.cursor()
 
-        cursor.execute(
+        user = conn.execute(
             "SELECT * FROM usuarios WHERE usuario=?",
             (usuario,)
-        )
+        ).fetchone()
 
-        user = cursor.fetchone()
+        if not user:
+            hash_password = generate_password_hash(password)
 
-        if user and check_password_hash(user["password"], password):
+            conn.execute(
+                "INSERT INTO usuarios (usuario, password) VALUES (?, ?)",
+                (usuario, hash_password)
+            )
+            conn.commit()
 
             session["usuario"] = usuario
+
+            conn.close()
             return redirect(url_for("index"))
 
-        if recordar:
-            session.permanent = True
+        if check_password_hash(user["password"], password):
 
+            session["usuario"] = usuario
+
+            conn.close()
             return redirect(url_for("index"))
 
         else:
-            return "Usuario o contraseña incorrectos"
+            conn.close()
+            flash("Usuario o contraseña incorrectos", "error")
+            return redirect(url_for("login"))
 
     return render_template("login.html")
-
 
 @app.route("/logout")
 def logout():

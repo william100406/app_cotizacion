@@ -335,3 +335,21 @@ body{
 .form-card button:hover{
     background-color: #1f1f3f;
 }
+
+.alert {
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.alert.error {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.alert.success {
+    background-color: #28a745;
+    color: white;
+}
