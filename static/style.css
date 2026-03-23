@@ -107,7 +107,7 @@ height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
-background:#dad7ed;
+background:#ffffff;
 
 }
 
@@ -282,7 +282,7 @@ transform:scale(1.1);
 
 /* fondo general */
 body{
-    background-color: #dad7ed;
+    background-color: #dbd7d7;
     font-family: Arial, Helvetica, sans-serif;
 }
 
