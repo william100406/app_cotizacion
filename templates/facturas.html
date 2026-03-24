@@ -1,28 +1,6 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>FactuCloud</title>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon"href="/static/F.ico">
-</head>
-
-<body>
-
-<div class="sidebar">
-
-    <h2>FactuCloud</h2>
-
-    <a href="/">Inicio</a>
-    <a href="/facturas">Facturas</a>
-    <a href="/historial">Historial</a>
-
-</div>
-
-
-<div class="main">
+{% block content %}
 
 <div class="card">
 
@@ -30,50 +8,47 @@
 
 <table class="tabla-facturas">
 
-    <thead>
-        <tr>
-            <th>NCF</th>
-            <th>Cliente</th>
-            <th>RNC</th>
-            <th>Fecha</th>
-            <th>Total</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
+<thead>
+<tr>
+<th>NCF</th>
+<th>Cliente</th>
+<th>RNC</th>
+<th>Fecha</th>
+<th>Total</th>
+<th>Acciones</th>
+</tr>
+</thead>
 
-    <tbody>
+<tbody>
 
-    {% for factura in facturas %}
+{% for factura in facturas %}
 
-        <tr>
-            <td>{{ factura[1] }}</td>
-            <td>{{ factura[2] }}</td>
-            <td>{{ factura[3] }}</td>
-            <td>{{ factura[4] }}</td>
-            <td>RD$ {{ factura[5] }}</td>
+<tr>
+<td>{{ factura[1] }}</td>
+<td>{{ factura[2] }}</td>
+<td>{{ factura[3] }}</td>
+<td>{{ factura[4] }}</td>
+<td>RD$ {{ factura[5] }}</td>
 
-            <td>
+<td>
 
-                <a class="btn-primary" href="/descargar_factura/{{ factura[0] }}">
-                    Descargar
-                </a>
+<a class="btn-primary" href="/descargar_factura/{{ factura[0] }}">
+Descargar
+</a>
 
-                <a class="btn-danger" href="/eliminar_factura/{{ factura[0] }}">
-                    Eliminar
-                </a>
+<a class="btn-danger" href="/eliminar_factura/{{ factura[0] }}">
+Eliminar
+</a>
 
-            </td>
-        </tr>
+</td>
+</tr>
 
-    {% endfor %}
+{% endfor %}
 
-    </tbody>
+</tbody>
 
 </table>
 
 </div>
 
-</div>
-
-</body>
-</html>
+{% endblock %}

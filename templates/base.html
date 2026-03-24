@@ -1,173 +1,205 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="manifest" href="/static/manifest.json">
-    <link rel="icon"href="/static/F.ico">
+<link rel="manifest" href="/static/manifest.json">
+<link rel="icon" href="/static/FC.ico">
 <meta name="theme-color" content="#1e1e2f">
-    <meta charset="UTF-8">
-    <title>FactuCloud</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>FactuCloud</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <style>
-        body {
-            background-color: #f4f6f9;
-        }
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-        .sidebar {
-            height: 100vh;
-            background-color: #1e293b;
-            color: white;
-            padding: 20px;
-        }
+<style>
 
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            margin-bottom: 15px;
-        }
+body{
+background-color:#f4f6f9;
+}
 
-        .sidebar a:hover {
-            color: #38bdf8;
-        }
 
-        .content {
-            padding: 30px;
-        }
 
-        .card {
-            border-radius: 12px;
-        }
+.sidebar{
+position:fixed;
+left: 0;
+top: 0;
+width: 250px;
+height:100vh;
+background-color:#1e293b;
+color:white;
+padding:20px;
+}
 
-        .submenu{
-            display:none;
-            list-style:none;
-            padding-left:15px;
-        }
+.sidebar h4{
+margin-bottom:20px;
+}
 
-        body.tema-claro{
-        background:#f4f6f9;
-        color:#000;
-        }
 
-        body.tema-oscuro{
-        background:#141429;
-        color:white;
-        }
+.sidebar a{
+color:white;
+text-decoration:none;
+display:block;
+width:100%;
+margin-bottom:6px;
+padding:10px 14px;
+border-radius:8px;
+transition:0.2s;
+}
 
-        body.tema-oscuro .content{
-        background:#1e1e2f;
-        }
 
-        body.tema-oscuro .sidebar{
-        background:#0f172a;
-        }
+.sidebar a:hover{
+background:rgba(255,255,255,0.10);
+color:white;
+}
 
-        
-    </style>
+
+.submenu{
+display:none;
+list-style:none;
+padding-left:10px;
+margin-top:5px;
+}
+
+.submenu li a{
+font-size:14px;
+padding:8px 12px;
+border-radius:6px;
+}
+
+
+.content{
+margin-left: 250px;
+padding:30px;
+width: calc(100% - 250px);
+}
+
+.card{
+border-radius:12px;
+}
+
+
+body.tema-claro{
+background:#f4f6f9;
+color:#000;
+}
+
+body.tema-oscuro{
+background:#141429;
+color:white;
+}
+
+body.tema-oscuro .content{
+background:#1e1e2f;
+}
+
+body.tema-oscuro .sidebar{
+background:#0f172a;
+}
+
+</style>
 </head>
 
 <body>
 
 <div class="container-fluid">
-    <div class="row">
+<div class="row">
 
-        <!-- Sidebar -->
-        <div class="col-md-2 sidebar">
-            <div class="logo">
-            <h4>FactuCloud</h4>
-            </div>
-            <hr>
-            <a href="/">Dashboard</a>
-            <a href="/nueva">Nueva Cotización</a>
-            <a href="/configurar_ncf">Configurar NCF</a>
-            <a href="facturas">Facturas</a>
-            <a href="clientes">Clientes</a>
+<div class="sidebar">
 
-            <a href="javascript:void(0)" onclick="toggleMenu()">⚙ Configuración <span id="arrow">▸</span></a>
-           <ul id="submenu-config" class="submenu">
-
-            <li><a href="/usuarios">Usuarios</a></li>
-
-            <ul id="submenu-temas" class="submenu">
-            <li onclick="cambiarTema('auto')">Sistema</li>
-            <li onclick="cambiarTema('claro')">Claro</li>
-            <li onclick="cambiarTema('oscuro')">Oscuro</li>
-            </ul>
-
-            </li>
-
-            <li><a href="/logout">Cerrar sesión</a></li>
-
-            <li>
-            Tema:
-            <select onchange="cambiarTema(this.value)">
-            <option value="auto">Sistema</option>
-            <option value="claro">Claro</option>
-            <option value="oscuro">Oscuro</option>
-            </select>
-            </li>
-
-            </ul>
-        </div>
-
-        <!-- Content -->
-        <div class="col-md-10 content">
-            {% block content %}{% endblock %}
-        </div>
-
-    </div>
+<div class="logo">
+<h4>FactuCloud</h4>
 </div>
-    <script>
-    function toggleMenu() {
-    let menu = document.getElementById("submenu-config");
-    let arrow = document.getElementById("arrow");
 
-    if (menu.style.display === "none" || menu.style.display === "") {
-        menu.style.display = "block";
-        arrow.innerHTML = "▾";
-    } else {
-        menu.style.display = "none";
-        arrow.innerHTML = "▸";
-    }
-    }
+<hr>
+
+<a href="/">Dashboard</a>
+<a href="/nueva">Nueva Cotización</a>
+<a href="/configurar_ncf">Configurar NCF</a>
+<a href="/facturas">Facturas</a>
+<a href="/clientes">Clientes</a>
+
+<a href="javascript:void(0)" onclick="toggleMenu()">⚙ Configuración <span id="arrow">▸</span></a>
+
+<ul id="submenu-config" class="submenu">
+
+<li><a href="/usuarios">Usuarios</a></li>
+
+<li>
+Tema:
+<select onchange="cambiarTema(this.value)">
+<option value="auto">Sistema</option>
+<option value="claro">Claro</option>
+<option value="oscuro">Oscuro</option>
+</select>
+</li>
+
+<li><a href="/logout">Cerrar sesión</a></li>
+
+</ul>
+
+</div>
+
+
+<div class="content">
+{% block content %}{% endblock %}
+</div>
+
+</div>
+</div>
+
+<script>
+
+function toggleMenu(){
+
+let menu=document.getElementById("submenu-config")
+let arrow=document.getElementById("arrow")
+
+if(menu.style.display==="none" || menu.style.display===""){
+menu.style.display="block"
+arrow.innerHTML="▾"
+}else{
+menu.style.display="none"
+arrow.innerHTML="▸"
+}
+
+}
+
 </script>
-    <script>
 
-        function cambiarTema(tema){
+<script>
 
-        localStorage.setItem("tema", tema)
+function cambiarTema(tema){
 
-        if(tema === "claro"){
-        document.body.classList.remove("tema-oscuro")
-        document.body.classList.add("tema-claro")
-        }
+localStorage.setItem("tema",tema)
 
-        if(tema === "oscuro"){
-        document.body.classList.remove("tema-claro")
-        document.body.classList.add("tema-oscuro")
-        }
+if(tema==="claro"){
+document.body.classList.remove("tema-oscuro")
+document.body.classList.add("tema-claro")
+}
 
-        if(tema === "auto"){
-        document.body.classList.remove("tema-claro")
-        document.body.classList.remove("tema-oscuro")
-        }
+if(tema==="oscuro"){
+document.body.classList.remove("tema-claro")
+document.body.classList.add("tema-oscuro")
+}
 
-        }
+if(tema==="auto"){
+document.body.classList.remove("tema-claro")
+document.body.classList.remove("tema-oscuro")
+}
 
-        window.onload = function(){
+}
 
-        let temaGuardado = localStorage.getItem("tema")
+window.onload=function(){
 
-        if(temaGuardado){
-        cambiarTema(temaGuardado)
-        }
+let temaGuardado=localStorage.getItem("tema")
 
-        }
+if(temaGuardado){
+cambiarTema(temaGuardado)
+}
 
-    </script>
+}
+
+</script>
+
 </body>
 </html>
