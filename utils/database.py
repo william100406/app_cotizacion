@@ -78,11 +78,13 @@ def obtener_cotizaciones():
     return datos
 
 
-def eliminar_cotizacion(id):
-    conn = conectar()
+def eliminar_cotizacion_db(id):
+    import sqlite3
+
+    conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
 
-    cursor.execute("DELETE FROM productos WHERE cotizacion_id = ?", (id,))
+    cursor.execute("DELETE FROM cotizacion_items WHERE cotizacion_id = ?", (id,))
     cursor.execute("DELETE FROM cotizaciones WHERE id = ?", (id,))
 
     conn.commit()

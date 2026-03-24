@@ -1,4 +1,4 @@
-from utils.database import *
+import utils.database as db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, request, redirect, url_for, send_file, session,make_response
 from flask import flash
@@ -39,6 +39,9 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         codigo TEXT,
         cliente TEXT,
+        rnc TEXT,
+        telefono TEXT,
+        correo TEXT,
         fecha TEXT,
         subtotal REAL,
         itbis REAL,
@@ -938,7 +941,7 @@ def detalle(id):
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM cotizacion_servicios")
+    cursor.execute("SELECT * FROM cotizacion_items")
     print(cursor.fetchall())
 
 
@@ -948,7 +951,7 @@ def detalle(id):
     )
     cotizacion = cursor.fetchone()
 
-    cursor.execute("SELECT * FROM cotizacion_servicios WHERE cotizacion_id=?",
+    cursor.execute("SELECT * FROM cotizacion_items WHERE cotizacion_id=?",
     (id,)           
     )
 
@@ -1180,19 +1183,9 @@ def arreglar_db():
 
 @app.route("/eliminar_cotizacion/<int:id>")
 def eliminar_cotizacion(id):
-
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-
-    cursor.execute("DELETE FROM cotizacion_servicios WHERE cotizacion_id=?", (id,))
-    cursor.execute("DELETE FROM cotizaciones WHERE id=?", (id,))
-    
-    conn.commit()
-    conn.close()
-
+    db.eliminar_cotizacion_db(id)
     return redirect(url_for("index"))
 
-    
 if __name__ == "__main__":
 
     init_db()
