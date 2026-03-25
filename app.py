@@ -502,10 +502,6 @@ def editar_cotizacion(id):
         rnc = request.form["rnc"]
         telefono = request.form["telefono"]
         correo = request.form["correo"]
-
-        subtotal = float(request.form["subtotal"])
-        itbis = float(request.form["itbis"])
-        total = float(request.form["total"])
     
         cursor.execute("""
         UPDATE cotizaciones
@@ -747,11 +743,11 @@ def factura_pdf(id):
 
     p.setFont("Helvetica-Bold", 12)
 
-    p.drawString(380, y, f"Subtotal: RD$ {factura['subtotal']}")
+    p.drawString(380, y, f"Subtotal: US$ {factura['subtotal']}")
     y -= 20
-    p.drawString(380, y, f"ITBIS: RD$ {factura['itbis']}")
+    p.drawString(380, y, f"ITBIS: US$ {factura['itbis']}")
     y -= 20
-    p.drawString(380, y, f"TOTAL: RD$ {factura['total']}")
+    p.drawString(380, y, f"TOTAL: US$ {factura['total']}")
 
     p.save()
 
@@ -859,7 +855,7 @@ def cotizacion_pdf(id):
 
     pdf.drawRightString(570,640,f"No. Cotizacion: {cotizacion['id']}")
     pdf.drawRightString(570,625,f"Fecha: {cotizacion['fecha']}")
-    pdf.drawRightString(570,610,"Atendido: Radhames Del Valle")
+    pdf.drawRightString(570,610,"Atendido por: Radhames Del Valle")
     pdf.drawRightString(570,595,"pag: 1")
 
 

@@ -1,79 +1,147 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>FactuCloud</title>
+{% block content %}
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon"href="/static/F.ico">
-</head>
+<style>
 
-<body>
+/* Fondo general */
+body {
+    background: #f4f6fb;
+    font-family: 'Segoe UI', sans-serif;
+}
 
-<div class="sidebar">
+/* Card */
+.card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 25px;
+    margin: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
 
-    <h2>FactuCloud</h2>
+/* Título */
+.card h2 {
+    color: #141429;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
 
-    <a href="/">Inicio</a>
-    <a href="/facturas">Facturas</a>
-    <a href="/historial">Historial</a>
+/* Tabla */
+.tabla-facturas {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 12px;
+    overflow: hidden;
+}
 
-</div>
+/* Encabezado */
+.tabla-facturas thead {
+    background: #141429;
+    color: #fff;
+}
 
+.tabla-facturas th {
+    padding: 14px;
+    text-align: left;
+    font-size: 14px;
+}
 
-<div class="main">
+/* Filas */
+.tabla-facturas td {
+    padding: 14px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+/* Hover */
+.tabla-facturas tbody tr:hover {
+    background: #f2f3ff;
+    transition: 0.2s;
+}
+
+/* Total */
+.tabla-facturas td:nth-child(5) {
+    font-weight: bold;
+    color: #2d2dfc;
+}
+
+/* Botones */
+.btn-primary,
+.btn-danger {
+    padding: 6px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 12px;
+    margin-right: 5px;
+    display: inline-block;
+    transition: 0.2s;
+}
+
+.btn-primary {
+    background: #dad7ed;
+    color: #141429;
+}
+
+.btn-primary:hover {
+    background: #c9c4e5;
+}
+
+.btn-danger {
+    background: #ff4d4d;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #e60000;
+}
+
+</style>
 
 <div class="card">
 
-<h2>Facturas Emitidas</h2>
+    <h2>Facturas Emitidas</h2>
 
-<table class="tabla-facturas">
+    <table class="tabla-facturas">
 
-    <thead>
-        <tr>
-            <th>NCF</th>
-            <th>Cliente</th>
-            <th>RNC</th>
-            <th>Fecha</th>
-            <th>Total</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
+        <thead>
+            <tr>
+                <th>NCF</th>
+                <th>Cliente</th>
+                <th>RNC</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
 
-    <tbody>
+        <tbody>
 
-    {% for factura in facturas %}
+        {% for factura in facturas %}
 
-        <tr>
-            <td>{{ factura[1] }}</td>
-            <td>{{ factura[2] }}</td>
-            <td>{{ factura[3] }}</td>
-            <td>{{ factura[4] }}</td>
-            <td>RD$ {{ factura[5] }}</td>
+            <tr>
+                <td>{{ factura[1] }}</td>
+                <td>{{ factura[2] }}</td>
+                <td>{{ factura[3] }}</td>
+                <td>{{ factura[4] }}</td>
+                <td>US$ {{ "{:,.2f}".format(factura[5]) }}</td>
 
-            <td>
+                <td>
+                    <a class="btn-primary" href="/descargar_factura/{{ factura[0] }}">
+                        Descargar
+                    </a>
 
-                <a class="btn-primary" href="/descargar_factura/{{ factura[0] }}">
-                    Descargar
-                </a>
+                    <a class="btn-danger" href="/eliminar_factura/{{ factura[0] }}">
+                        Eliminar
+                    </a>
+                </td>
+            </tr>
 
-                <a class="btn-danger" href="/eliminar_factura/{{ factura[0] }}">
-                    Eliminar
-                </a>
+        {% endfor %}
 
-            </td>
-        </tr>
+        </tbody>
 
-    {% endfor %}
-
-    </tbody>
-
-</table>
+    </table>
 
 </div>
 
-</div>
-
-</body>
-</html>
+{% endblock %}

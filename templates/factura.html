@@ -2,48 +2,174 @@
 
 {% block content %}
 
-<h2>Factura</h2>
+<style>
 
-<p><strong>Cliente:</strong> {{ cotizacion.cliente }}</p>
-<p><strong>Total:</strong> RD$ {{ cotizacion.total }}</p>
+/* CONTENEDOR PRINCIPAL */
+.factura-card{
+    background: #1e1e2f;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    max-width: 900px;
+    margin: auto;
+}
 
-<h4>Items</h4>
+/* HEADER */
+.factura-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
 
-<table border="1">
+.factura-header h2{
+    margin: 0;
+    color: #fff;
+}
 
-<tr>
-<th>Descripción</th>
-<th>Cantidad</th>
-<th>Precio</th>
-<th>Total</th>
-</tr>
+.factura-header span{
+    color: #9ca3af;
+}
 
-{% for item in items %}
+/* INFO CLIENTE */
+.factura-info{
+    margin-bottom: 20px;
+    color: #e5e7eb;
+}
 
-<tr>
-<td>{{ item.descripcion }}</td>
-<td>{{ item.cantidad }}</td>
-<td>{{ item.precio }}</td>
-<td>{{ item.total }}</td>
-</tr>
+/* TABLA */
+.factura-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
 
-{% endfor %}
+.factura-table th{
+    background: #0f172a;
+    padding: 12px;
+    text-align: left;
+    color: white;
+}
 
-</table>
+.factura-table td{
+    padding: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: #e5e7eb;
+}
 
-<br>
+/* TOTALES */
+.totales{
+    margin-top: 20px;
+    text-align: right;
+}
 
-<form method="POST">
+.totales p{
+    margin: 5px 0;
+}
 
-<label>RNC del cliente</label>
-<input type="text" name="rnc" required>
+.total-final{
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+}
 
-<br><br>
+/* INPUT */
+.factura-input{
+    margin-top: 20px;
+}
 
-<button type="submit">
-Generar Factura
-</button>
+.factura-input input{
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    background: #0f172a;
+    color: white;
+}
 
-</form>
+/* BOTONES */
+.factura-actions{
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-primary{
+    flex: 1;
+    background: linear-gradient(90deg,#4f46e5,#6366f1);
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+}
+
+.btn-secondary{
+    flex: 1;
+    background: #374151;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+}
+
+</style>
+
+<div class="factura-card">
+
+    <div class="factura-header">
+        <h2>Factura</h2>
+        <span>Fecha: {{ cotizacion.fecha }}</span>
+    </div>
+
+    <div class="factura-info">
+        <strong>Cliente:</strong> {{ cotizacion.cliente }}
+    </div>
+
+    <table class="factura-table">
+        <tr>
+            <th>Descripción</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+            <th>Total</th>
+        </tr>
+
+        {% for item in items %}
+        <tr>
+            <td>{{ item.descripcion }}</td>
+            <td>{{ item.cantidad }}</td>
+            <td>US$ {{ item.precio }}</td>
+            <td>US$ {{ item.total }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <div class="totales">
+        <p>Subtotal: US$ {{ cotizacion.subtotal }}</p>
+        <p>ITBIS: US$ {{ cotizacion.itbis }}</p>
+        <p class="total-final">Total: US$ {{ cotizacion.total }}</p>
+    </div>
+
+    <form method="POST">
+
+        <div class="factura-input">
+            <label>RNC del cliente</label>
+            <input type="text" name="rnc" required>
+        </div>
+
+        <div class="factura-actions">
+            <button type="submit" class="btn-primary">
+                Generar Factura
+            </button>
+
+            <a href="{{ url_for('factura_pdf', id=cotizacion.id) }}" class="btn-secondary">
+                Guardar PDF
+            </a>
+        </div>
+
+    </form>
+
+</div>
 
 {% endblock %}
