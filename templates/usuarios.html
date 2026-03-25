@@ -1,19 +1,8 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Configuración de Usuario</title>
+{% extends "base.html" %}
+
+{% block content %}
 
 <style>
-
-body{
-    background-color:#dbd7d7;
-    font-family: Arial, Helvetica, sans-serif;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-}
 
 .contenedor{
     background:#ffffff;
@@ -21,6 +10,7 @@ body{
     border-radius:10px;
     box-shadow:0px 4px 15px rgba(0, 4, 15, 0.1);
     width:350px;
+    margin:40px auto; /* antes 80px */
 }
 
 h1{
@@ -44,6 +34,7 @@ input{
 .botones{
     display:flex;
     justify-content:space-between;
+    gap:10px;
 }
 
 button{
@@ -56,7 +47,7 @@ button{
 
 .guardar{
     background:#141429;
-    color: white;
+    color:white;
 }
 
 .guardar:hover{
@@ -64,21 +55,20 @@ button{
 }
 
 .cancelar{
-   background-color: #141429;
-   color: white;
-   border: none;
-   border-radius: 6px;
-   
+    background:white;
+    color:#141429;
+    padding:10px 18px;
+    border-radius:6px;
+    text-decoration:none;
+    border:1px solid #141429;
+    display:inline-block;
 }
 
 .cancelar:hover{
-    opacity:0.8;
+    background:#f3f3f3;
 }
 
 </style>
-</head>
-
-<body>
 
 <div class="contenedor">
 
@@ -94,12 +84,11 @@ button{
 
 <div class="botones">
 <button type="submit" class="guardar">Guardar Cambios</button>
-<a href="/" class="cancelar"><button type="button">Cancelar</button></a>
+<a href="/" class="cancelar">Cancelar</a>
 </div>
 
 </form>
 
 </div>
 
-</body>
-</html>
+{% endblock %}
