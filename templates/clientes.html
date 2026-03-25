@@ -26,7 +26,8 @@
 
 <div class="col-md-6 mb-3">
 <label class="form-label">Teléfono</label>
-<input type="number" name="telefono" class="form-control">
+<input type="tel" pattern= "[0-9+\-\s()]+" placeholder="+1 (809) 123-4567"  
+name="telefono" class="form-control">
 </div>
 
 <div class="col-md-6 mb-3">
@@ -57,6 +58,7 @@
 <th>RNC</th>
 <th>Teléfono</th>
 <th>Dirección</th>
+<th>Acciones</th>
 </tr>
 </thead>
 
@@ -70,6 +72,28 @@
 <td>{{ c["rnc"] }}</td>
 <td>{{ c["telefono"] }}</td>
 <td>{{ c["direccion"] }}</td>
+
+<td>
+    <a
+    href="{{ url_for('editar_cliente',
+        id=c['id']) }}"
+        class="btn btn-warning btn-sm">
+        Editar
+    </a>
+
+
+    <form
+        action="{{ url_for('eliminar_cliente',
+        id=c['id']) }}"
+        method="POST"
+        style="display:inline;">
+        <button class= "btn btn-danger btn-sm"
+        onclick="return confirm('¿Eliminar cliente?')">
+    Eliminar
+</button>
+    </form>
+
+</td>
 </tr>
 
 {% endfor %}
