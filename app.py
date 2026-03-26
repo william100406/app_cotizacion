@@ -435,9 +435,12 @@ def nueva_cotizacion():
         cliente = request.form["cliente"]
         rnc = request.form["rnc"]
         telefono = request.form["telefono"]
-        if not telefono.isdigit():
+
+        telefono_limpio= telefono.replace("-","").replace(" ", "").replace("(", "").replace(")", "")
+        if not telefono_limpio.isdigit():
             flash("El teléfono debe contener solo números", "danger")
-            return render_template("nueva_cotizacion.html", data=request.form)
+            return render_template("nueva_cotizacion.html", data=request.form.to_dict(),clientes=clientes,
+                servicios=servicios)
         correo = request.form["correo"]
 
         subtotal = float(request.form["subtotal"])
@@ -1095,7 +1098,7 @@ def buscar_clientes():
     return {"clientes": resultados}
 
 
-@app.route("/eliminar_cliente/<int:id>")
+@app.route("/eliminar_cliente/<int:id>", methods=["POST"])
 def eliminar_cliente(id):
 
     conn = get_db()
@@ -1125,16 +1128,17 @@ def editar_cliente(id):
 
     if request.method == "POST":
 
-        cliente = request.form["cliente"]
+        nombre = request.form["nombre"]
         rnc = request.form["rnc"]
         telefono = request.form["telefono"]
         correo = request.form["correo"]
+        direccion = request.form ["direccion"]
 
         conn.execute("""
         UPDATE clientes
-        SET nombre=?, rnc=?, telefono=?, direccion=?
+        SET nombre=?, rnc=?, telefono=?, correo=?, direccion=?
         WHERE id=?
-        """, (cliente, rnc, telefono, correo,id))
+        """, (nombre, rnc, telefono, correo,direccion, id))
 
         conn.commit()
         conn.close()
@@ -1174,8 +1178,9 @@ def arreglar_db():
 
     return "Base de datos actualizada correctamente"
 
-@app.route("/eliminar_cotizacion/<int:id>")
+@app.route("/eliminar_cotizacion/<int:id>",methods=["POST"])
 def eliminar_cotizacion(id):
+
     db.eliminar_cotizacion_db(id)
     return redirect(url_for("index"))
 

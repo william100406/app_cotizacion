@@ -6,13 +6,6 @@
 
 <h2 class="mb-4">Clientes</h2>
 
-<form method="GET" class="mb-3">
-<div class="input-group">
-<input type="text" name="buscar" class="form-control" placeholder="Buscar cliente...">
-<button class="btn btn-secondary">Buscar</button>
-</div>
-</form>
-
 <div class="card shadow p-4 mb-4">
 
 <h5 class="mb-3">Agregar nuevo cliente</h5>
@@ -33,7 +26,12 @@
 
 <div class="col-md-6 mb-3">
 <label class="form-label">Teléfono</label>
-<input type="number" name="telefono" class="form-control">
+<input type="tel"
+       name="telefono"
+       class="form-control"
+       placeholder="+1 (809) 123-4567"
+       inputmode="numeric"
+       oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')">
 </div>
 
 <div class="col-md-6 mb-3">
@@ -64,6 +62,7 @@
 <th>RNC</th>
 <th>Teléfono</th>
 <th>Dirección</th>
+<th>Acciones</th>
 </tr>
 </thead>
 
@@ -77,6 +76,28 @@
 <td>{{ c["rnc"] }}</td>
 <td>{{ c["telefono"] }}</td>
 <td>{{ c["direccion"] }}</td>
+
+<td>
+    <a
+    href="{{ url_for('editar_cliente',
+        id=c['id']) }}"
+        class="btn btn-warning btn-sm">
+        Editar
+    </a>
+
+
+    <form
+        action="{{ url_for('eliminar_cliente',
+        id=c['id']) }}"
+        method="POST"
+        style="display:inline;">
+        <button class= "btn btn-danger btn-sm"
+        onclick="return confirm('¿Eliminar cliente?')">
+    Eliminar
+</button>
+    </form>
+
+</td>
 </tr>
 
 {% endfor %}
