@@ -120,10 +120,11 @@ body {
                     <a class="btn-primary" href="/descargar_factura/{{ factura[0] }}">
                         Descargar
                     </a>
-
-                    <a class="btn-danger" href="/eliminar_factura/{{ factura[0] }}">
+                    <form action="/eliminar_factura/{{ factura[0] }}" method="POST" style="display:inline;">
+                        <button class="btn-danger" type="submit">
                         Eliminar
-                    </a>
+                        </button>
+                    </form>
                 </td>
             </tr>
 

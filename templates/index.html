@@ -145,11 +145,12 @@ Factura
 </a>
 {% endif %}
 
-<a href="/eliminar_cotizacion/{{ cotizacion.id }}"
-class="btn btn-sm btn-danger"
-onclick="return confirm('¿Seguro que deseas eliminar esta cotización?')">
-Eliminar
-</a>
+<form action="/eliminar_cotizacion/{{ cotizacion.id }}" method="POST" style="display:inline;">
+    <button class="btn-danger" type="submit"
+        onclick="return confirm('¿Seguro que deseas eliminar esta cotización?')">
+        Eliminar
+    </button>
+</form>
 
 
 </td>

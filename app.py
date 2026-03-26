@@ -622,12 +622,12 @@ def facturar(id):
         conn.commit()
         conn.close()
 
-        return redirect(url_for("index"))
+        return redirect(url_for("factura_pdf", id=factura_id))
 
     conn.close()
 
     return render_template(
-        "factura.html",
+        "facturar.html",
         cotizacion=cotizacion,
         items=items
     )
@@ -704,9 +704,9 @@ def factura_pdf(id):
     y -= 40
 
     p.setFont("Helvetica", 12)
-    p.drawString(50, y, "Empresa: Mi Empresa SRL")
+    p.drawString(50, y, "Empresa: D.V.D PUBLICITYSTUDIO ")
     y -= 20
-    p.drawString(50, y, "RNC: 130000000")
+    p.drawString(50, y, "RNC: 132357604")
 
     y -= 30
 
@@ -763,7 +763,7 @@ def factura_pdf(id):
         mimetype="application/pdf"
     )
 
-@app.route("/eliminar_factura/<int:id>")
+@app.route("/eliminar_factura/<int:id>", methods=["POST"])
 def eliminar_factura(id):
 
     conn = get_db()
@@ -944,10 +944,6 @@ def detalle(id):
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM cotizacion_items")
-    print(cursor.fetchall())
-
 
     cursor.execute(
         "SELECT * FROM cotizaciones WHERE id=?",
@@ -1178,7 +1174,7 @@ def arreglar_db():
 
     return "Base de datos actualizada correctamente"
 
-@app.route("/eliminar_cotizacion/<int:id>",methods=["POST"])
+@app.route("/eliminar_cotizacion/<int:id>", methods=["POST"])
 def eliminar_cotizacion(id):
 
     db.eliminar_cotizacion_db(id)

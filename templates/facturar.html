@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+
+.facturar-container{
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    padding: 20px;
+}
+
+.card{
+    background: #1e293b;
+    border-radius: 14px;
+    padding: 20px;
+    color: white;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.card-header{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.card-header h2{
+    margin: 0;
+}
+
+.card-header span{
+    color: #94a3b8;
+}
+
+.factura-table{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.factura-table th{
+    background: #0f172a;
+    padding: 10px;
+    text-align: left;
+}
+
+.factura-table td{
+    padding: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.factura-table td:nth-child(3),
+.factura-table td:nth-child(4){
+    text-align: right;
+}
+
+.resumen p{
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+}
+
+.total{
+    font-size: 18px;
+    font-weight: bold;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding-top: 10px;
+}
+
+input{
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    margin-top: 10px;
+    background: #0f172a;
+    color: white;
+}
+
+.btn{
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.btn-primary{
+    background: linear-gradient(90deg,#4f46e5,#6366f1);
+    color: white;
+}
+
+.btn-secondary{
+    background: #334155;
+    color: white;
+}
+
+</style>
+
+<div class="facturar-container">
+
+    <div class="card">
+
+        <div class="card-header">
+            <h2>Facturar Cotización</h2>
+            <span>{{ cotizacion.fecha }}</span>
+        </div>
+
+        <p><strong>Cliente:</strong> {{ cotizacion.cliente }}</p>
+
+        <table class="factura-table">
+            <tr>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Valor</th>
+            </tr>
+
+            {% for item in items %}
+            <tr>
+                <td>{{ item.descripcion }}</td>
+                <td>{{ item.cantidad }}</td>
+                <td>US$ {{ item.precio }}</td>
+                <td>US$ {{ item.total }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Resumen</h3>
+
+        <div class="resumen">
+            <p><span>Subtotal:</span> <span>US$ {{ cotizacion.subtotal }}</span></p>
+            <p><span>ITBIS:</span> <span>US$ {{ cotizacion.itbis }}</span></p>
+            <p class="total"><span>Total:</span> <span>US$ {{ cotizacion.total }}</span></p>
+        </div>
+
+        <form method="POST">
+
+            <label>RNC del cliente</label>
+            <input type="text" name="rnc" required>
+
+            <button class="btn btn-primary">
+                Generar Factura
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

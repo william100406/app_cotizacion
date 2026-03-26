@@ -3,18 +3,18 @@ body{
     font-family: Arial, Helvetica, sans-serif;
 }
 
-/* contenedor */
+
 .ncf-container{
     padding:40px;
 }
 
-/* titulo */
+
 .titulo{
     color:#141429;
     margin-bottom:25px;
 }
 
-/* tarjeta */
+
 .card-ncf{
     background:white;
     padding:30px;
@@ -23,7 +23,7 @@ body{
     box-shadow:0 10px 25px rgba(0,0,0,0.1);
 }
 
-/* inputs */
+
 .form-group{
     margin-bottom:20px;
     display:flex;
@@ -43,7 +43,6 @@ body{
     font-size:14px;
 }
 
-/* botón */
 .btn-guardar{
     background:#141429;
     color:white;
