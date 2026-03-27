@@ -8,8 +8,8 @@ def conectar():
 
 def crear_tablas():
     conn = conectar()
-    cursor = conn.cursor()
-
+    cursor = conn.cursor() 
+    
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS cotizaciones (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -90,17 +90,7 @@ def eliminar_cotizacion_db(cotizacion_id):
     conn.commit()
     conn.close()
 
-    cursor.execute("""
-CREATE TABLE IF NOT EXISTS cotizaciones (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    cliente TEXT,
-    subtotal REAL,
-    itbis REAL,
-    total REAL,
-    estado TEXT
-)
-""")
-    
+
 def arreglar_tabla():
     conn = conectar()
     cursor = conn.cursor()
