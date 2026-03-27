@@ -78,14 +78,37 @@ def obtener_cotizaciones():
     return datos
 
 
-def eliminar_cotizacion_db(id):
-    import sqlite3
-
-    conn = sqlite3.connect("database.db")
+def eliminar_cotizacion_db(cotizacion_id):
+    conn = conectar()
     cursor = conn.cursor()
 
-    cursor.execute("DELETE FROM cotizacion_items WHERE cotizacion_id = ?", (id,))
-    cursor.execute("DELETE FROM cotizaciones WHERE id = ?", (id,))
+    cursor.execute(
+        "UPDATE cotizaciones SET estado='Eliminada' WHERE id=?",
+        (cotizacion_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    cursor.execute("""
+CREATE TABLE IF NOT EXISTS cotizaciones (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cliente TEXT,
+    subtotal REAL,
+    itbis REAL,
+    total REAL,
+    estado TEXT
+)
+""")
+    
+def arreglar_tabla():
+    conn = conectar()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("ALTER TABLE cotizaciones ADD COLUMN estado TEXT")
+    except sqlite3.OperationalError:
+        pass
 
     conn.commit()
     conn.close()

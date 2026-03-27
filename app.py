@@ -272,15 +272,7 @@ def init_db():
     usuario TEXT,
     password TEXT
     )
-    """)
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS usuarios (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    usuario TEXT UNIQUE,
-    password TEXT
-    )
-    """)
+    """) 
 
     cursor.execute("SELECT * FROM usuarios")
 
@@ -303,6 +295,25 @@ CREATE TABLE IF NOT EXISTS clientes (
     direccion TEXT
 )
 """)
+    
+    cursor.execute("""
+CREATE TABLE IF NOT EXISTS empresa (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT,
+    rnc TEXT,
+    telefono TEXT,
+    correo TEXT,
+    direccion TEXT
+)
+""")
+
+    cursor.execute("SELECT * FROM empresa")
+
+    if not cursor.fetchone():
+        cursor.execute("""
+        INSERT INTO empresa (nombre, rnc, telefono, correo, direccion)
+        VALUES (?, ?, ?, ?, ?)
+        """, ("Mi Empresa SRL", "", "", "", ""))
 
     conn.commit()
     conn.close()
@@ -704,7 +715,9 @@ def factura_pdf(id):
     y -= 40
 
     p.setFont("Helvetica", 12)
-    p.drawString(50, y, "Empresa: Mi Empresa SRL")
+    empresa = conn.execute("SELECT * FROM empresa LIMIT 1").fetchone()
+
+    p.drawString(50, y, f"Empresa: {empresa['nombre']}")
     y -= 20
     p.drawString(50, y, "RNC: 130000000")
 
@@ -980,22 +993,20 @@ def login():
         recordar = request.form.get("recordar")
 
         conn = get_db()
-        cursor = conn.cursor()
 
-        cursor.execute(
+        user = conn.execute(
             "SELECT * FROM usuarios WHERE usuario=?",
             (usuario,)
-        )
+        ).fetchone()
 
-        user = cursor.fetchone()
+        conn.close()
 
         if user and check_password_hash(user["password"], password):
 
             session["usuario"] = usuario
-            return redirect(url_for("index"))
 
-        if recordar:
-            session.permanent = True
+            if recordar:
+                session.permanent = True
 
             return redirect(url_for("index"))
 
@@ -1023,13 +1034,15 @@ def usuarios():
         nuevo_usuario = request.form["usuario"]
         nueva_password = request.form["password"]
 
+        from werkzeug.security import generate_password_hash
+
         conn.execute("""
         UPDATE usuarios
         SET usuario=?, password=?
         WHERE id=1
-        """, (nuevo_usuario, nueva_password))
+        """, (nuevo_usuario, generate_password_hash(nueva_password)))
 
-        conn.commit()
+    conn.commit()
 
     user = conn.execute("SELECT * FROM usuarios LIMIT 1").fetchone()
 
@@ -1184,8 +1197,88 @@ def eliminar_cotizacion(id):
     db.eliminar_cotizacion_db(id)
     return redirect(url_for("index"))
 
+@app.context_processor
+def inject_user():
+    return dict(usuario=session.get("usuario"))
+
+@app.route("/perfil", methods=["GET", "POST"])
+def perfil():
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    conn = get_db()
+
+    user = conn.execute("SELECT * FROM usuarios LIMIT 1").fetchone()
+    empresa = conn.execute("SELECT * FROM empresa LIMIT 1").fetchone()
+
+    if request.method == "POST":
+
+        archivo = request.files.get("foto")
+
+        if archivo and archivo.filename != "":
+            from werkzeug.utils import secure_filename
+            import os
+
+            nombre = secure_filename(archivo.filename)
+            ruta = os.path.join("static/uploads", nombre)
+            archivo.save(ruta)
+
+            conn.execute("""
+            UPDATE usuarios
+            SET foto=?
+            WHERE id=?
+            """, (nombre, user["id"]))
+
+        usuario = request.form["usuario"]
+        password = request.form["password"]
+        confirmar = request.form["confirmar"]
+
+        nombre_empresa = request.form["empresa"]
+        rnc = request.form["rnc"]
+        telefono = request.form["telefono"]
+        correo = request.form["correo"]
+        direccion = request.form["direccion"]
+
+        if password:
+            if password != confirmar:
+                return "Las contraseñas no coinciden"
+            
+            if len(password) < 4:
+                return "La contraseña es muy corta"
+
+            password_hash = generate_password_hash(password)
+
+            conn.execute("""
+            UPDATE usuarios
+            SET usuario=?, password=?
+            WHERE id=?
+            """, (usuario, password_hash, user["id"]))
+        else:
+            conn.execute("""
+            UPDATE usuarios
+            SET usuario=?
+            WHERE id=?
+            """, (usuario, user["id"]))
+
+        conn.execute("""
+        UPDATE empresa
+        SET nombre=?, rnc=?, telefono=?, correo=?, direccion=?
+        WHERE id=?
+        """, (nombre_empresa, rnc, telefono, correo, direccion, empresa["id"]))
+
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for("index"))
+
+    conn.close()
+
+    return render_template("perfil.html", user=user, empresa=empresa)
+
 if __name__ == "__main__":
 
     init_db()
+    db.arreglar_tabla()
 
     app.run(host= "0.0.0.0", port= 5000, debug=True)
