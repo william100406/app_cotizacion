@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>{{ tipo_documento }}</title>
+
+<style>
+
+</style>
+
+</head>
+<body>
+
+<div class="documento">
+
+    <div class="header">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}">
+            <div>
+                <strong>D.V.D</strong><br>
+                PUBLICITYSTUDIO
+            </div>
+        </div>
+
+        <div class="empresa-info">
+            Fecha: {{ fecha }}<br>
+            Santo Domingo D.N. Rep.Dom.<br>
+            T. 829-874-1003<br>
+            Email: delvallepublicity@gmail.com<br>
+            RNC: 132357604
+        </div>
+    </div>
+
+    <div class="titulo">
+        {{ tipo_documento }}
+    </div>
+
+    <div class="info">
+        <div>
+            <strong>Cliente:</strong> {{ cliente.nombre }}<br>
+            <strong>RNC:</strong> {{ cliente.rnc }}<br>
+            <strong>Dirección:</strong> {{ cliente.direccion }}
+        </div>
+
+        <div>
+            <strong>No. Documento:</strong> {{ numero }}<br>
+            <strong>Fecha:</strong> {{ fecha }}<br>
+            <strong>Atendido por:</strong> {{ atendido_por }}
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Cantidad</th>
+                <th>Descripción</th>
+                <th class="right">Precio</th>
+                <th class="right">Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        {% for item in items %}
+        <tr>
+            <td>{{ item.cantidad }}</td>
+            <td>{{ item.descripcion }}</td>
+            <td class="right">{{ item.precio }}</td>
+            <td class="right">{{ item.total }}</td>
+        </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+    <div class="totales">
+        <div>
+            <span>Sub-total:</span>
+            <span>{{ subtotal }}</span>
+        </div>
+        <div>
+            <span>ITBIS:</span>
+            <span>{{ itbis }}</span>
+        </div>
+        <div class="total-final">
+            <span>Total:</span>
+            <span>{{ total }}</span>
+        </div>
+    </div>
+
+
+    <div class="footer">
+        *Esta factura es válida dentro de los siguientes 15 días.<br>
+        **Se requiere el 50% de avance y 50% contra entrega.<br>
+        ***Tiempo de producción: 2 semanas luego de aprobada.
+    </div>
+
+</div>
+
+</body>
+</html>

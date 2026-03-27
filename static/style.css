@@ -89,8 +89,13 @@ button {
 }
 
 .btn-danger {
-    background: #e74c3c;
-    color: white;
+    background-color: #e74c3c !important;
+    color: white !important;
+    border: none;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b !important;
 }
 
 table {

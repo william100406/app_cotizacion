@@ -153,6 +153,10 @@ ${opciones}
 
 tabla.appendChild(fila);
 
+$(fila).find('.servicio').select2({
+    placeholder: "Buscar servicio...",
+    width: 'resolve'
+});
 }
 
 function eliminarFila(btn){
