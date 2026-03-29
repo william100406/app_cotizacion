@@ -1,99 +1,210 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>{{ tipo_documento }}</title>
 
 <style>
+
+body {
+    font-family: Arial;
+    font-size: 12px;
+}
+
+.header-table {
+    width: 100%;
+}
+
+.header-table td {
+    vertical-align: top;
+}
+
+.logo img {
+    height: 90px; 
+}
+
+.empresa {
+    text-align: right;
+    font-size: 11px;
+}
+
+.titulo {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+.info-table {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.info-table td {
+    vertical-align: top;
+    width: 50%;
+}
+
+.items {
+    width: 100%;
+    margin-top: 15px;
+    border-collapse: collapse;
+}
+
+.items th {
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    padding: 5px;
+}
+
+.items th.right {
+    text-align: right;
+}
+
+.items td {
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
+}
+
+.right {
+    text-align: right;
+}
+
+
+.totales {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.totales td {
+    padding: 3px;
+}
+
+.total-final {
+    border-top: 2px solid black;
+    font-weight: bold;
+}
+
+.total-final td {
+    padding-top: 6px; 
+}
+
+.watermark {
+    position: absolute;
+    top: 200px;
+    left: 150px;
+    width: 300px;
+    opacity: 0.08; 
+    z-index: -1;
+}
+
+.footer {
+    margin-top: 30px;
+    font-size: 10px;
+}
+
+.firma {
+    margin-top: 50px;
+    text-align: center; 
+}
+
+.linea-firma {
+    margin: 10px auto;
+    width: 200px;
+    border-top: 1px solid black;
+}
 
 </style>
 
 </head>
+
 <body>
 
-<div class="documento">
+<tr>
+    <td colspan="2" align="center" style="padding-top:40px; padding-bottom:40px;">
+        <img src="{{ url_for('static', filename='logo.png') }}" width="250">
+    </td>
+</tr>
 
-    <div class="header">
-        <div class="logo">
-            <img src="{{ url_for('static', filename='logo.png') }}">
-            <div>
-                <strong>D.V.D</strong><br>
-                PUBLICITYSTUDIO
-            </div>
-        </div>
+    <td class="empresa">
+        Fecha: {{ fecha }}<br>
+        Santo Domingo D.N.<br>
+        Tel: 829-874-1003<br>
+        Email: delvallepublicity@gmail.com<br>
+        RNC: 132357604
+    </td>
+</tr>
+</table>
 
-        <div class="empresa-info">
-            Fecha: {{ fecha }}<br>
-            Santo Domingo D.N. Rep.Dom.<br>
-            T. 829-874-1003<br>
-            Email: delvallepublicity@gmail.com<br>
-            RNC: 132357604
-        </div>
-    </div>
+<div class="titulo">
+    {{ tipo_documento }}
+</div>
 
-    <div class="titulo">
-        {{ tipo_documento }}
-    </div>
+<table class="info-table">
+<tr>
+<td>
+    <strong>Cliente:</strong> {{ cliente.nombre }}<br>
+    <strong>RNC:</strong> {{ cliente.rnc }}<br>
+    <strong>Dirección:</strong> {{ cliente.direccion }}
+</td>
 
-    <div class="info">
-        <div>
-            <strong>Cliente:</strong> {{ cliente.nombre }}<br>
-            <strong>RNC:</strong> {{ cliente.rnc }}<br>
-            <strong>Dirección:</strong> {{ cliente.direccion }}
-        </div>
+<td>
+    <strong>No:</strong> {{ numero }}<br>
+    <strong>Fecha:</strong> {{ fecha }}<br>
+    <strong>Atendido por:</strong> {{ atendido_por }}
+</td>
+</tr>
+</table>
 
-        <div>
-            <strong>No. Documento:</strong> {{ numero }}<br>
-            <strong>Fecha:</strong> {{ fecha }}<br>
-            <strong>Atendido por:</strong> {{ atendido_por }}
-        </div>
-    </div>
+<table class="items">
+<tr>
+    <th>Cant.</th>
+    <th>Descripción</th>
+    <th class="right">Precio</th>
+    <th class="right">Valor</th>
+</tr>
 
-    <table>
-        <thead>
+{% for item in items %}
+<tr>
+    <td>{{ item.cantidad }}</td>
+    <td>{{ item.descripcion }}</td>
+    <td class="right">{{ item.precio }}</td>
+    <td class="right">{{ item.total }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+<table width="100%" style="margin-top:20px;">
+<tr>
+    <td width="65%"></td>
+    <td width="35%">
+        <table width="100%">
             <tr>
-                <th>Cantidad</th>
-                <th>Descripción</th>
-                <th class="right">Precio</th>
-                <th class="right">Valor</th>
+                <td>Sub-total:</td>
+                <td class="right">{{ subtotal }}</td>
             </tr>
-        </thead>
-        <tbody>
+            <tr>
+                <td>ITBIS:</td>
+                <td class="right">{{ itbis }}</td>
+            </tr>
+            <tr class="total-final">
+                <td>Total:</td>
+                <td class="right">{{ total }}</td>
+            </tr>
+        </table>
+    </td>
+</tr>
+</table>
 
-        {% for item in items %}
-        <tr>
-            <td>{{ item.cantidad }}</td>
-            <td>{{ item.descripcion }}</td>
-            <td class="right">{{ item.precio }}</td>
-            <td class="right">{{ item.total }}</td>
-        </tr>
-        {% endfor %}
+<div class="footer">
+    *Válida por 15 días.<br>
+    *50% anticipo / 50% contra entrega.<br>
+    *Tiempo de entrega: 2 semanas.
+</div>
 
-        </tbody>
-    </table>
-
-    <div class="totales">
-        <div>
-            <span>Sub-total:</span>
-            <span>{{ subtotal }}</span>
-        </div>
-        <div>
-            <span>ITBIS:</span>
-            <span>{{ itbis }}</span>
-        </div>
-        <div class="total-final">
-            <span>Total:</span>
-            <span>{{ total }}</span>
-        </div>
-    </div>
-
-
-    <div class="footer">
-        *Esta factura es válida dentro de los siguientes 15 días.<br>
-        **Se requiere el 50% de avance y 50% contra entrega.<br>
-        ***Tiempo de producción: 2 semanas luego de aprobada.
-    </div>
-
+<div class="firma">
+    <div class="linea-firma"></div>
+    Firma y sello
 </div>
 
 </body>

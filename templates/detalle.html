@@ -1,170 +1,215 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Detalle de Cotización</title>
+    <title>Cotización</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <style>
-       body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #0b1a33, #111827);
-    margin: 0;
-    color: #e5e7eb;
+```
+<style>
+```
+
+body {
+font-family: Arial, sans-serif;
+background: #111827;
+margin: 0;
 }
 
 .contenido {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding-top: 40px;
+display: flex;
+justify-content: center;
+padding: 40px;
 }
 
 .card {
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(12px);
-    padding: 30px;
-    border-radius: 16px;
-    width: 80%;
-    max-width: 900px;
-    border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+background: white;
+padding: 40px;
+width: 900px;
+border-radius: 12px;
 }
 
-h2 {
-    margin-bottom: 15px;
-    color: #ffffff;
+/* HEADER */
+.header {
+display: flex;
+justify-content: space-between;
+margin-bottom: 30px;
 }
 
-h3 {
-    margin-top: 25px;
-    color: #f9fafb;
+.empresa h1 {
+margin: 0;
 }
 
-.info p {
-    margin: 6px 0;
-    color: #cbd5e1;
+.info-doc {
+text-align: right;
 }
 
-hr {
-    margin: 20px 0;
-    border: none;
-    height: 1px;
-    background: rgba(255,255,255,0.1);
+.cliente {
+margin-bottom: 20px;
 }
 
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    overflow: hidden;
-    border-radius: 10px;
+width: 100%;
+border-collapse: collapse;
+margin-top: 20px;
 }
 
 th {
-    background: #0f172a;
-    color: #fff;
-    padding: 12px;
-    text-align: left;
+background: #111827;
+color: white;
+padding: 10px;
 }
 
 td {
-    padding: 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    color: #e5e7eb;
+padding: 10px;
+border-bottom: 1px solid #ddd;
 }
 
-tr:hover {
-    background: rgba(255,255,255,0.05);
+.totales {
+margin-top: 20px;
+width: 300px;
+margin-left: auto;
+}
+
+.totales div {
+display: flex;
+justify-content: space-between;
+margin-bottom: 5px;
+}
+
+.total-final {
+font-size: 20px;
+font-weight: bold;
 }
 
 .btn-imprimir {
-    margin-top: 20px;
-    padding: 10px 18px;
-    border: none;
-    background: linear-gradient(135deg, #38bdf8, #60a5fa);
-    color: white;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.2s;
-}
-
-.btn-imprimir:hover {
-    transform: scale(1.05);
-    opacity: 0.9;
+margin-top: 20px;
+padding: 10px 18px;
+background: #2563eb;
+color: white;
+border: none;
+cursor: pointer;
 }
 
 .btn-volver {
-    margin-left: 10px;
-    padding: 10px 18px;
-    background: rgba(255,255,255,0.08);
-    color: #e5e7eb;
-    border-radius: 10px;
-    text-decoration: none;
-    font-weight: bold;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: 0.2s;
+margin-left: 10px;
+text-decoration: none;
 }
 
-.btn-volver:hover {
-    background: rgba(255,255,255,0.15);
-    transform: translateX(-3px);
+.firma {
+margin-top: 60px;
 }
-    </style>
+
+.firma-linea {
+width: 250px;
+border-top: 1px solid black;
+}
+
+@media print {
+
+```
+body * {
+    visibility: hidden;
+}
+
+#area-imprimir, #area-imprimir * {
+    visibility: visible;
+}
+
+#area-imprimir {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.btn-imprimir,
+.btn-volver {
+    display: none;
+}
+``
+
+} </style>
 
 </head>
+
 <body>
 
 <div class="contenido">
-    <div class="card">
+<div id="area-imprimir" class="card">
 
-        <h2>Detalle de Cotización</h2>
+```
+<!-- HEADER -->
+<div class="header">
+    <div class="empresa">
+        <h1>Tu Empresa</h1>
+        <p>Servicios Profesionales</p>
+    </div>
 
-        <div class="info">
-            <p><strong>Número:</strong> {{ cotizacion.id }}</p>
-            <p><strong>Cliente:</strong> {{ cotizacion.cliente }}</p>
-            <p><strong>Total:</strong> US$ {{ cotizacion.total }}</p>
-            <p><strong>Fecha:</strong> {{ cotizacion.fecha }}</p>
-        </div>
+    <div class="info-doc">
+        <p><strong>Cotización #{{ cotizacion.id }}</strong></p>
+        <p>{{ cotizacion.fecha }}</p>
+    </div>
+</div>
 
-        <hr>
+<hr>
 
-        <h3>Servicios</h3>
+<div class="cliente">
+    <p><strong>Cliente:</strong> {{ cotizacion.cliente }}</p>
+</div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Servicio</th>
-                    <th>Cantidad</th>
-                    <th>Precio</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
+<table>
+    <thead>
+        <tr>
+            <th>Servicio</th>
+            <th>Cant.</th>
+            <th>Precio</th>
+            <th>Total</th>
+        </tr>
+    </thead>
 
-            <tbody>
-                {% for s in servicios %}
-                <tr>
-                    <td>{{ s.descripcion }}</td>
-                    <td>{{ s.cantidad }}</td>
-                    <td>{{ s.precio }}</td>
-                    <td>{{ s.total }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <tbody>
+        {% for s in servicios %}
+        <tr>
+            <td>{{ s.descripcion }}</td>
+            <td>{{ s.cantidad }}</td>
+            <td>{{ s.precio }}</td>
+            <td>{{ s.total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-        <button onclick="window.print()" class="btn-imprimir">
+<div class="totales">
+    <div>
+        <span>Subtotal:</span>
+        <span>US$ {{ cotizacion.total / 1.18 }}</span>
+    </div>
+    <div>
+        <span>ITBIS (18%):</span>
+        <span>US$ {{ cotizacion.total - (cotizacion.total / 1.18) }}</span>
+    </div>
+    <div class="total-final">
+        <span>Total:</span>
+        <span>US$ {{ cotizacion.total }}</span>
+    </div>
+</div>
+
+<div class="firma">
+    <div class="firma-linea"></div>
+    <p>Firma autorizada</p>
+</div>
+
+<button onclick="window.print()" class="btn-imprimir">
     Imprimir
 </button>
 
 <a href="{{ url_for('index') }}" class="btn-volver">
-    <i class="fa fa-arrow-left"></i> Volver
+    Volver
 </a>
+```
 
-    </div>
+</div>
 </div>
 
 </body>

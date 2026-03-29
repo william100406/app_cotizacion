@@ -4,22 +4,22 @@
 
 <div class="d-flex align-items-center mb-4">
 
-     <a href="{{ url_for('index') }}" class="me-3 text-decoration-none">
-        <i class="bi bi-arrow-left fs-4"></i>
-    </a>
+```
+ <a href="{{ url_for('index') }}" class="me-3 text-decoration-none">
+    <i class="bi bi-arrow-left fs-4"></i>
+</a>
 
-    <h3 class="mb-0">Nueva Cotización</h3>
+<h3 class="mb-0">Nueva Cotización</h3>
+```
 
 </div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert {{ category }}">
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
+{% if messages %}
+{% for category, message in messages %} <div class="alert {{ category }}">
+{{ message }} </div>
+{% endfor %}
+{% endif %}
 {% endwith %}
 
 <div class="card shadow p-4">
@@ -161,29 +161,34 @@ ${opciones}
 
 tabla.appendChild(fila);
 
+// Activar Select2
 $(fila).find('.servicio').select2({
     placeholder: "Buscar servicio...",
     width: 'resolve'
 });
+
+// Evento servicio (IMPORTANTE)
+$(fila).find('.servicio').on('change', function(){
+    actualizarPrecio(fila);
+});
+
+// Evento tipo precio
+fila.querySelector(".tipo_precio").addEventListener("change", function(){
+    actualizarPrecio(fila);
+});
+
 }
 
-function eliminarFila(btn){
-btn.closest("tr").remove();
-calcular();
-}
+function actualizarPrecio(fila){
 
-document.addEventListener("change", function(e){
+const select = fila.querySelector(".servicio");
+const index = select.options[select.selectedIndex].getAttribute("data-index");
 
-if(e.target.classList.contains("servicio") || e.target.classList.contains("tipo_precio")){
+if(index === null || index === "") return;
 
-const fila = e.target.closest("tr");
+const servicio = servicios[index];
 
-const servicioNombre = fila.querySelector(".servicio").value;
 const tipo = fila.querySelector(".tipo_precio").value;
-
-const servicio = servicios.find(s => s.nombre === servicioNombre);
-
-if(!servicio) return;
 
 let precio = 0;
 
@@ -194,11 +199,14 @@ if(tipo === "c") precio = servicio.precio_c || 0;
 fila.querySelector(".precio").value = precio;
 
 calcular();
-
 }
 
-});
+function eliminarFila(btn){
+btn.closest("tr").remove();
+calcular();
+}
 
+// Cambio de cantidad
 document.addEventListener("input", function(e){
 if(e.target.classList.contains("cantidad")){
 calcular();

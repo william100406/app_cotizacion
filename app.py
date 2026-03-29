@@ -6,12 +6,13 @@ import sqlite3
 from datetime import timedelta
 from datetime import datetime
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
+from reportlab.pdfbase.pdfmetrics import stringWidth
 import io
 
 app = Flask(__name__)
@@ -24,6 +25,26 @@ def get_db():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     return conn
+
+def generar_codigo_cotizacion(conn):
+    year = datetime.now().year
+
+    ultimo = conn.execute("""
+        SELECT codigo FROM cotizaciones
+        WHERE codigo LIKE ?
+        ORDER BY id DESC LIMIT 1
+    """, (f"COT-{year}-%",)).fetchone()
+
+    if ultimo and ultimo["codigo"]:
+        try:
+            ultimo_num = int(ultimo["codigo"].split("-")[-1])
+        except:
+            ultimo_num = 0
+        nuevo_num = ultimo_num + 1
+    else:
+        nuevo_num = 1
+
+    return f"COT-{year}-{nuevo_num:06d}"
 
 def init_db():
     conn = get_db()
@@ -466,11 +487,7 @@ def nueva_cotizacion():
         itbis = float(request.form["itbis"])
         total = float(request.form["total"])
         
-
-        cursor.execute("SELECT COUNT(*) FROM cotizaciones")
-        numero = cursor.fetchone()[0] + 1
-
-        codigo = f"COT-{datetime.now().year}-{numero:04d}"
+        codigo = generar_codigo_cotizacion(conn)
         fecha = datetime.now().strftime("%d/%m/%Y")
 
         cursor.execute("""
@@ -790,9 +807,11 @@ def factura_pdf(id):
     return send_file(
         buffer,
         as_attachment=True,
-        download_name="factura.pdf",
+        download_name=f"FACT--{factura['ncf']}.Pdf",
         mimetype="application/pdf"
-    )
+
+    
+)
 
 @app.route("/eliminar_factura/<int:id>", methods=["POST"])
 def eliminar_factura(id):
@@ -848,124 +867,260 @@ def cotizacion_pdf(id):
     conn = get_db()
 
     cotizacion = conn.execute(
-        "SELECT * FROM cotizaciones WHERE id=?", (id,)
+        "SELECT * FROM cotizaciones WHERE id=?",
+        (id,)
     ).fetchone()
 
     items = conn.execute(
-        "SELECT * FROM cotizacion_items WHERE cotizacion_id=?", (id,)
+        "SELECT * FROM cotizacion_items WHERE cotizacion_id=?",
+        (id,)
     ).fetchall()
 
-    buffer = io.BytesIO()
-    pdf = canvas.Canvas(buffer, pagesize=letter)
-
-    width, height = letter
-
-
-    pdf.setFont("Helvetica-Bold",26)
-    pdf.drawString(40,760,"D.V.D")
-
-    pdf.setFont("Helvetica",12)
-    pdf.drawString(40,740,"PUBLICITYSTUDIO")
-
-    pdf.setFont("Helvetica",10)
-
-    pdf.drawRightString(570,760,f"Fecha: {cotizacion['fecha']}")
-    pdf.drawRightString(570,745,"Santo Domingo D.N. Rep.Dom.")
-    pdf.drawRightString(570,730,"T. 829-874-1003")
-    pdf.drawRightString(570,715,"Email: delvallepublicity@gmail.com")
-    pdf.drawRightString(570,700,"RNC: 132357604")
-
-
-    pdf.setFont("Helvetica-Bold",16)
-    pdf.drawCentredString(width/2,670,"COTIZACIÓN")
-
-
-    pdf.setFont("Helvetica",11)
-
-    pdf.drawString(40,640,f"Codigo: {cotizacion['codigo']}")
-    pdf.drawString(40,625,f"Nombre: {cotizacion['cliente']}")
-    pdf.drawString(40,610,"Direccion: -")
-    pdf.drawString(40,595,f"Contacto: {cotizacion['cliente']}")
-
-    pdf.drawRightString(570,640,f"No. Cotizacion: {cotizacion['id']}")
-    pdf.drawRightString(570,625,f"Fecha: {cotizacion['fecha']}")
-    pdf.drawRightString(570,610,"Atendido por: Radhames Del Valle")
-    pdf.drawRightString(570,595,"pag: 1")
-
-
-    pdf.line(40,575,570,575)
-
-
-    pdf.setFont("Helvetica-Bold",11)
-
-    pdf.drawString(50,555,"Cantidad")
-    pdf.drawString(150,555,"Descripción")
-    pdf.drawString(420,555,"Precio")
-    pdf.drawString(500,555,"Valor")
-
-    pdf.line(40,545,570,545)
-
-
-    y = 520
-
-    pdf.setFont("Helvetica",10)
-
-    for item in items:
-
-        pdf.drawString(60,y,str(item["cantidad"]))
-        pdf.drawString(150,y,item["descripcion"])
-
-        precio = float(item["precio"])
-        total = float(item["total"])
-
-        pdf.drawRightString(470,y,f"{precio:,.2f}")
-        pdf.drawRightString(560,y,f"{total:,.2f}")
-
-        y -= 20
-
-    pdf.line(40,200,570,200)
-
-
-    pdf.setFont("Helvetica",9)
-
-    pdf.drawString(40,180,"*Esta factura es válida dentro de los siguientes 15 días.")
-    pdf.drawString(40,165,"**Se requiere el 50% de avance y 50% contra entrega.")
-    pdf.drawString(40,150,"***Tiempo de producción: 2 semanas luego de aprobada la factura.")
-
-
-    subtotal = float(cotizacion["subtotal"])
-    itbis = float(cotizacion["itbis"])
-    total = float(cotizacion["total"])
-
-    pdf.setFont("Helvetica",11)
-
-    pdf.drawRightString(520,170,"Sub-total:")
-    pdf.drawRightString(560,170,f"{subtotal:,.2f}")
-
-    pdf.drawRightString(520,150,"ITBIS:")
-    pdf.drawRightString(560,150,f"{itbis:,.2f}")
-
-    pdf.setFont("Helvetica-Bold",12)
-
-    pdf.drawRightString(520,120,"Total:")
-    pdf.drawRightString(560,120,f"{total:,.2f}")
-
-
-    pdf.line(200,80,360,80)
-
-    pdf.setFont("Helvetica",9)
-    pdf.drawCentredString(280,65,"Firma y Sello")
-
-    pdf.save()
-
-    buffer.seek(0)
+    empresa = conn.execute(
+        "SELECT * FROM empresa LIMIT 1"
+    ).fetchone()
 
     conn.close()
+
+    if not cotizacion:
+        return "Cotización no encontrada"
+
+    buffer = io.BytesIO()
+
+    page_width, page_height = letter
+    left_margin = 36
+    right_margin = 36
+    top_margin = 120
+    bottom_margin = 60
+
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        leftMargin=left_margin,
+        rightMargin=right_margin,
+        topMargin=top_margin,
+        bottomMargin=bottom_margin
+    )
+
+    styles = getSampleStyleSheet()
+    normal = ParagraphStyle(
+        "normal_small",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=9,
+        leading=11
+    )
+    small = ParagraphStyle(
+        "small",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=8,
+        leading=10
+    )
+    bold = ParagraphStyle(
+        "bold",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
+        fontSize=9,
+        leading=11
+    )
+    title_style = ParagraphStyle(
+        "title",
+        parent=styles["Title"],
+        fontName="Helvetica-Bold",
+        fontSize=18,
+        alignment=1,
+        leading=22,
+        spaceAfter=8
+    )
+
+    logo_path = os.path.join(app.root_path, "static", "logo.png")
+
+    def money(value):
+        try:
+            return f"RD$ {float(value):,.2f}"
+        except:
+            return "RD$ 0.00"
+
+    def draw_header_footer(canvas, doc):
+        canvas.saveState()
+
+        # Marca de agua
+        if os.path.exists(logo_path):
+            try:
+                canvas.saveState()
+                try:
+                    canvas.setFillAlpha(0.06)
+                except:
+                    pass
+                # Logo grande y suave al centro
+                canvas.drawImage(
+                    logo_path,
+                    x=(page_width - 320) / 2,
+                    y=220,
+                    width=320,
+                    height=320,
+                    preserveAspectRatio=True,
+                    mask='auto'
+                )
+                try:
+                    canvas.setFillAlpha(1)
+                except:
+                    pass
+                canvas.restoreState()
+            except:
+                pass
+
+        # Logo superior izquierdo
+        if os.path.exists(logo_path):
+            try:
+                canvas.drawImage(
+                    logo_path,
+                    doc.leftMargin,
+                    page_height - 78,
+                    width=145,
+                    height=55,
+                    preserveAspectRatio=True,
+                    mask='auto'
+                )
+            except:
+                pass
+
+        # Info superior derecha
+        canvas.setFont("Helvetica", 9)
+        y = page_height - 28
+        canvas.drawRightString(page_width - doc.rightMargin, y, f"Fecha: {cotizacion['fecha']}")
+        y -= 12
+        canvas.drawRightString(page_width - doc.rightMargin, y, "Santo Domingo D.N.")
+        y -= 12
+        canvas.drawRightString(page_width - doc.rightMargin, y, f"Tel: {empresa['telefono'] if empresa else '829-874-1003'}")
+        y -= 12
+        canvas.drawRightString(page_width - doc.rightMargin, y, f"Email: {empresa['correo'] if empresa else 'delvallepublicity@gmail.com'}")
+        y -= 12
+        canvas.drawRightString(page_width - doc.rightMargin, y, f"RNC: {empresa['rnc'] if empresa else '132357604'}")
+
+        # Título
+        canvas.setFont("Helvetica-Bold", 18)
+        canvas.drawCentredString(page_width / 2, page_height - 104, "COTIZACIÓN")
+
+        # Línea superior
+        canvas.line(doc.leftMargin, page_height - 112, page_width - doc.rightMargin, page_height - 112)
+
+        # Footer
+        canvas.setFont("Helvetica", 8)
+        canvas.drawString(doc.leftMargin, 28, "*Válida por 15 días.")
+        canvas.drawString(doc.leftMargin, 18, "*50% anticipo / 50% contra entrega.")
+        canvas.drawString(doc.leftMargin, 8, "*Tiempo de entrega: 2 semanas.")
+
+        canvas.setFont("Helvetica", 8)
+        canvas.drawCentredString(page_width / 2, 34, "Firma y sello")
+        canvas.line((page_width - 180) / 2, 48, (page_width + 180) / 2, 48)
+
+        canvas.restoreState()
+
+    story = []
+
+    # Datos del cliente
+    cliente_data = [
+        [
+            Paragraph("<b>Cliente:</b> " + str(cotizacion["cliente"]), normal),
+            Paragraph("<b>No:</b> " + str(cotizacion["codigo"]), normal),
+        ],
+        [
+            Paragraph("<b>RNC:</b> " + str(cotizacion["rnc"] or "-"), normal),
+            Paragraph("<b>Fecha:</b> " + str(cotizacion["fecha"]), normal),
+        ],
+        [
+            Paragraph("<b>Dirección:</b> " + str("-"), normal),
+            Paragraph("<b>Atendido por:</b> Radhames Del Valle", normal),
+        ],
+    ]
+
+    cliente_table = Table(cliente_data, colWidths=[260, 250])
+    cliente_table.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 2),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+    ]))
+
+    story.append(Spacer(1, 20))
+    story.append(cliente_table)
+    story.append(Spacer(1, 14))
+
+    # Tabla de items
+    items_data = [[
+        Paragraph("<b>Cant.</b>", bold),
+        Paragraph("<b>Descripción</b>", bold),
+        Paragraph("<b align='right'>Precio</b>", bold),
+        Paragraph("<b align='right'>Valor</b>", bold),
+    ]]
+
+    for item in items:
+        items_data.append([
+            Paragraph(str(item["cantidad"]), normal),
+            Paragraph(str(item["descripcion"]), normal),
+            Paragraph(f"{float(item['precio']):,.2f}", ParagraphStyle(
+                "right_price", parent=normal, alignment=2
+            )),
+            Paragraph(f"{float(item['total']):,.2f}", ParagraphStyle(
+                "right_total", parent=normal, alignment=2
+            )),
+        ])
+
+    items_table = Table(items_data, colWidths=[50, 290, 95, 95], repeatRows=1)
+    items_table.setStyle(TableStyle([
+        ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#cccccc")),
+        ("LINEABOVE", (0, 0), (-1, 0), 1.2, colors.black),
+        ("LINEBELOW", (0, 0), (-1, 0), 1.2, colors.black),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("ALIGN", (0, 0), (0, -1), "LEFT"),
+        ("ALIGN", (2, 1), (3, -1), "RIGHT"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    ]))
+
+    story.append(items_table)
+    story.append(Spacer(1, 16))
+
+    # Totales
+    totals_data = [
+        [Paragraph("Sub-total:", normal), Paragraph(money(cotizacion["subtotal"]), ParagraphStyle("r1", parent=normal, alignment=2))],
+        [Paragraph("ITBIS:", normal), Paragraph(money(cotizacion["itbis"]), ParagraphStyle("r2", parent=normal, alignment=2))],
+        [Paragraph("<b>Total:</b>", bold), Paragraph(f"<b>{money(cotizacion['total'])}</b>", ParagraphStyle("r3", parent=bold, alignment=2))]
+    ]
+
+    totals_table = Table(totals_data, colWidths=[100, 110], hAlign="RIGHT")
+    totals_table.setStyle(TableStyle([
+        ("LINEABOVE", (0, 2), (-1, 2), 1.2, colors.black),
+        ("TOPPADDING", (0, 2), (-1, 2), 8),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+    ]))
+
+    story.append(totals_table)
+    story.append(Spacer(1, 26))
+
+    # Firma centrada
+    firma = Paragraph("___________________________<br/>Firma y sello", ParagraphStyle(
+        "firma",
+        parent=small,
+        alignment=1
+    ))
+    story.append(firma)
+
+    doc.build(story, onFirstPage=draw_header_footer, onLaterPages=draw_header_footer)
+
+    buffer.seek(0)
 
     return send_file(
         buffer,
         as_attachment=True,
-        download_name=f"cotizacion_{cotizacion['codigo']}.pdf",
+        download_name=f"{cotizacion['codigo']}.pdf",
         mimetype="application/pdf"
     )
 
