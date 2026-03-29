@@ -222,12 +222,15 @@ def init_db():
 
     ]
 
-    for servicio in servicios:
-        cursor.execute("""
-        INSERT INTO servicios (nombre, 
-        precio_a, precio_b, precio_c)
-        VALUES (?, ?, ?, ?)
-        """, servicio)
+    cursor.execute("SELECT COUNT(*) FROM servicios")
+    count = cursor.fetchone()[0]
+
+    if count == 0:
+        for servicio in servicios:
+            cursor.execute("""
+            INSERT INTO servicios (nombre, precio_a, precio_b, precio_c)
+            VALUES (?, ?, ?, ?)
+            """, servicio)
 
 
 
@@ -267,12 +270,17 @@ def init_db():
     """)
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS usuarios (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    usuario TEXT,
-    password TEXT
-    )
-    """) 
+CREATE TABLE IF NOT EXISTS usuarios (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+usuario TEXT,
+password TEXT
+)
+""")
+
+    try:
+        cursor.execute("ALTER TABLE usuarios ADD COLUMN foto TEXT")
+    except:
+        pass 
 
     cursor.execute("SELECT * FROM usuarios")
 
@@ -526,7 +534,7 @@ def editar_cotizacion(id):
         conn.commit()
         conn.close()
 
-        return redirect("/historial")
+        return redirect("/")
 
     cursor.execute("SELECT * FROM cotizaciones WHERE id=?",(id,))
     cotizacion = cursor.fetchone()
@@ -690,8 +698,8 @@ def factura_pdf(id):
     conn = get_db()
 
     factura = conn.execute(
-        "SELECT * FROM facturas WHERE cotizacion_id=?",
-        (id,)
+    "SELECT * FROM facturas WHERE cotizacion_id=?",
+    (id,)
     ).fetchone()
 
     if not factura:
@@ -702,12 +710,23 @@ def factura_pdf(id):
         (factura["id"],)
     ).fetchall()
 
+    empresa = conn.execute("SELECT * FROM empresa LIMIT 1").fetchone()
+
     conn.close()
 
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
 
-    y = 750
+    import os
+    logo_path = os.path.join("static", "logo.png")
+
+    try:
+        logo = ImageReader(logo_path)
+        p.drawImage(logo, 50, 700, width=180, height=90)
+    except:
+        pass
+
+    y = 650
 
     p.setFont("Helvetica-Bold", 18)
     p.drawString(50, y, "FACTURA")
@@ -715,11 +734,10 @@ def factura_pdf(id):
     y -= 40
 
     p.setFont("Helvetica", 12)
-    empresa = conn.execute("SELECT * FROM empresa LIMIT 1").fetchone()
 
     p.drawString(50, y, f"Empresa: {empresa['nombre']}")
     y -= 20
-    p.drawString(50, y, "RNC: 132357604")
+    p.drawString(50, y, f"RNC: {empresa['rnc']}")
 
     y -= 30
 
@@ -806,7 +824,7 @@ def eliminar_factura(id):
     conn.commit()
     conn.close()
 
-    return redirect(url_for("index"))
+    return redirect(url_for("facturas"))
 
 @app.route("/reset_facturas")
 def reset_facturas():
@@ -1190,7 +1208,14 @@ def arreglar_db():
 @app.route("/eliminar_cotizacion/<int:id>", methods=["POST"])
 def eliminar_cotizacion(id):
 
-    db.eliminar_cotizacion_db(id)
+    conn = get_db()
+
+    conn.execute("DELETE FROM cotizacion_items WHERE cotizacion_id=?", (id,))
+    conn.execute("DELETE FROM cotizaciones WHERE id=?", (id,))
+
+    conn.commit()
+    conn.close()
+
     return redirect(url_for("index"))
 
 @app.context_processor
@@ -1278,3 +1303,5 @@ if __name__ == "__main__":
     db.arreglar_tabla()
 
     app.run(host= "0.0.0.0", port= 5000, debug=True)
+
+    

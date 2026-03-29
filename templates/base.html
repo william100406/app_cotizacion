@@ -4,6 +4,7 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <link rel="manifest" href="/static/manifest.json">
 <link rel="icon" href="/static/FC.ico">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 <meta name="theme-color" content="#1e1e2f">
 <meta charset="UTF-8">
 <title>FactuCloud</title>
@@ -459,6 +460,79 @@ transition:0.2s;
 background:rgba(255,255,255,0.05);
 }
 
+body.tema-oscuro .select2-container--default .select2-selection--single {
+    background-color: #0f172a;
+    border: 1px solid #334155;
+    height: 38px;
+    display: flex;
+    align-items: center;
+}
+
+body.tema-oscuro .select2-container--default .select2-selection__rendered {
+    color: white !important;
+}
+
+body.tema-oscuro .select2-container--default .select2-selection__arrow b {
+    border-color: #fff transparent transparent transparent;
+}
+
+body.tema-oscuro .select2-dropdown {
+    background-color: #0f172a;
+    color: white;
+    border: 1px solid #334155;
+}
+
+body.tema-oscuro .select2-results__option {
+    color: white;
+}
+
+body.tema-oscuro .select2-results__option--highlighted {
+    background-color: #2563eb !important;
+    color: white;
+}
+
+body.tema-oscuro .select2-search__field {
+    background-color: #020617 !important;
+    color: white !important;
+    border: 1px solid #334155 !important;
+}
+
+body.tema-claro .select2-container--default .select2-selection--single {
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    height: 38px;
+    display: flex;
+    align-items: center;
+}
+
+body.tema-claro .select2-container--default .select2-selection__rendered {
+    color: #000 !important;
+}
+
+body.tema-claro .select2-container--default .select2-selection__arrow b {
+    border-color: #000 transparent transparent transparent;
+}
+
+body.tema-claro .select2-dropdown {
+    background-color: #ffffff;
+    color: #000;
+    border: 1px solid #ced4da;
+}
+
+body.tema-claro .select2-results__option {
+    color: #000;
+}
+
+body.tema-claro .select2-results__option--highlighted {
+    background-color: #0d6efd !important;
+    color: #fff;
+}
+
+body.tema-claro .select2-search__field {
+    background-color: #ffffff !important;
+    color: #000 !important;
+    border: 1px solid #ced4da !important;
+}
 </style>
 </head>
 

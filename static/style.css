@@ -176,3 +176,21 @@ color: white;
 label {
     color: rgb(0, 0, 0);
 }
+
+.back-btn {
+    position: fixed;
+    top: 20px;
+    left: 260px;
+    color: #dad7ed;
+    font-size: 26px;
+    text-decoration: none;
+    z-index: 1000;
+}
+
+.back-btn:hover {
+    color: #6c63ff;
+}
+
+.main-content {
+    position: relative;
+}
