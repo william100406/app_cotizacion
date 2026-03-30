@@ -1060,7 +1060,8 @@ def cotizacion_pdf(id):
 
     items_table = Table(items_data, colWidths=[50, 290, 95, 95], repeatRows=1)
     items_table.setStyle(TableStyle([
-        ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#cccccc")),
+        ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#d9d9d9")),
+        ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#f2f2f2")),
         ("LINEABOVE", (0, 0), (-1, 0), 1.2, colors.black),
         ("LINEBELOW", (0, 0), (-1, 0), 1.2, colors.black),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
@@ -1088,10 +1089,12 @@ def cotizacion_pdf(id):
         ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
         ("LEFTPADDING", (0, 0), (-1, -1), 4),
         ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+        ("BACKGROUND", (0,2), (-1,2), colors.HexColor("#f2f2f2")),
     ]))
 
     story.append(totals_table)
     story.append(Spacer(1, 26))
+    story.append(Spacer(1, 80))
 
     condiciones = Paragraph(
     "*Válida por 15 días.<br/>"
@@ -1107,13 +1110,20 @@ def cotizacion_pdf(id):
     story.append(Spacer(1,20))
     story.append(condiciones)
     story.append(Spacer(1,30))
+    
+    firma_table = Table(
+        [[""], ["Firma y sello"]],
+        colWidths=[200],
+        hAlign="CENTER"
+    )
 
-    firma = Paragraph("___________________________<br/>Firma y sello", ParagraphStyle(
-        "firma",
-        parent=small,
-        alignment=1
-    ))
-    story.append(firma)
+    firma_table.setStyle(TableStyle([
+        ("LINEABOVE", (0,0), (0,0), 1.2, colors.black),
+        ("ALIGN", (0,0), (-1,-1), "CENTER"),
+        ("TOPPADDING", (0,0), (-1,-1), 6),
+    ]))
+
+    story.append(firma_table)
 
     fecha = datetime.now().strftime("%d-%m-%Y")
 
