@@ -14,6 +14,8 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase.pdfmetrics import stringWidth
 import io
+import os
+import re
 
 app = Flask(__name__)
 
@@ -938,14 +940,14 @@ def cotizacion_pdf(id):
 
     def money(value):
         try:
-            return f"RD$ {float(value):,.2f}"
+            return f"$ {float(value):,.2f}"
         except:
-            return "RD$ 0.00"
+            return "$ 0.00"
 
     def draw_header_footer(canvas, doc):
         canvas.saveState()
 
-        # Marca de agua
+
         if os.path.exists(logo_path):
             try:
                 canvas.saveState()
@@ -953,13 +955,13 @@ def cotizacion_pdf(id):
                     canvas.setFillAlpha(0.06)
                 except:
                     pass
-                # Logo grande y suave al centro
+                
                 canvas.drawImage(
                     logo_path,
                     x=(page_width - 320) / 2,
                     y=220,
-                    width=320,
-                    height=320,
+                    width=420,
+                    height=520,
                     preserveAspectRatio=True,
                     mask='auto'
                 )
@@ -971,56 +973,44 @@ def cotizacion_pdf(id):
             except:
                 pass
 
-        # Logo superior izquierdo
+        
         if os.path.exists(logo_path):
             try:
                 canvas.drawImage(
                     logo_path,
                     doc.leftMargin,
                     page_height - 78,
-                    width=145,
-                    height=55,
+                    width=200,
+                    height=80,
                     preserveAspectRatio=True,
                     mask='auto'
                 )
             except:
                 pass
 
-        # Info superior derecha
+
         canvas.setFont("Helvetica", 9)
         y = page_height - 28
         canvas.drawRightString(page_width - doc.rightMargin, y, f"Fecha: {cotizacion['fecha']}")
         y -= 12
         canvas.drawRightString(page_width - doc.rightMargin, y, "Santo Domingo D.N.")
         y -= 12
-        canvas.drawRightString(page_width - doc.rightMargin, y, f"Tel: {empresa['telefono'] if empresa else '829-874-1003'}")
+        canvas.drawRightString(page_width - doc.rightMargin, y, "Tel: 829-874-1003")
         y -= 12
-        canvas.drawRightString(page_width - doc.rightMargin, y, f"Email: {empresa['correo'] if empresa else 'delvallepublicity@gmail.com'}")
+        canvas.drawRightString(page_width - doc.rightMargin, y, "Email: delvallepublicity@gmail.com")
         y -= 12
-        canvas.drawRightString(page_width - doc.rightMargin, y, f"RNC: {empresa['rnc'] if empresa else '132357604'}")
+        canvas.drawRightString(page_width - doc.rightMargin, y, "RNC: 132357604")
 
-        # Título
         canvas.setFont("Helvetica-Bold", 18)
         canvas.drawCentredString(page_width / 2, page_height - 104, "COTIZACIÓN")
 
-        # Línea superior
         canvas.line(doc.leftMargin, page_height - 112, page_width - doc.rightMargin, page_height - 112)
-
-        # Footer
-        canvas.setFont("Helvetica", 8)
-        canvas.drawString(doc.leftMargin, 28, "*Válida por 15 días.")
-        canvas.drawString(doc.leftMargin, 18, "*50% anticipo / 50% contra entrega.")
-        canvas.drawString(doc.leftMargin, 8, "*Tiempo de entrega: 2 semanas.")
-
-        canvas.setFont("Helvetica", 8)
-        canvas.drawCentredString(page_width / 2, 34, "Firma y sello")
-        canvas.line((page_width - 180) / 2, 48, (page_width + 180) / 2, 48)
 
         canvas.restoreState()
 
     story = []
 
-    # Datos del cliente
+
     cliente_data = [
         [
             Paragraph("<b>Cliente:</b> " + str(cotizacion["cliente"]), normal),
@@ -1049,7 +1039,6 @@ def cotizacion_pdf(id):
     story.append(cliente_table)
     story.append(Spacer(1, 14))
 
-    # Tabla de items
     items_data = [[
         Paragraph("<b>Cant.</b>", bold),
         Paragraph("<b>Descripción</b>", bold),
@@ -1086,7 +1075,6 @@ def cotizacion_pdf(id):
     story.append(items_table)
     story.append(Spacer(1, 16))
 
-    # Totales
     totals_data = [
         [Paragraph("Sub-total:", normal), Paragraph(money(cotizacion["subtotal"]), ParagraphStyle("r1", parent=normal, alignment=2))],
         [Paragraph("ITBIS:", normal), Paragraph(money(cotizacion["itbis"]), ParagraphStyle("r2", parent=normal, alignment=2))],
@@ -1105,13 +1093,36 @@ def cotizacion_pdf(id):
     story.append(totals_table)
     story.append(Spacer(1, 26))
 
-    # Firma centrada
+    condiciones = Paragraph(
+    "*Válida por 15 días.<br/>"
+    "*50% anticipo / 50% contra entrega.<br/>"
+    "*Tiempo de entrega: 2 semanas.",
+    ParagraphStyle(
+        "condiciones",
+        parent=small,
+        alignment=0
+    )
+    )
+
+    story.append(Spacer(1,20))
+    story.append(condiciones)
+    story.append(Spacer(1,30))
+
     firma = Paragraph("___________________________<br/>Firma y sello", ParagraphStyle(
         "firma",
         parent=small,
         alignment=1
     ))
     story.append(firma)
+
+    fecha = datetime.now().strftime("%d-%m-%Y")
+
+    nombre_cliente = cotizacion["cliente"] or "Cliente"
+    nombre_limpio = re.sub(r'[^A-Za-z0-9]', '_', nombre_cliente)
+
+    nombre_archivo = f"COT-{nombre_limpio}-{fecha}.pdf"
+
+    doc.title = nombre_archivo
 
     doc.build(story, onFirstPage=draw_header_footer, onLaterPages=draw_header_footer)
 
@@ -1120,7 +1131,7 @@ def cotizacion_pdf(id):
     return send_file(
         buffer,
         as_attachment=True,
-        download_name=f"{cotizacion['codigo']}.pdf",
+        download_name=nombre_archivo,
         mimetype="application/pdf"
     )
 
