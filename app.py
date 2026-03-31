@@ -717,8 +717,8 @@ def factura_pdf(id):
     conn = get_db()
 
     factura = conn.execute(
-    "SELECT * FROM facturas WHERE cotizacion_id=?",
-    (id,)
+        "SELECT * FROM facturas WHERE id=?",
+        (id,)
     ).fetchone()
 
     if not factura:
@@ -729,91 +729,202 @@ def factura_pdf(id):
         (factura["id"],)
     ).fetchall()
 
-    empresa = conn.execute("SELECT * FROM empresa LIMIT 1").fetchone()
+    empresa = conn.execute(
+        "SELECT * FROM empresa LIMIT 1"
+    ).fetchone()
 
     conn.close()
 
     buffer = io.BytesIO()
-    p = canvas.Canvas(buffer, pagesize=letter)
 
-    import os
-    logo_path = os.path.join("static", "logo.png")
+    page_width, page_height = letter
+    left_margin = 36
+    right_margin = 36
+    top_margin = 120
+    bottom_margin = 60
 
-    try:
-        logo = ImageReader(logo_path)
-        p.drawImage(logo, 50, 700, width=180, height=90)
-    except:
-        pass
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        leftMargin=left_margin,
+        rightMargin=right_margin,
+        topMargin=top_margin,
+        bottomMargin=bottom_margin
+    )
 
-    y = 650
+    styles = getSampleStyleSheet()
 
-    p.setFont("Helvetica-Bold", 18)
-    p.drawString(50, y, "FACTURA")
+    normal = ParagraphStyle(
+        "normal_small",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=9,
+        leading=11
+    )
 
-    y -= 40
+    small = ParagraphStyle(
+        "small",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=8,
+        leading=10
+    )
 
-    p.setFont("Helvetica", 12)
+    bold = ParagraphStyle(
+        "bold",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
+        fontSize=9,
+        leading=11
+    )
 
-    p.drawString(50, y, f"Empresa: {empresa['nombre']}")
-    y -= 20
-    p.drawString(50, y, f"RNC: {empresa['rnc']}")
+    logo_path = os.path.join(app.root_path, "static", "logo.png")
 
-    y -= 30
+    def money(value):
+        try:
+            return f"$ {float(value):,.2f}"
+        except:
+            return "$ 0.00"
 
-    p.drawString(50, y, f"NCF: {factura['ncf']}")
-    y -= 20
-    p.drawString(50, y, f"Cliente: {factura['cliente']}")
-    y -= 20
-    p.drawString(50, y, f"RNC Cliente: {factura['rnc']}")
-    y -= 20
-    p.drawString(50, y, f"Fecha: {factura['fecha']}")
+    def draw_header_footer(canvas, doc):
 
-    y -= 40
+        canvas.saveState()
 
-    p.setFont("Helvetica-Bold", 12)
-    p.drawString(50, y, "Descripción")
-    p.drawString(300, y, "Cantidad")
-    p.drawString(380, y, "Precio")
-    p.drawString(460, y, "Total")
+        if os.path.exists(logo_path):
+            try:
+                canvas.drawImage(
+                    logo_path,
+                    doc.leftMargin,
+                    page_height - 78,
+                    width=200,
+                    height=80,
+                    preserveAspectRatio=True,
+                    mask='auto'
+                )
+            except:
+                pass
 
-    y -= 10
-    p.line(50, y, 550, y)
+        canvas.setFont("Helvetica", 9)
 
-    y -= 20
+        y = page_height - 28
+        canvas.drawRightString(page_width - doc.rightMargin, y, f"Fecha: {factura['fecha']}")
+        y -= 12
+        canvas.drawRightString(page_width - doc.rightMargin, y, "Santo Domingo D.N.")
+        y -= 12
+        canvas.drawRightString(page_width - doc.rightMargin, y, empresa["telefono"] or "")
+        y -= 12
+        canvas.drawRightString(page_width - doc.rightMargin, y, empresa["correo"] or "")
+        y -= 12
+        canvas.drawRightString(page_width - doc.rightMargin, y, f"RNC: {empresa['rnc']}")
 
-    p.setFont("Helvetica", 11)
+        canvas.setFont("Helvetica-Bold", 18)
+        canvas.drawCentredString(page_width / 2, page_height - 104, "FACTURA")
+
+        canvas.line(doc.leftMargin, page_height - 112, page_width - doc.rightMargin, page_height - 112)
+
+        canvas.restoreState()
+
+    story = []
+
+    cliente_data = [
+
+        [
+            Paragraph("<b>Cliente:</b> " + str(factura["cliente"]), normal),
+            Paragraph("<b>NCF:</b> " + str(factura["ncf"]), normal),
+        ],
+
+        [
+            Paragraph("<b>RNC:</b> " + str(factura["rnc"] or "-"), normal),
+            Paragraph("<b>Fecha:</b> " + str(factura["fecha"]), normal),
+        ],
+
+        [
+            Paragraph("<b>Dirección:</b> -", normal),
+            Paragraph("<b>Atendido por:</b> Radhames Del Valle", normal),
+        ],
+    ]
+
+    cliente_table = Table(cliente_data, colWidths=[260, 250])
+
+    story.append(Spacer(1, 20))
+    story.append(cliente_table)
+    story.append(Spacer(1, 14))
+
+    items_data = [[
+        Paragraph("<b>Cant.</b>", bold),
+        Paragraph("<b>Descripción</b>", bold),
+        Paragraph("<b align='right'>Precio</b>", bold),
+        Paragraph("<b align='right'>Valor</b>", bold),
+    ]]
 
     for item in items:
 
-        p.drawString(50, y, item["descripcion"])
-        p.drawString(300, y, str(item["cantidad"]))
-        p.drawString(380, y, str(item["precio"]))
-        p.drawString(460, y, str(item["total"]))
+        items_data.append([
+            Paragraph(str(item["cantidad"]), normal),
+            Paragraph(str(item["descripcion"]), normal),
+            Paragraph(f"{float(item['precio']):,.2f}", ParagraphStyle("right_price", parent=normal, alignment=2)),
+            Paragraph(f"{float(item['total']):,.2f}", ParagraphStyle("right_total", parent=normal, alignment=2)),
+        ])
 
-        y -= 20
+    items_table = Table(items_data, colWidths=[50, 290, 95, 95], repeatRows=1)
 
-    y -= 20
+    items_table.setStyle(TableStyle([
+        ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#d9d9d9")),
+        ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#f2f2f2")),
+        ("LINEABOVE", (0, 0), (-1, 0), 1.2, colors.black),
+        ("LINEBELOW", (0, 0), (-1, 0), 1.2, colors.black),
+        ("ALIGN", (2,1), (3,-1), "RIGHT")
+    ]))
 
-    p.setFont("Helvetica-Bold", 12)
+    story.append(items_table)
+    story.append(Spacer(1,16))
 
-    p.drawString(380, y, f"Subtotal: US$ {factura['subtotal']}")
-    y -= 20
-    p.drawString(380, y, f"ITBIS: US$ {factura['itbis']}")
-    y -= 20
-    p.drawString(380, y, f"TOTAL: US$ {factura['total']}")
+    totals_data = [
 
-    p.save()
+        [Paragraph("Sub-total:", normal), Paragraph(money(factura["subtotal"]), ParagraphStyle("r1", parent=normal, alignment=2))],
+
+        [Paragraph("ITBIS:", normal), Paragraph(money(factura["itbis"]), ParagraphStyle("r2", parent=normal, alignment=2))],
+
+        [Paragraph("<b>Total:</b>", bold), Paragraph(f"<b>{money(factura['total'])}</b>", ParagraphStyle("r3", parent=bold, alignment=2))]
+
+    ]
+
+    totals_table = Table(totals_data, colWidths=[100,110], hAlign="RIGHT")
+
+    story.append(totals_table)
+
+    story.append(Spacer(1,40))
+
+    firma_table = Table(
+        [[""], ["Firma y sello"]],
+        colWidths=[200],
+        hAlign="CENTER"
+    )
+
+    firma_table.setStyle(TableStyle([
+        ("LINEABOVE", (0,0), (0,0), 1.2, colors.black),
+        ("ALIGN", (0,0), (-1,-1), "CENTER")
+    ]))
+
+    story.append(firma_table)
+
+    fecha = datetime.now().strftime("%d-%m-%Y")
+
+    nombre_cliente = factura["cliente"] or "Cliente"
+    nombre_limpio = re.sub(r'[^A-Za-z0-9]', '_', nombre_cliente)
+
+    nombre_archivo = f"FACT-{nombre_limpio}-{fecha}.pdf"
+
+    doc.build(story, onFirstPage=draw_header_footer)
 
     buffer.seek(0)
 
     return send_file(
         buffer,
         as_attachment=True,
-        download_name=f"FACT--{factura['ncf']}.Pdf",
+        download_name=nombre_archivo,
         mimetype="application/pdf"
-
-    
-)
+    )
 
 @app.route("/eliminar_factura/<int:id>", methods=["POST"])
 def eliminar_factura(id):
@@ -1472,6 +1583,7 @@ def perfil():
     conn.close()
 
     return render_template("perfil.html", user=user, empresa=empresa)
+    
 
 if __name__ == "__main__":
 
