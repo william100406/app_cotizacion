@@ -717,7 +717,7 @@ def factura_pdf(id):
     conn = get_db()
 
     factura = conn.execute(
-        "SELECT * FROM facturas WHERE id=?",
+        "SELECT * FROM facturas WHERE cotizacion_id=?",
         (id,)
     ).fetchone()
 
