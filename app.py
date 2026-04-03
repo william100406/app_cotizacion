@@ -18,6 +18,9 @@ import re
 
 app = Flask(__name__)
 
+def money(value):
+    return f"${value:,.2f}"
+
 app.jinja_env.globals.update(money=money)
 
 load_dotenv()
