@@ -2,7 +2,9 @@ import utils.database as db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, request, redirect, url_for, send_file, session,make_response
 from flask import flash
-import sqlite3
+import psycopg2
+import psycopg2.extras
+from dotenv import load_dotenv
 from datetime import timedelta
 from datetime import datetime
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
@@ -23,10 +25,71 @@ app.secret_key = "g7@9d#s1!Sistema_cotización"
 
 app.permanent_session_lifetime = timedelta(days=7)
 
+load_dotenv()
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+class CursorWrapper:
+
+    def __init__(self, cursor):
+        self.cursor = cursor
+        self.lastrowid = None
+
+    def execute(self, sql, params=None):
+
+        sql = sql.replace("?", "%s")
+
+        if sql.strip().lower().startswith("insert") and "returning" not in sql.lower():
+            sql = sql.rstrip(";") + " RETURNING id"
+            self.cursor.execute(sql, params)
+            row = self.cursor.fetchone()
+            if row:
+                self.lastrowid = row["id"]
+        else:
+            self.cursor.execute(sql, params)
+
+        return self
+
+    def executemany(self, sql, params):
+        sql = sql.replace("?", "%s")
+        self.cursor.executemany(sql, params)
+
+    def fetchone(self):
+        return self.cursor.fetchone()
+
+    def fetchall(self):
+        return self.cursor.fetchall()
+
+    def __getattr__(self, name):
+        return getattr(self.cursor, name)
+
+
+class DBWrapper:
+
+    def __init__(self):
+        self.conn = psycopg2.connect(DATABASE_URL)
+
+    def cursor(self):
+        return CursorWrapper(
+            self.conn.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            )
+        )
+
+    def execute(self, sql, params=None):
+        cur = self.cursor()
+        cur.execute(sql, params)
+        return cur
+
+    def commit(self):
+        self.conn.commit()
+
+    def close(self):
+        self.conn.close()
+
+
 def get_db():
-    conn = sqlite3.connect("database.db")
-    conn.row_factory = sqlite3.Row
-    return conn
+    return DBWrapper()
 
 def generar_codigo_cotizacion(conn):
     year = datetime.now().year
@@ -56,7 +119,7 @@ def init_db():
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS cotizaciones (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         codigo TEXT,
         cliente TEXT,
         rnc TEXT,
@@ -72,7 +135,7 @@ def init_db():
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS cotizacion_items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         cotizacion_id INTEGER,
         descripcion TEXT,
         cantidad REAL,
@@ -83,7 +146,7 @@ def init_db():
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS servicios (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     nombre TEXT,
     precio_a REAL,
     precio_b REAL,
@@ -246,7 +309,7 @@ def init_db():
     ]
 
     cursor.execute("SELECT COUNT(*) FROM servicios")
-    count = cursor.fetchone()[0]
+    count = cursor.fetchone()["count"]
 
     if count == 0:
         for servicio in servicios:
@@ -259,7 +322,7 @@ def init_db():
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS facturas (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         ncf TEXT,
         rnc TEXT,
         cliente TEXT,
@@ -273,7 +336,7 @@ def init_db():
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS factura_items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         factura_id INTEGER,
         descripcion TEXT,
         cantidad REAL,
@@ -284,7 +347,7 @@ def init_db():
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS configuracion_ncf (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         tipo TEXT,
         desde INTEGER,
         hasta INTEGER,
@@ -294,7 +357,7 @@ def init_db():
 
     cursor.execute("""
 CREATE TABLE IF NOT EXISTS usuarios (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
+id SERIAL PRIMARY KEY,
 usuario TEXT,
 password TEXT
 )
@@ -319,7 +382,7 @@ password TEXT
 
     cursor.execute("""
 CREATE TABLE IF NOT EXISTS clientes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     nombre TEXT,
     rnc TEXT,
     telefono TEXT,
@@ -329,7 +392,7 @@ CREATE TABLE IF NOT EXISTS clientes (
     
     cursor.execute("""
 CREATE TABLE IF NOT EXISTS empresa (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     nombre TEXT,
     rnc TEXT,
     telefono TEXT,
@@ -377,21 +440,21 @@ def index():
     pendientes = conn.execute("""
     SELECT COUNT(*) FROM cotizaciones
     WHERE estado='Pendiente'
-    """).fetchone()[0]
+    """).fetchone()["count"]
 
     aprobadas = conn.execute("""
     SELECT COUNT(*) FROM cotizaciones
     WHERE estado='Aprobada'
-    """).fetchone()[0]
+    """).fetchone()["count"]
 
     facturadas = conn.execute("""
     SELECT COUNT(*) FROM cotizaciones
     WHERE estado='Facturada'
-    """).fetchone()[0]
+    """).fetchone()["count"]
 
     total_facturado = conn.execute("""
-    SELECT SUM(total) FROM facturas
-    """).fetchone()[0]
+    SELECT SUM(total) AS total FROM facturas
+    """).fetchone()["total"]
 
     if total_facturado is None:
         total_facturado = 0
@@ -462,10 +525,10 @@ def nueva_cotizacion():
 
     for s in servicios_db:
         servicios.append({
-            "nombre": s[0],
-            "precio_a": s[1],
-            "precio_b": s[2],
-            "precio_c": s[3]
+            "nombre": s["nombre"],
+            "precio_a": s["precio_a"],
+            "precio_b": s["precio_b"],
+            "precio_c": s["precio_c"]
         })
 
     if request.method == "POST":
@@ -533,8 +596,7 @@ def nueva_cotizacion():
 @app.route("/editar_cotizacion/<int:id>", methods=["GET","POST"])
 def editar_cotizacion(id):
 
-    conn = sqlite3.connect("database.db")
-    conn.row_factory = sqlite3.Row
+    conn = get_db()
     cursor = conn.cursor()
 
     if request.method == "POST":
@@ -717,7 +779,7 @@ def factura_pdf(id):
     conn = get_db()
 
     factura = conn.execute(
-        "SELECT * FROM facturas WHERE cotizacion_id=?",
+        "SELECT * FROM facturas WHERE id=?",
         (id,)
     ).fetchone()
 
@@ -1259,8 +1321,7 @@ def cotizacion_pdf(id):
 @app.route("/detalle/<int:id>")
 def detalle(id):
 
-    conn = sqlite3.connect("database.db")
-    conn.row_factory = sqlite3.Row
+    conn = get_db()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -1448,6 +1509,11 @@ def editar_cliente(id):
         correo = request.form["correo"]
         direccion = request.form ["direccion"]
 
+        try:
+           conn.execute("ALTER TABLE clientes ADD COLUMN correo TEXT")
+        except:
+            pass
+
         conn.execute("""
         UPDATE clientes
         SET nombre=?, rnc=?, telefono=?, correo=?, direccion=?
@@ -1469,7 +1535,7 @@ def editar_cliente(id):
 @app.route("/arreglar_db")
 def arreglar_db():
 
-    conn = sqlite3.connect("database.db")
+    conn = get_db()
     cursor = conn.cursor()
 
     try:
@@ -1529,6 +1595,7 @@ def perfil():
             import os
 
             nombre = secure_filename(archivo.filename)
+            os.makedirs("static/uploads", exist_ok=True)
             ruta = os.path.join("static/uploads", nombre)
             archivo.save(ruta)
 
@@ -1590,6 +1657,5 @@ if __name__ == "__main__":
     init_db()
     db.arreglar_tabla()
 
-    app.run(host= "0.0.0.0", port= 5000, debug=True)
-
-    
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port= 5000)
