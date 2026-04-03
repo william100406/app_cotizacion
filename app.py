@@ -17,6 +17,7 @@ import os
 import re
 
 app = Flask(__name__)
+
 load_dotenv()
 
 app.secret_key = os.environ.get("SECRET_KEY", "g7@9d#s1!Sistema_cotización")
@@ -1526,6 +1527,8 @@ def perfil():
     conn.close()
     return render_template("perfil.html", user=user, empresa=empresa)
 
+with app.app_context():
+    init_db()
 
 if __name__ == "__main__":
     init_db()
