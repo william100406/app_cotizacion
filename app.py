@@ -18,6 +18,8 @@ import re
 
 app = Flask(__name__)
 
+app.jinja_env.globals.update(money=money)
+
 load_dotenv()
 
 app.secret_key = os.environ.get("SECRET_KEY", "g7@9d#s1!Sistema_cotización")
