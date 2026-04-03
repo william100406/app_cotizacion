@@ -37,14 +37,20 @@ class CursorWrapper:
     def execute(self, sql, params=None):
         sql = sql.replace("?", "%s")
 
-        if sql.strip().lower().startswith("insert") and "returning" not in sql.lower():
-            sql = sql.rstrip(";") + " RETURNING id"
-            self.cursor.execute(sql, params)
-            row = self.cursor.fetchone()
-            if row and "id" in row:
-                self.lastrowid = row["id"]
-        else:
-            self.cursor.execute(sql, params)
+        try:
+            if sql.strip().lower().startswith("insert") and "returning" not in sql.lower():
+                sql = sql.rstrip(";") + " RETURNING id"
+                self.cursor.execute(sql, params)
+                row = self.cursor.fetchone()
+
+                if row and "id" in row:
+                    self.lastrowid = row["id"]
+            else:
+                self.cursor.execute(sql, params)
+
+        except Exception as e:
+            self.cursor.connection.rollback()
+            raise e
 
         return self
 
@@ -391,7 +397,7 @@ def init_db():
     try:
         cursor.execute("ALTER TABLE usuarios ADD COLUMN foto TEXT")
     except Exception:
-        pass
+        conn.rollback()
 
     cursor.execute("SELECT * FROM usuarios LIMIT 1")
     if not cursor.fetchone():
@@ -416,7 +422,7 @@ def init_db():
     try:
         cursor.execute("ALTER TABLE clientes ADD COLUMN correo TEXT")
     except Exception:
-        pass
+        conn.rollback()
 
     cursor.execute(
         """
@@ -1527,8 +1533,6 @@ def perfil():
     conn.close()
     return render_template("perfil.html", user=user, empresa=empresa)
 
-with app.app_context():
-    init_db()
 
 if __name__ == "__main__":
     init_db()
