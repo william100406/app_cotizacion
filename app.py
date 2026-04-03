@@ -19,8 +19,6 @@ import re
 app = Flask(__name__)
 load_dotenv()
 
-init_db()
-
 app.secret_key = os.environ.get("SECRET_KEY", "g7@9d#s1!Sistema_cotización")
 app.permanent_session_lifetime = timedelta(days=7)
 
