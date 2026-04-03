@@ -142,9 +142,11 @@ transform:translateY(0);
 
 
 .content{
-margin-left: 250px;
-padding:30px;
-width: calc(100% - 250px);
+    margin-left: 250px;
+    padding:30px;
+    width: calc(100% - 250px);
+    min-height: 100vh; /* 🔥 esto arregla el corte */
+    background: transparent !important; /* 🔥 CLAVE */
 }
 
 .card{
@@ -158,36 +160,43 @@ color:#000;
 }
 
 body.tema-oscuro{
-background:#141429;
-color:white;
-}
-
-body.tema-oscuro .content{
-background:#1e1e2f;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(79,140,255,0.25), transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(13,110,253,0.18), transparent 40%),
+        linear-gradient(135deg, #0f1020, #141429);
 }
 
 body.tema-oscuro .sidebar{
-background:#0f172a;
-}
-
-body.tema-oscuro .content{
-    background: #141429;
+    background: rgba(15,23,42,0.6);
+    backdrop-filter: blur(12px);
 }
 
 body.tema-oscuro .card{
-    background: #1e1e2f !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.04) !important;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+    color: white !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
 }
 
 body.tema-oscuro .form-card{
-    background: #1e1e2f;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
     color: #fff;
 }
 
 body.tema-oscuro table{
-    background: #1e1e2f;
-    color: #fff;
+    background: transparent !important;
+}
+
+body.tema-oscuro thead{
+    background: rgba(255,255,255,0.05) !important;
+}
+
+body.tema-oscuro tr:hover{
+    background: rgba(255,255,255,0.05);
 }
 
 body.tema-oscuro th{
@@ -533,10 +542,135 @@ body.tema-claro .select2-search__field {
     color: #000 !important;
     border: 1px solid #ced4da !important;
 }
+
+.btn-primary{
+    background: linear-gradient(135deg, #0d6efd, #4f8cff);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 12px;
+
+    box-shadow: 0 0 15px rgba(79, 140, 255, 0.5);
+
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover{
+    transform: translateY(-2px);
+
+    box-shadow: 
+        0 0 20px rgba(79, 140, 255, 0.8),
+        0 0 40px rgba(79, 140, 255, 0.5);
+}
+
+button,
+.btn-primary{
+    background: linear-gradient(135deg, #0d6efd, #4f8cff);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 12px;
+
+    box-shadow: 0 0 15px rgba(79, 140, 255, 0.5);
+
+    transition: all 0.3s ease;
+}
+
+.mobile-header{
+    display:none;
+}
+
+.overlay{
+    display:none;
+}
+
+@media (max-width: 768px){
+
+    .sidebar{
+        position: fixed;
+        left: -260px;
+        top: 0;
+        width: 240px;
+        height: 100%;
+        z-index: 1000;
+        transition: 0.3s ease;
+    }
+
+    .sidebar.active{
+        left: 0;
+    }
+
+    .content{
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .mobile-header{
+        display:flex;
+        align-items:center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        background: rgba(15,23,42,0.8);
+        backdrop-filter: blur(12px);
+        position: sticky;
+        top:0;
+        z-index:1100;
+    }
+
+    .menu-toggle{
+        background: none;
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .mobile-title{
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .overlay{
+        display:none;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        top:0;
+        left:0;
+        z-index:900;
+    }
+
+    .overlay.active{
+        display:block;
+    }
+}
+
+@media (max-width:768px){
+    input, select, textarea{
+        font-size:16px;
+    }
+
+    button{
+        width:100%;
+    }
+}
 </style>
 </head>
 
 <body>
+
+    <div class="mobile-header">
+    <button class="menu-toggle" onclick="toggleSidebar()">
+        <i class="fa fa-bars"></i>
+    </button>
+    <span class="mobile-title">FactuCloud</span>
+</div>
+
+<div class="overlay" onclick="toggleSidebar()"></div>
 
 <div class="container-fluid">
 <div class="row">
@@ -675,6 +809,13 @@ document.getElementById("profileMenu").classList.toggle("show");
 document.addEventListener("click", function(){
 document.getElementById("profileMenu").classList.remove("show");
 });
+</script>
+
+<script>
+function toggleSidebar(){
+    document.querySelector(".sidebar").classList.toggle("active");
+    document.querySelector(".overlay").classList.toggle("active");
+}
 </script>
 
 </body>

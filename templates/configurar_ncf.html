@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 <div class="main-content">
+    <div class="center-container">
 
     <a href="{{ url_for('index') }}" class="back-btn">
         <i class="bi bi-arrow-left"></i>
@@ -16,19 +17,25 @@
 
         <form method="POST">
 
-            <label>Tipo de NCF</label>
-            <input type="text" name="tipo" required>
+    <div class="form-group">
+        <label>Tipo de NCF</label>
+        <input type="text" name="tipo" required>
+    </div>
 
-            <label>Desde</label>
-            <input type="number" name="desde" required>
+    <div class="form-group">
+        <label>Desde</label>
+        <input type="number" name="desde" required>
+    </div>
 
-            <label>Hasta</label>
-            <input type="number" name="hasta" required>
+    <div class="form-group">
+        <label>Hasta</label>
+        <input type="number" name="hasta" required>
+    </div>
 
-            <button type="submit">Guardar Configuración</button>
+    <button type="submit">Guardar Configuración</button>
 
-        </form>
-
+</form>
+        </div>
     </div>
 </div>
 

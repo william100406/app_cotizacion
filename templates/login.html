@@ -36,9 +36,10 @@ body {
   display: grid;
   place-items: center;
   color: var(--text);
+
   background:
-    radial-gradient(circle at top left, rgba(13, 110, 253, 0.22), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.08), transparent 22%),
+    radial-gradient(circle at 20% 20%, rgba(13,110,253,0.25), transparent 30%),
+    radial-gradient(circle at 80% 80%, rgba(79,140,255,0.18), transparent 35%),
     linear-gradient(135deg, var(--bg-dark), var(--bg-darker));
 }
 
@@ -94,9 +95,11 @@ input {
   width: 100%;
   padding: 12px 12px 12px 40px;
   border-radius: 12px;
-  border: 1px solid var(--gray-line);
-  background: rgba(255, 255, 255, 0.045);
-  color: #ffffff;
+
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+
+  color: #fff;
   transition: 0.25s ease;
 }
 
@@ -107,8 +110,8 @@ input::placeholder {
 input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px var(--primary-glow);
-  background: rgba(255, 255, 255, 0.065);
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 0 0 3px rgba(13,110,253,0.25);
 }
 
 label {
@@ -130,23 +133,30 @@ input[type="checkbox"] {
   width: 100%;
   padding: 12px;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   font-weight: 700;
   color: #fff;
+
   background: linear-gradient(135deg, var(--primary), var(--primary-2));
   cursor: pointer;
   margin-top: 10px;
-  box-shadow: 0 12px 30px rgba(13, 110, 253, 0.28);
-  transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+
+  box-shadow:
+    0 10px 25px rgba(13, 110, 253, 0.35),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+
+  transition: all 0.25s ease;
 }
 
 .login-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 16px 34px rgba(13, 110, 253, 0.34);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow:
+    0 14px 35px rgba(13, 110, 253, 0.45),
+    inset 0 1px 0 rgba(255,255,255,0.2);
 }
 
 .login-btn:active {
-  transform: translateY(0);
+  transform: scale(0.98);
 }
 
 .divider {
@@ -207,7 +217,7 @@ input[type="checkbox"] {
 <div class="login-card">
 
 <h2>Iniciar Sesión</h2>
- 
+
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     {% for category, message in messages %}

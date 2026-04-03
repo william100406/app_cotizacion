@@ -4,13 +4,11 @@
 
 <div class="d-flex align-items-center mb-4">
 
-```
- <a href="{{ url_for('index') }}" class="me-3 text-decoration-none">
+    <a href="{{ url_for('index') }}" class="me-3 text-decoration-none">
     <i class="bi bi-arrow-left fs-4"></i>
-</a>
+    </a>
 
 <h3 class="mb-0">Nueva Cotización</h3>
-```
 
 </div>
 
@@ -46,11 +44,11 @@
 <div class="mb-3">
 <label class="form-label">Teléfono</label>
 <input type="tel"
-       name="telefono"
-       class="form-control"
-       placeholder="+1 (809) 123-4567"
-       inputmode="numeric"
-       oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')">
+    name="telefono"
+    class="form-control"
+    placeholder="+1 (809) 123-4567"
+    inputmode="numeric"
+    oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')">
 </div>
 
 <div class="mb-3">
@@ -161,18 +159,15 @@ ${opciones}
 
 tabla.appendChild(fila);
 
-// Activar Select2
 $(fila).find('.servicio').select2({
     placeholder: "Buscar servicio...",
     width: 'resolve'
 });
 
-// Evento servicio (IMPORTANTE)
 $(fila).find('.servicio').on('change', function(){
     actualizarPrecio(fila);
 });
 
-// Evento tipo precio
 fila.querySelector(".tipo_precio").addEventListener("change", function(){
     actualizarPrecio(fila);
 });
@@ -206,7 +201,6 @@ btn.closest("tr").remove();
 calcular();
 }
 
-// Cambio de cantidad
 document.addEventListener("input", function(e){
 if(e.target.classList.contains("cantidad")){
 calcular();
