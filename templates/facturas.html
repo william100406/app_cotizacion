@@ -95,7 +95,7 @@ body {
     <a href="{{ url_for('index') }}" class="me-3 text-decoration-none">
         <i class="bi bi-arrow-left fs-4"></i>
     </a>
-
+    
     <h2 class="mb-0">Facturas Emitidas</h2>
 
 </div>
@@ -114,31 +114,28 @@ body {
         </thead>
 
         <tbody>
+    {% for factura in facturas %}
+    <tr>
+        <td>{{ factura["ncf"] }}</td>
+        <td>{{ factura["cliente"] }}</td>
+        <td>{{ factura["rnc"] }}</td>
+        <td>{{ factura["fecha"] }}</td>
+        <td>{{ money(factura["total"]) }}</td>
 
-        {% for factura in facturas %}
+        <td>
+            <a class="btn-primary" href="/factura_pdf/{{ factura['id'] }}">
+                Descargar
+            </a>
 
-            <tr>
-                <td>{{ factura[1] }}</td>
-                <td>{{ factura[2] }}</td>
-                <td>{{ factura[3] }}</td>
-                <td>{{ factura[4] }}</td>
-                <td>US$ {{ "{:,.2f}".format(factura[5]) }}</td>
-
-                <td>
-                    <a class="btn-primary" href="/descargar_factura/{{ factura[0] }}">
-                        Descargar
-                    </a>
-                    <form action="/eliminar_factura/{{ factura[0] }}" method="POST" style="display:inline;">
-                        <button class="btn-danger" type="submit">
-                        Eliminar
-                        </button>
-                    </form>
-                </td>
-            </tr>
-
-        {% endfor %}
-
-        </tbody>
+            <form action="/eliminar_factura/{{ factura['id'] }}" method="POST" style="display:inline;">
+                <button class="btn-danger" type="submit">
+                    Eliminar
+                </button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
 
     </table>
 

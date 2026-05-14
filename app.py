@@ -1,8 +1,6 @@
 import utils.database as db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, request, redirect, url_for, send_file, session, flash
-import psycopg2
-import psycopg2.extras
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
@@ -18,15 +16,17 @@ import re
 
 app = Flask(__name__)
 
+def money(value):
+    return f"${value:,.2f}"
+
+app.jinja_env.globals.update(money=money)
+
 load_dotenv()
 
 app.secret_key = os.environ.get("SECRET_KEY", "g7@9d#s1!Sistema_cotización")
 app.permanent_session_lifetime = timedelta(days=7)
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
-
-if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL no está configurada")
+DATABASE_URL = "sistema.db"
 
 
 class CursorWrapper:
@@ -35,18 +35,32 @@ class CursorWrapper:
         self.lastrowid = None
 
     def execute(self, sql, params=None):
-        sql = sql.replace("?", "%s")
+        sql = sql.replace("%s", "?")
 
         try:
-            if sql.strip().lower().startswith("insert") and "returning" not in sql.lower():
-                sql = sql.rstrip(";") + " RETURNING id"
-                self.cursor.execute(sql, params)
-                row = self.cursor.fetchone()
+            if params is None:
+                if sql.strip().lower().startswith("insert") and "returning" not in sql.lower():
+                    sql = sql.rstrip(";") + " RETURNING id"
 
-                if row and "id" in row:
-                    self.lastrowid = row["id"]
+                    self.cursor.execute(sql)
+                    row = self.cursor.fetchone()
+
+                    if row and "id" in row.keys():
+                        self.lastrowid = row["id"]
+                else:
+                    self.cursor.execute(sql)
+
             else:
-                self.cursor.execute(sql, params)
+                if sql.strip().lower().startswith("insert") and "returning" not in sql.lower():
+                    sql = sql.rstrip(";") + " RETURNING id"
+
+                    self.cursor.execute(sql, params)
+                    row = self.cursor.fetchone()
+
+                    if row and "id" in row.keys():
+                        self.lastrowid = row["id"]
+                else:
+                    self.cursor.execute(sql, params)
 
         except Exception as e:
             self.cursor.connection.rollback()
@@ -55,7 +69,7 @@ class CursorWrapper:
         return self
 
     def executemany(self, sql, params):
-        sql = sql.replace("?", "%s")
+        sql = sql.replace("%s", "?")
         self.cursor.executemany(sql, params)
         return self
 
@@ -74,12 +88,12 @@ class CursorWrapper:
 
 class DBWrapper:
     def __init__(self):
-        self.conn = psycopg2.connect(DATABASE_URL, sslmode="require")
+        import sqlite3
+        self.conn = sqlite3.connect(DATABASE_URL)
+        self.conn.row_factory = sqlite3.Row
 
     def cursor(self):
-        return CursorWrapper(
-            self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        )
+        return CursorWrapper(self.conn.cursor())
 
     def execute(self, sql, params=None):
         cur = self.cursor()
@@ -88,6 +102,9 @@ class DBWrapper:
 
     def commit(self):
         self.conn.commit()
+
+    def rollback(self):
+        self.conn.rollback()
 
     def close(self):
         self.conn.close()
@@ -147,7 +164,7 @@ def init_db():
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS cotizaciones (
-            id SERIAL PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             codigo TEXT,
             cliente TEXT,
             rnc TEXT,
@@ -165,7 +182,7 @@ def init_db():
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS cotizacion_items (
-            id SERIAL PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             cotizacion_id INTEGER,
             descripcion TEXT,
             cantidad REAL,
@@ -178,7 +195,7 @@ def init_db():
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS servicios (
-            id SERIAL PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT,
             precio_a REAL,
             precio_b REAL,
@@ -330,8 +347,8 @@ def init_db():
     ("Retoque digital", 50, 40, 30),
 ]
 
-    cursor.execute("SELECT COUNT(*) FROM servicios")
-    count = cursor.fetchone()["count"]
+    cursor.execute("SELECT COUNT(*) AS count FROM servicios")
+    count = cursor.fetchone()[0]
 
     if count == 0:
         for servicio in servicios:
@@ -346,7 +363,7 @@ def init_db():
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS facturas (
-            id SERIAL PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             ncf TEXT,
             rnc TEXT,
             cliente TEXT,
@@ -362,7 +379,7 @@ def init_db():
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS factura_items (
-            id SERIAL PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             factura_id INTEGER,
             descripcion TEXT,
             cantidad REAL,
@@ -375,7 +392,7 @@ def init_db():
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS configuracion_ncf (
-            id SERIAL PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             tipo TEXT,
             desde INTEGER,
             hasta INTEGER,
@@ -387,7 +404,7 @@ def init_db():
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS usuarios (
-            id SERIAL PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             usuario TEXT,
             password TEXT
         )
@@ -410,7 +427,7 @@ def init_db():
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS clientes (
-            id SERIAL PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT,
             rnc TEXT,
             telefono TEXT,
@@ -427,7 +444,7 @@ def init_db():
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS empresa (
-            id SERIAL PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT,
             rnc TEXT,
             telefono TEXT,
@@ -479,15 +496,15 @@ def index():
         ).fetchall()
 
     pendientes = conn.execute(
-        "SELECT COUNT(*) FROM cotizaciones WHERE estado='Pendiente'"
+    "SELECT COUNT(*) AS count FROM cotizaciones WHERE estado='Pendiente'"
     ).fetchone()["count"]
 
     aprobadas = conn.execute(
-        "SELECT COUNT(*) FROM cotizaciones WHERE estado='Aprobada'"
+    "SELECT COUNT(*) AS count FROM cotizaciones WHERE estado='Aprobada'"
     ).fetchone()["count"]
 
     facturadas = conn.execute(
-        "SELECT COUNT(*) FROM cotizaciones WHERE estado='Facturada'"
+    "SELECT COUNT(*) AS count FROM cotizaciones WHERE estado='Facturada'"
     ).fetchone()["count"]
 
     total_facturado = conn.execute("SELECT SUM(total) AS total FROM facturas").fetchone()["total"]
