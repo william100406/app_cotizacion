@@ -2,28 +2,250 @@
 
 {% block content %}
 
-<h3>Editar Cotización</h3>
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center">
+        <a href="{{ url_for('detalle', id=cotizacion.id) }}" class="me-3 text-decoration-none">
+            <i class="bi bi-arrow-left fs-4"></i>
+        </a>
+        <h3 class="mb-0">Editar Cotizacion</h3>
+    </div>
 
-<form method="POST">
+    <a href="{{ url_for('cotizacion_pdf', id=cotizacion.id) }}" class="btn btn-dark">
+        <i class="fa fa-file-pdf"></i> Descargar PDF
+    </a>
+</div>
 
-<label>Cliente</label>
-<input type="text" name="cliente" value="{{ cotizacion.cliente }}" class="form-control">
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{ category }}">{{ message }}</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
 
-<label>RNC</label>
-<input type="text" name="rnc" value="{{ cotizacion.rnc }}" class="form-control">
+<div class="card shadow p-4">
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Nombre del cliente</label>
+                <input type="text" class="form-control" name="cliente" list="lista_clientes" value="{{ cotizacion.cliente }}" required>
 
-<label>Teléfono</label>
-<input type="tel" name="telefono" value="{{ cotizacion.telefono }}" class="form-control">
+                <datalist id="lista_clientes">
+                    {% for cliente in clientes %}
+                    <option value="{{ cliente.nombre }}"></option>
+                    {% endfor %}
+                </datalist>
+            </div>
 
-<label>Correo</label>
-<input type="text" name="correo" value="{{ cotizacion.correo }}" class="form-control">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">RNC / Cedula</label>
+                <input type="text" name="rnc" value="{{ cotizacion.rnc }}" class="form-control">
+            </div>
 
-<br>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Telefono</label>
+                <input type="tel"
+                    name="telefono"
+                    value="{{ cotizacion.telefono }}"
+                    class="form-control"
+                    placeholder="+1 (809) 123-4567"
+                    inputmode="numeric"
+                    oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')">
+            </div>
 
-<button class="btn btn-success">
-Guardar cambios
-</button>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Correo</label>
+                <input type="email" name="correo" value="{{ cotizacion.correo }}" class="form-control">
+            </div>
+        </div>
 
-</form>
+        <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+            <h5 class="mb-0">Servicios y precios</h5>
+            <button type="button" class="btn btn-outline-secondary" onclick="agregarFila()">
+                <i class="fa fa-plus"></i> Agregar servicio
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table align-middle" id="tabla">
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th width="140">Tipo precio</th>
+                        <th width="120">Cantidad</th>
+                        <th width="140">Precio</th>
+                        <th width="140">Total</th>
+                        <th width="70"></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="row justify-content-end">
+            <div class="col-md-4">
+                <label>Subtotal</label>
+                <input type="number" step="0.01" class="form-control" name="subtotal" value="{{ cotizacion.subtotal }}" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label>ITBIS (18%)</label>
+                <input type="number" step="0.01" class="form-control" name="itbis" value="{{ cotizacion.itbis }}" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label>Total</label>
+                <input type="number" step="0.01" class="form-control fw-bold" name="total" value="{{ cotizacion.total }}" readonly>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-success">
+                <i class="fa fa-save"></i> Guardar cambios
+            </button>
+            <a href="{{ url_for('detalle', id=cotizacion.id) }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+const servicios = {{ servicios | tojson | safe }};
+const itemsIniciales = {{ items | tojson | safe }};
+
+function opcionesServicios(valorActual){
+    let opciones = '<option value="">Seleccionar servicio</option>';
+
+    servicios.forEach((s, i) => {
+        const selected = s.nombre === valorActual ? 'selected' : '';
+        opciones += `<option value="${s.nombre}" data-index="${i}" ${selected}>${s.nombre}</option>`;
+    });
+
+    if(valorActual && !servicios.some(s => s.nombre === valorActual)){
+        opciones += `<option value="${valorActual}" selected>${valorActual}</option>`;
+    }
+
+    return opciones;
+}
+
+function agregarFila(item = null){
+    const tabla = document.querySelector("#tabla tbody");
+    const fila = document.createElement("tr");
+    const descripcion = item ? item.descripcion : "";
+    const cantidad = item ? item.cantidad : 1;
+    const precio = item ? item.precio : 0;
+    const total = item ? item.total : 0;
+
+    fila.innerHTML = `
+        <td>
+            <select class="form-control servicio" name="descripcion[]">
+                ${opcionesServicios(descripcion)}
+            </select>
+        </td>
+        <td>
+            <select class="form-control tipo_precio">
+                <option value="manual">Manual</option>
+                <option value="a">A</option>
+                <option value="b">B</option>
+                <option value="c">C</option>
+            </select>
+        </td>
+        <td>
+            <input type="number" step="0.01" class="form-control cantidad" name="cantidad[]" value="${cantidad}">
+        </td>
+        <td>
+            <input type="number" step="0.01" class="form-control precio" name="precio[]" value="${precio}">
+        </td>
+        <td>
+            <input type="number" step="0.01" class="form-control total_linea" name="total_linea[]" value="${total}" readonly>
+        </td>
+        <td>
+            <button type="button" class="btn btn-danger btn-sm" onclick="eliminarFila(this)">
+                <i class="fa fa-trash"></i>
+            </button>
+        </td>
+    `;
+
+    tabla.appendChild(fila);
+
+    $(fila).find(".servicio").select2({
+        placeholder: "Buscar servicio...",
+        width: "100%"
+    });
+
+    $(fila).find(".servicio").on("change", function(){
+        actualizarPrecio(fila);
+    });
+
+    fila.querySelector(".tipo_precio").addEventListener("change", function(){
+        actualizarPrecio(fila);
+    });
+
+    calcular();
+}
+
+function actualizarPrecio(fila){
+    const tipo = fila.querySelector(".tipo_precio").value;
+    if(tipo === "manual"){
+        calcular();
+        return;
+    }
+
+    const select = fila.querySelector(".servicio");
+    const index = select.options[select.selectedIndex].getAttribute("data-index");
+    if(index === null || index === ""){
+        calcular();
+        return;
+    }
+
+    const servicio = servicios[index];
+    let precio = 0;
+
+    if(tipo === "a") precio = servicio.precio_a || 0;
+    if(tipo === "b") precio = servicio.precio_b || 0;
+    if(tipo === "c") precio = servicio.precio_c || 0;
+
+    fila.querySelector(".precio").value = precio;
+    calcular();
+}
+
+function eliminarFila(btn){
+    btn.closest("tr").remove();
+    calcular();
+}
+
+document.addEventListener("input", function(e){
+    if(e.target.classList.contains("cantidad") || e.target.classList.contains("precio")){
+        const fila = e.target.closest("tr");
+        fila.querySelector(".tipo_precio").value = "manual";
+        calcular();
+    }
+});
+
+function calcular(){
+    let subtotal = 0;
+
+    document.querySelectorAll("#tabla tbody tr").forEach(fila => {
+        const cantidad = parseFloat(fila.querySelector(".cantidad").value) || 0;
+        const precio = parseFloat(fila.querySelector(".precio").value) || 0;
+        const total = cantidad * precio;
+
+        fila.querySelector(".total_linea").value = total.toFixed(2);
+        subtotal += total;
+    });
+
+    const itbis = subtotal * 0.18;
+    const total = subtotal + itbis;
+
+    document.querySelector('[name="subtotal"]').value = subtotal.toFixed(2);
+    document.querySelector('[name="itbis"]').value = itbis.toFixed(2);
+    document.querySelector('[name="total"]').value = total.toFixed(2);
+}
+
+if(itemsIniciales.length){
+    itemsIniciales.forEach(item => agregarFila(item));
+}else{
+    agregarFila();
+}
+</script>
 
 {% endblock %}

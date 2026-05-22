@@ -136,6 +136,7 @@ ${opciones}
 <option value="a">A</option>
 <option value="b">B</option>
 <option value="c">C</option>
+<option value="manual">Manual</option>
 </select>
 </td>
 
@@ -144,7 +145,7 @@ ${opciones}
 </td>
 
 <td>
-<input type="number" class="form-control precio" name="precio[]" value="0" readonly>
+<input type="number" step="0.01" class="form-control precio" name="precio[]" value="0">
 </td>
 
 <td>
@@ -187,6 +188,11 @@ const tipo = fila.querySelector(".tipo_precio").value;
 
 let precio = 0;
 
+if(tipo === "manual"){
+calcular();
+return;
+}
+
 if(tipo === "a") precio = servicio.precio_a || 0;
 if(tipo === "b") precio = servicio.precio_b || 0;
 if(tipo === "c") precio = servicio.precio_c || 0;
@@ -202,7 +208,10 @@ calcular();
 }
 
 document.addEventListener("input", function(e){
-if(e.target.classList.contains("cantidad")){
+if(e.target.classList.contains("cantidad") || e.target.classList.contains("precio")){
+if(e.target.classList.contains("precio")){
+e.target.closest("tr").querySelector(".tipo_precio").value = "manual";
+}
 calcular();
 }
 });

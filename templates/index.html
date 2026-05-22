@@ -71,7 +71,7 @@
         <th>Fecha</th>
         <th>Total</th>
         <th>Estado</th>
-        <th width="360">Acciones</th>
+        <th width="430">Acciones</th>
         </tr>
 
         </thead>
@@ -114,6 +114,10 @@
         <td>
 
 
+        <a href="/detalle/{{ cotizacion.id }}" class="btn btn-sm btn-info">
+        Ver
+        </a>
+
         <a href="/editar_cotizacion/{{ cotizacion.id }}" class="btn btn-sm btn-warning">
         Editar
         </a>
@@ -133,6 +137,11 @@
         <a href="/cotizacion_pdf/{{ cotizacion.id }}"
         class="btn btn-sm btn-dark">
         PDF
+        </a>
+
+        <a href="/enviar_cotizacion/{{ cotizacion.id }}"
+        class="btn btn-sm btn-primary">
+        Enviar
         </a>
 
         {% if cotizacion.estado == "Facturada" %}

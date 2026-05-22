@@ -7,7 +7,7 @@
       <div class="avatar-box">
         <img
           id="preview"
-          src="{{ url_for('static', filename='uploads/' + (user.foto if user.foto else 'default.png')) }}"
+          src="{{ url_for('static', filename='uploads/' + (user.foto if user.foto else 'default.png')) }}{% if usuario_foto_version %}?v={{ usuario_foto_version }}{% endif %}"
           alt="Foto de perfil"
           class="avatar-img"
         >
@@ -30,7 +30,6 @@
         name="foto"
         accept="image/*"
         class="d-none"
-        onchange="previewImage(event)"
       >
 
       <div class="section">
@@ -41,7 +40,7 @@
       <div class="grid-2">
         <div class="field">
           <label>Usuario</label>
-          <input type="text" name="usuario" value="{{ user.usuario }}" required>
+          <input type="text" name="usuario" value="{{ user.usuario }}" required oninput="syncTopbarName(this.value)">
         </div>
 
         <div class="field">
@@ -434,14 +433,38 @@ function toggleIcon(input, iconId) {
 }
 
 function previewImage(event) {
-  const file = event.target.files[0];
+  const file = event.target.files && event.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
   reader.onload = function () {
-    document.getElementById("preview").src = reader.result;
+    const preview = document.getElementById("preview");
+    if (preview) {
+      preview.src = reader.result;
+    }
+    syncTopbarImage(reader.result);
   };
   reader.readAsDataURL(file);
+}
+
+function syncTopbarName(value) {
+  const topbarName = document.getElementById("topbarProfileName");
+  if (!topbarName) return;
+
+  const cleanValue = value.trim();
+  topbarName.textContent = cleanValue || "Usuario";
+}
+
+function syncTopbarImage(src) {
+  const topbarImage = document.getElementById("topbarProfileImage");
+  if (!topbarImage) return;
+
+  topbarImage.src = src;
+}
+
+const fotoInput = document.getElementById("foto");
+if (fotoInput) {
+  fotoInput.addEventListener("change", previewImage);
 }
 
 document.querySelector("#perfilForm").addEventListener("submit", function(e) {

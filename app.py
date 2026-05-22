@@ -13,6 +13,7 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 import io
 import os
 import re
+from urllib.parse import quote
 
 app = Flask(__name__)
 
@@ -53,7 +54,11 @@ def _read_database_url_from_file(path):
 DATABASE_URL = (
     os.environ.get("DATABASE_URL")
     or os.environ.get("SUPABASE_DATABASE_URL")
-    or _read_database_url_from_file("pass.env")
+    or (
+        _read_database_url_from_file("pass.env")
+        if os.environ.get("USE_PASS_ENV_DATABASE_URL") == "1"
+        else None
+    )
     or "sistema.db"
 )
 USING_POSTGRES = DATABASE_URL.startswith(POSTGRES_SCHEMES)
@@ -228,6 +233,13 @@ def validar_telefono(telefono):
     numeros = re.sub(r"\D", "", telefono)
 
     return 7 <= len(numeros) <= 15
+
+
+def to_float(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0
 
 
 def generar_codigo_cotizacion(conn):
@@ -669,9 +681,9 @@ def nueva_cotizacion():
             )
 
         correo = request.form["correo"]
-        subtotal = float(request.form["subtotal"])
-        itbis = float(request.form["itbis"])
-        total = float(request.form["total"])
+        subtotal = to_float(request.form["subtotal"])
+        itbis = to_float(request.form["itbis"])
+        total = to_float(request.form["total"])
 
         codigo = generar_codigo_cotizacion(conn)
         fecha = datetime.now().strftime("%d/%m/%Y")
@@ -692,6 +704,13 @@ def nueva_cotizacion():
         totales = request.form.getlist("total_linea[]")
 
         for i in range(len(descripciones)):
+            if not descripciones[i].strip():
+                continue
+
+            cantidad = to_float(cantidades[i])
+            precio = to_float(precios[i])
+            total_linea = to_float(totales[i]) or cantidad * precio
+
             cursor.execute(
                 """
                 INSERT INTO cotizacion_items (cotizacion_id, descripcion, cantidad, precio, total)
@@ -700,9 +719,9 @@ def nueva_cotizacion():
                 (
                     cotizacion_id,
                     descripciones[i],
-                    cantidades[i],
-                    precios[i],
-                    totales[i],
+                    cantidad,
+                    precio,
+                    total_linea,
                 ),
             )
 
@@ -719,29 +738,98 @@ def editar_cotizacion(id):
     conn = get_db()
     cursor = conn.cursor()
 
+    clientes = conn.execute("SELECT nombre FROM clientes").fetchall()
+    servicios_db = conn.execute("SELECT nombre, precio_a, precio_b, precio_c FROM servicios").fetchall()
+    servicios = [
+        {
+            "nombre": servicio["nombre"],
+            "precio_a": servicio["precio_a"],
+            "precio_b": servicio["precio_b"],
+            "precio_c": servicio["precio_c"],
+        }
+        for servicio in servicios_db
+    ]
+
     if request.method == "POST":
         cliente = request.form["cliente"]
         rnc = request.form["rnc"]
         telefono = request.form["telefono"]
         correo = request.form["correo"]
 
+        if not validar_telefono(telefono):
+            cotizacion = conn.execute("SELECT * FROM cotizaciones WHERE id=%s", (id,)).fetchone()
+            items = conn.execute(
+                "SELECT * FROM cotizacion_items WHERE cotizacion_id=%s",
+                (id,),
+            ).fetchall()
+            flash("Telefono invalido. Ejemplo valido: +1 (829) 123-4567", "danger")
+            conn.close()
+            return render_template(
+                "editar_cotizacion.html",
+                cotizacion=cotizacion,
+                items=items,
+                clientes=clientes,
+                servicios=servicios,
+            )
+
+        descripciones = request.form.getlist("descripcion[]")
+        cantidades = request.form.getlist("cantidad[]")
+        precios = request.form.getlist("precio[]")
+        totales = request.form.getlist("total_linea[]")
+
+        subtotal = 0
+        lineas = []
+
+        for i in range(len(descripciones)):
+            descripcion = descripciones[i].strip()
+            if not descripcion:
+                continue
+
+            cantidad = to_float(cantidades[i])
+            precio = to_float(precios[i])
+            total_linea = to_float(totales[i]) or cantidad * precio
+            subtotal += total_linea
+            lineas.append((descripcion, cantidad, precio, total_linea))
+
+        itbis = subtotal * 0.18
+        total = subtotal + itbis
+
         cursor.execute(
             """
             UPDATE cotizaciones
-            SET cliente=%s, rnc=%s, telefono=%s, correo=%s
+            SET cliente=%s, rnc=%s, telefono=%s, correo=%s, subtotal=%s, itbis=%s, total=%s
             WHERE id=%s
             """,
-            (cliente, rnc, telefono, correo, id),
+            (cliente, rnc, telefono, correo, subtotal, itbis, total, id),
         )
+
+        cursor.execute("DELETE FROM cotizacion_items WHERE cotizacion_id=%s", (id,))
+
+        for descripcion, cantidad, precio, total_linea in lineas:
+            cursor.execute(
+                """
+                INSERT INTO cotizacion_items (cotizacion_id, descripcion, cantidad, precio, total)
+                VALUES (%s, %s, %s, %s, %s)
+                """,
+                (id, descripcion, cantidad, precio, total_linea),
+            )
 
         conn.commit()
         conn.close()
-        return redirect("/")
+        return redirect(url_for("detalle", id=id))
 
     cursor.execute("SELECT * FROM cotizaciones WHERE id=%s", (id,))
     cotizacion = cursor.fetchone()
+    cursor.execute("SELECT * FROM cotizacion_items WHERE cotizacion_id=%s", (id,))
+    items = cursor.fetchall()
     conn.close()
-    return render_template("editar_cotizacion.html", cotizacion=cotizacion)
+    return render_template(
+        "editar_cotizacion.html",
+        cotizacion=cotizacion,
+        items=items,
+        clientes=clientes,
+        servicios=servicios,
+    )
 
 
 @app.route("/aprobar/<int:id>")
@@ -1338,6 +1426,28 @@ def cotizacion_pdf(id):
     )
 
 
+@app.route("/enviar_cotizacion/<int:id>")
+def enviar_cotizacion(id):
+    conn = get_db()
+    cotizacion = conn.execute("SELECT * FROM cotizaciones WHERE id=%s", (id,)).fetchone()
+    conn.close()
+
+    if not cotizacion:
+        return "Cotizacion no encontrada"
+
+    destinatario = cotizacion["correo"] or ""
+    codigo = cotizacion["codigo"] or f"#{cotizacion['id']}"
+    subject = quote(f"Cotizacion {codigo}")
+    body = quote(
+        "Hola,\n\n"
+        f"Te comparto la cotizacion {codigo}. "
+        "Puedes adjuntar el PDF descargado desde FactuCloud antes de enviar este correo.\n\n"
+        "Saludos."
+    )
+
+    return redirect(f"mailto:{destinatario}?subject={subject}&body={body}")
+
+
 @app.route("/detalle/<int:id>")
 def detalle(id):
     conn = get_db()
@@ -1539,7 +1649,31 @@ def eliminar_cotizacion(id):
 
 @app.context_processor
 def inject_user():
-    return dict(usuario=session.get("usuario"))
+    usuario_actual = session.get("usuario")
+    foto_actual = None
+    foto_version = ""
+
+    if usuario_actual:
+        try:
+            conn = get_db()
+            user = conn.execute("SELECT usuario, foto FROM usuarios LIMIT 1").fetchone()
+            conn.close()
+
+            if user:
+                usuario_actual = user["usuario"]
+                foto_actual = user["foto"]
+                if foto_actual:
+                    foto_path = os.path.join(app.root_path, "static", "uploads", foto_actual)
+                    if os.path.exists(foto_path):
+                        foto_version = str(os.path.getmtime_ns(foto_path))
+        except Exception:
+            pass
+
+    return dict(
+        usuario=usuario_actual,
+        usuario_foto=foto_actual,
+        usuario_foto_version=foto_version,
+    )
 
 
 @app.route("/perfil", methods=["GET", "POST"])

@@ -383,6 +383,22 @@ cursor:pointer;
 transition:0.2s;
 }
 
+.profile-avatar-img{
+width:24px;
+height:24px;
+border-radius:50%;
+object-fit:cover;
+background:#0f172a;
+border:1px solid rgba(255,255,255,0.45);
+}
+
+.profile-name{
+max-width:160px;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
+}
+
 .profile-btn:hover{
 background:rgba(255,255,255,0.15);
 }
@@ -715,8 +731,13 @@ button,
     <div class="profile-dropdown">
       
       <button class="profile-btn" onclick="toggleProfileMenu(event)">
-        <i class="fa fa-user-circle"></i>
-        <span>{{ usuario if usuario else "Usuario" }}</span>
+        <img
+          id="topbarProfileImage"
+          class="profile-avatar-img"
+          src="{{ url_for('static', filename='uploads/' + (usuario_foto if usuario_foto else 'default.png')) }}{% if usuario_foto_version %}?v={{ usuario_foto_version }}{% endif %}"
+          alt="Foto de perfil"
+        >
+        <span id="topbarProfileName" class="profile-name">{{ usuario if usuario else "Usuario" }}</span>
         <i class="fa fa-chevron-down"></i>
       </button>
 
