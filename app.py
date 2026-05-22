@@ -26,38 +26,100 @@ load_dotenv()
 app.secret_key = os.environ.get("SECRET_KEY", "g7@9d#s1!Sistema_cotización")
 app.permanent_session_lifetime = timedelta(days=7)
 
-DATABASE_URL = "sistema.db"
+POSTGRES_SCHEMES = ("postgres://", "postgresql://")
+
+
+def _read_database_url_from_file(path):
+    if not os.path.exists(path):
+        return None
+
+    with open(path, "r", encoding="utf-8") as file:
+        for raw_line in file:
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
+
+            if "=" in line:
+                key, value = line.split("=", 1)
+                if key.strip() in {"DATABASE_URL", "SUPABASE_DATABASE_URL"}:
+                    return value.strip().strip("\"'")
+
+            if line.startswith(POSTGRES_SCHEMES) or line.startswith("sqlite://"):
+                return line.strip("\"'")
+
+    return None
+
+
+DATABASE_URL = (
+    os.environ.get("DATABASE_URL")
+    or os.environ.get("SUPABASE_DATABASE_URL")
+    or _read_database_url_from_file("pass.env")
+    or "sistema.db"
+)
+USING_POSTGRES = DATABASE_URL.startswith(POSTGRES_SCHEMES)
+
+
+class AppRow(dict):
+    def __init__(self, columns, values):
+        super().__init__(zip(columns, values))
+        self._values = list(values)
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self._values[key]
+        return super().__getitem__(key)
 
 
 class CursorWrapper:
-    def __init__(self, cursor):
+    def __init__(self, cursor, using_postgres):
         self.cursor = cursor
+        self.using_postgres = using_postgres
         self.lastrowid = None
 
+    def _prepare_sql(self, sql):
+        if self.using_postgres:
+            return sql.replace("INTEGER PRIMARY KEY AUTOINCREMENT", "SERIAL PRIMARY KEY")
+        return sql.replace("%s", "?")
+
+    def _insert_needs_id(self, sql):
+        normalized = sql.strip().lower()
+        return normalized.startswith("insert") and "returning" not in normalized
+
+    def _add_returning_id(self, sql):
+        return sql.rstrip().rstrip(";") + " RETURNING id"
+
+    def _wrap_row(self, row):
+        if row is None or self.cursor.description is None:
+            return row
+
+        columns = [column[0] for column in self.cursor.description]
+        return AppRow(columns, row)
+
     def execute(self, sql, params=None):
-        sql = sql.replace("%s", "?")
+        sql = self._prepare_sql(sql)
+        self.lastrowid = None
 
         try:
             if params is None:
-                if sql.strip().lower().startswith("insert") and "returning" not in sql.lower():
-                    sql = sql.rstrip(";") + " RETURNING id"
+                if self._insert_needs_id(sql):
+                    sql = self._add_returning_id(sql)
 
                     self.cursor.execute(sql)
-                    row = self.cursor.fetchone()
+                    row = self.fetchone()
 
-                    if row and "id" in row.keys():
+                    if row and "id" in row:
                         self.lastrowid = row["id"]
                 else:
                     self.cursor.execute(sql)
 
             else:
-                if sql.strip().lower().startswith("insert") and "returning" not in sql.lower():
-                    sql = sql.rstrip(";") + " RETURNING id"
+                if self._insert_needs_id(sql):
+                    sql = self._add_returning_id(sql)
 
                     self.cursor.execute(sql, params)
-                    row = self.cursor.fetchone()
+                    row = self.fetchone()
 
-                    if row and "id" in row.keys():
+                    if row and "id" in row:
                         self.lastrowid = row["id"]
                 else:
                     self.cursor.execute(sql, params)
@@ -69,15 +131,15 @@ class CursorWrapper:
         return self
 
     def executemany(self, sql, params):
-        sql = sql.replace("%s", "?")
+        sql = self._prepare_sql(sql)
         self.cursor.executemany(sql, params)
         return self
 
     def fetchone(self):
-        return self.cursor.fetchone()
+        return self._wrap_row(self.cursor.fetchone())
 
     def fetchall(self):
-        return self.cursor.fetchall()
+        return [self._wrap_row(row) for row in self.cursor.fetchall()]
 
     def close(self):
         return self.cursor.close()
@@ -88,12 +150,27 @@ class CursorWrapper:
 
 class DBWrapper:
     def __init__(self):
-        import sqlite3
-        self.conn = sqlite3.connect(DATABASE_URL)
-        self.conn.row_factory = sqlite3.Row
+        self.using_postgres = USING_POSTGRES
+
+        if self.using_postgres:
+            import psycopg2
+
+            connect_kwargs = {}
+            if "supabase" in DATABASE_URL and "sslmode=" not in DATABASE_URL:
+                connect_kwargs["sslmode"] = os.environ.get("DB_SSLMODE", "require")
+
+            self.conn = psycopg2.connect(DATABASE_URL, **connect_kwargs)
+        else:
+            import sqlite3
+
+            sqlite_path = DATABASE_URL
+            if sqlite_path.startswith("sqlite:///"):
+                sqlite_path = sqlite_path.replace("sqlite:///", "", 1)
+
+            self.conn = sqlite3.connect(sqlite_path)
 
     def cursor(self):
-        return CursorWrapper(self.conn.cursor())
+        return CursorWrapper(self.conn.cursor(), self.using_postgres)
 
     def execute(self, sql, params=None):
         cur = self.cursor()
@@ -112,6 +189,26 @@ class DBWrapper:
 
 def get_db():
     return DBWrapper()
+
+
+def add_column_if_missing(conn, table, column, column_type):
+    if USING_POSTGRES:
+        exists = conn.execute(
+            """
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = current_schema()
+            AND table_name = %s
+            AND column_name = %s
+            LIMIT 1
+            """,
+            (table, column),
+        ).fetchone()
+    else:
+        columns = conn.execute(f"PRAGMA table_info({table})").fetchall()
+        exists = any(existing["name"] == column for existing in columns)
+
+    if not exists:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {column_type}")
 
 
 def money(value):
@@ -411,10 +508,7 @@ def init_db():
         """
     )
 
-    try:
-        cursor.execute("ALTER TABLE usuarios ADD COLUMN foto TEXT")
-    except Exception:
-        conn.rollback()
+    add_column_if_missing(conn, "usuarios", "foto", "TEXT")
 
     cursor.execute("SELECT * FROM usuarios LIMIT 1")
     if not cursor.fetchone():
@@ -436,10 +530,7 @@ def init_db():
         """
     )
 
-    try:
-        cursor.execute("ALTER TABLE clientes ADD COLUMN correo TEXT")
-    except Exception:
-        conn.rollback()
+    add_column_if_missing(conn, "clientes", "correo", "TEXT")
 
     cursor.execute(
         """
@@ -1404,10 +1495,7 @@ def editar_cliente(id):
         correo = request.form["correo"]
         direccion = request.form["direccion"]
 
-        try:
-            conn.execute("ALTER TABLE clientes ADD COLUMN correo TEXT")
-        except Exception:
-            pass
+        add_column_if_missing(conn, "clientes", "correo", "TEXT")
 
         conn.execute(
             """
@@ -1429,22 +1517,10 @@ def editar_cliente(id):
 @app.route("/arreglar_db")
 def arreglar_db():
     conn = get_db()
-    cursor = conn.cursor()
 
-    try:
-        cursor.execute("ALTER TABLE cotizaciones ADD COLUMN rnc TEXT")
-    except Exception:
-        pass
-
-    try:
-        cursor.execute("ALTER TABLE cotizaciones ADD COLUMN telefono TEXT")
-    except Exception:
-        pass
-
-    try:
-        cursor.execute("ALTER TABLE cotizaciones ADD COLUMN correo TEXT")
-    except Exception:
-        pass
+    add_column_if_missing(conn, "cotizaciones", "rnc", "TEXT")
+    add_column_if_missing(conn, "cotizaciones", "telefono", "TEXT")
+    add_column_if_missing(conn, "cotizaciones", "correo", "TEXT")
 
     conn.commit()
     conn.close()
@@ -1553,10 +1629,11 @@ def perfil():
 
 if __name__ == "__main__":
     init_db()
-    try:
-        db.arreglar_tabla()
-    except Exception as e:
-        print("Error arreglando tabla:", e)
+    if not USING_POSTGRES:
+        try:
+            db.arreglar_tabla()
+        except Exception as e:
+            print("Error arreglando tabla:", e)
 
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
