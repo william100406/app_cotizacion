@@ -112,6 +112,18 @@
 const servicios = {{ servicios | tojson | safe }};
 const itemsIniciales = {{ items | tojson | safe }};
 
+function escaparHtml(valor){
+    return String(valor ?? "").replace(/[&<>"']/g, function(caracter){
+        return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        }[caracter];
+    });
+}
+
 function opcionesServicios(valorActual){
     let opciones = '<option value="">Seleccionar servicio</option>';
 
@@ -131,19 +143,20 @@ function agregarFila(item = null){
     const tabla = document.querySelector("#tabla tbody");
     const fila = document.createElement("tr");
     const descripcion = item ? item.descripcion : "";
+    const descripcionHtml = escaparHtml(descripcion);
     const cantidad = item ? item.cantidad : 1;
     const precio = item ? item.precio : 0;
     const total = item ? item.total : 0;
 
     fila.innerHTML = `
         <td>
-            <select class="form-control servicio" name="descripcion[]">
+            <select class="form-control servicio">
                 ${opcionesServicios(descripcion)}
             </select>
+            <textarea class="form-control descripcion-texto mt-2" name="descripcion[]" rows="3" placeholder="Descripcion">${descripcionHtml}</textarea>
         </td>
         <td>
             <select class="form-control tipo_precio">
-                <option value="manual">Manual</option>
                 <option value="a">A</option>
                 <option value="b">B</option>
                 <option value="c">C</option>
@@ -169,10 +182,12 @@ function agregarFila(item = null){
 
     $(fila).find(".servicio").select2({
         placeholder: "Buscar servicio...",
-        width: "100%"
+        width: "100%",
+        tags: true
     });
 
     $(fila).find(".servicio").on("change", function(){
+        actualizarDescripcionDesdeServicio(fila);
         actualizarPrecio(fila);
     });
 
@@ -183,21 +198,26 @@ function agregarFila(item = null){
     calcular();
 }
 
+function actualizarDescripcionDesdeServicio(fila){
+    const select = fila.querySelector(".servicio");
+    const descripcion = fila.querySelector(".descripcion-texto");
+    const valor = select.value || "";
+
+    if(valor){
+        descripcion.value = valor;
+    }
+}
+
 function actualizarPrecio(fila){
     const tipo = fila.querySelector(".tipo_precio").value;
-    if(tipo === "manual"){
-        calcular();
-        return;
-    }
 
     const select = fila.querySelector(".servicio");
-    const index = select.options[select.selectedIndex].getAttribute("data-index");
-    if(index === null || index === ""){
+    const servicio = servicios.find(s => s.nombre === select.value);
+    if(!servicio){
         calcular();
         return;
     }
 
-    const servicio = servicios[index];
     let precio = 0;
 
     if(tipo === "a") precio = servicio.precio_a || 0;
@@ -216,7 +236,6 @@ function eliminarFila(btn){
 document.addEventListener("input", function(e){
     if(e.target.classList.contains("cantidad") || e.target.classList.contains("precio")){
         const fila = e.target.closest("tr");
-        fila.querySelector(".tipo_precio").value = "manual";
         calcular();
     }
 });

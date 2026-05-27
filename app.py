@@ -14,6 +14,7 @@ import io
 import os
 import re
 from urllib.parse import quote
+from xml.sax.saxutils import escape as xml_escape
 
 app = Flask(__name__)
 
@@ -240,6 +241,315 @@ def to_float(value):
         return float(value)
     except (TypeError, ValueError):
         return 0
+
+
+def row_value(row, key, default=""):
+    if row is None:
+        return default
+
+    try:
+        value = row[key]
+    except Exception:
+        value = row.get(key, default) if hasattr(row, "get") else default
+
+    if value is None or value == "":
+        return default
+
+    return value
+
+
+def pdf_text(value, default="-"):
+    value = row_value({"value": value}, "value", default)
+    text = str(value).replace("\r\n", "\n").replace("\r", "\n").strip()
+    text = re.sub(r"[\u25a0\u25aa\u25fe\u25fc\u25fb\u25a1\u25ab\u25fd]", "", text)
+    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", text)
+    return text if text else default
+
+
+def pdf_money(value):
+    return money(to_float(value))
+
+
+def cotizacion_numero_pdf(cotizacion):
+    codigo = str(row_value(cotizacion, "codigo", "")).strip()
+    match = re.search(r"(\d+)$", codigo)
+
+    if match:
+        numero = int(match.group(1))
+    else:
+        numero = int(to_float(row_value(cotizacion, "id", 0)))
+
+    return f"{numero:02d}"
+
+
+def draw_right_parts(pdf, parts, right_x, y, size=10):
+    total_width = sum(stringWidth(text, font, size) for text, font, _ in parts)
+    x = right_x - total_width
+
+    for text, font, color in parts:
+        pdf.setFont(font, size)
+        pdf.setFillColor(color)
+        pdf.drawString(x, y, text)
+        x += stringWidth(text, font, size)
+
+    pdf.setFillColor(colors.black)
+
+
+def draw_paragraph(pdf, text, x, top_y, width, style):
+    safe = xml_escape(pdf_text(text, "")).replace("\n", "<br/>")
+    paragraph = Paragraph(safe, style)
+    _, height = paragraph.wrap(width, 500)
+    paragraph.drawOn(pdf, x, top_y - height)
+    return height
+
+
+def make_pdf_paragraph(text, width, style):
+    safe = xml_escape(pdf_text(text, "")).replace("\n", "<br/>")
+    paragraph = Paragraph(safe, style)
+    _, height = paragraph.wrap(width, 500)
+    return paragraph, height
+
+
+def draw_pdf_template(buffer, tipo_documento, documento, items, empresa=None, cotizacion=None):
+    page_width, page_height = letter
+    pdf = canvas.Canvas(buffer, pagesize=letter)
+
+    logo_path = os.path.join(app.root_path, "static", "logo_pdf.png")
+    watermark_path = os.path.join(app.root_path, "static", "logo_mark_pdf_rotated.png")
+    signature_path = os.path.join(app.root_path, "static", "signature_pdf.png")
+
+    red = colors.HexColor("#ed1c24")
+    dark = colors.HexColor("#231f20")
+    light_mark = colors.HexColor("#eeeeee")
+
+    styles = getSampleStyleSheet()
+    desc_style = ParagraphStyle(
+        "pdf_desc",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=12,
+        leading=13,
+        textColor=dark,
+    )
+    small_style = ParagraphStyle(
+        "pdf_small",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=6.8,
+        leading=9,
+        textColor=dark,
+    )
+
+    x_left = 14.7
+    x_qty = 139
+    x_desc = 341
+    x_price = 487
+    x_right = 593.7
+    table_top = 577.7
+    header_bottom = 547.7
+    table_bottom = 154
+
+    fecha = pdf_text(row_value(documento, "fecha", datetime.now().strftime("%d/%m/%Y")))
+    cliente = pdf_text(row_value(documento, "cliente", "-"))
+    rnc = pdf_text(row_value(documento, "rnc", "-"))
+    telefono = pdf_text(row_value(cotizacion, "telefono", row_value(empresa, "telefono", "")), "")
+    correo = "delvallepublicity@gmail.com"
+    empresa_rnc = "132357604"
+    direccion = "Santo Domingo D.N. Rep.Dom."
+    telefono_empresa = "829//874//1003"
+
+    tipo_documento = tipo_documento.lower()
+    es_factura = tipo_documento == "factura"
+    titulo = "Factura" if es_factura else "Cotizacion"
+    numero = row_value(documento, "ncf", "-") if es_factura else cotizacion_numero_pdf(documento)
+    numero_label = "NCF" if es_factura else "No. Cotizacion"
+
+    def draw_static_page(page_number=1):
+        pdf.setFillColor(colors.white)
+        pdf.rect(0, 0, page_width, page_height, fill=1, stroke=0)
+
+        if os.path.exists(watermark_path):
+            try:
+                pdf.drawImage(
+                    watermark_path,
+                    368,
+                    16,
+                    width=215,
+                    height=690,
+                    preserveAspectRatio=False,
+                    mask="auto",
+                )
+            except Exception:
+                pass
+        else:
+            pdf.setFillColor(light_mark)
+            pdf.setFont("Helvetica-Bold", 120)
+            pdf.drawRightString(page_width + 20, 230, "DVD")
+
+        if os.path.exists(logo_path):
+            try:
+                pdf.drawImage(
+                    logo_path,
+                    x_left,
+                    713,
+                    width=189,
+                    height=46.5,
+                    preserveAspectRatio=True,
+                    mask="auto",
+                )
+            except Exception:
+                pass
+
+        right_x = 586
+        draw_right_parts(
+            pdf,
+            [("Fecha:  ", "Helvetica-Bold", dark), (fecha, "Helvetica", dark)],
+            right_x,
+            744,
+            10,
+        )
+        pdf.setFont("Helvetica", 10)
+        pdf.setFillColor(dark)
+        pdf.drawRightString(right_x, 721, direccion)
+        draw_right_parts(
+            pdf,
+            [("T.", "Helvetica-Bold", red), (telefono_empresa, "Helvetica", dark)],
+            right_x,
+            707,
+            10,
+        )
+        draw_right_parts(
+            pdf,
+            [("Email:", "Helvetica-Bold", red), (correo, "Helvetica", dark)],
+            right_x,
+            693,
+            10,
+        )
+        draw_right_parts(
+            pdf,
+            [("RNC:", "Helvetica-Bold", red), (empresa_rnc, "Helvetica", dark)],
+            right_x,
+            679,
+            10,
+        )
+
+        pdf.setFillColor(dark)
+        pdf.setFont("Helvetica-Bold", 13)
+        pdf.drawCentredString(page_width / 2, 669, titulo)
+        if not es_factura and items:
+            first_description = pdf_text(row_value(items[0], "descripcion", ""), "")
+            if first_description and len(first_description) <= 42:
+                short_description = first_description.splitlines()[0].strip()
+                pdf.drawCentredString(page_width / 2, 652, short_description)
+
+        pdf.setFont("Helvetica", 10)
+        left_y = 639
+        pdf.drawString(116, left_y, f"Codigo: {pdf_text(row_value(cotizacion, 'codigo', numero))}")
+        pdf.drawString(116, left_y - 12, f"Nombre: {cliente}")
+        pdf.drawString(116, left_y - 24, "Direccion: -")
+        pdf.drawString(116, left_y - 36, f"Contacto: {telefono or rnc}")
+
+        pdf.drawString(409, left_y, f"{numero_label}: {pdf_text(numero)}")
+        pdf.drawString(409, left_y - 12, f"Fecha: {fecha}")
+        pdf.drawString(409, left_y - 24, "Atendido: Radhames Del Valle")
+        pdf.drawString(409, left_y - 36, f"pag:                 {page_number}")
+
+        pdf.setLineWidth(0.9)
+        pdf.setStrokeColor(dark)
+        pdf.line(x_left, table_top, x_right, table_top)
+        pdf.line(x_left, header_bottom, x_right, header_bottom)
+        pdf.setFont("Helvetica", 13)
+        pdf.drawCentredString((x_left + x_qty) / 2, 560, "Cantidad")
+        pdf.drawCentredString((x_qty + x_desc) / 2, 560, "Descripcion")
+        pdf.drawCentredString((x_desc + x_price) / 2, 560, "Precio")
+        pdf.drawCentredString((x_price + x_right) / 2, 560, "Valor")
+
+        pdf.setDash(4, 4)
+        pdf.line(x_qty, table_top, x_qty, table_bottom)
+        pdf.line(x_desc, table_top, x_desc, table_bottom)
+        pdf.line(x_price, table_top, x_price, table_bottom)
+        pdf.setDash()
+
+    def draw_footer():
+        pdf.setStrokeColor(dark)
+        pdf.setLineWidth(0.9)
+        pdf.line(38, table_bottom, 600, table_bottom)
+
+        condiciones = (
+            "*Esta factura es valida dentro de los siguientes 15 dias.<br/>"
+            "<b>**Se requiere el 50% de avance y 50% contra entrega.</b><br/>"
+            "<b>***Tiempo de produccion: 1 mes (promedio), luego de aprobada la factura</b>"
+        )
+        terms = Paragraph(condiciones, small_style)
+        _, height = terms.wrap(330, 40)
+        terms.drawOn(pdf, 38, 121 - height)
+
+        totals = [
+            ("Sub-total:", row_value(documento, "subtotal", 0), "Helvetica"),
+            ("ITBIS:", row_value(documento, "itbis", 0), "Helvetica"),
+            ("Desc.:", 0, "Helvetica"),
+            ("Total:", row_value(documento, "total", 0), "Helvetica-Bold"),
+        ]
+        y = 119
+        for label, value, font in totals:
+            pdf.setFont(font, 12)
+            amount = "$ 00.00" if label == "Desc.:" else pdf_money(value)
+            pdf.drawRightString(586, y, f"{label} {amount}")
+            y -= 14
+
+        if os.path.exists(signature_path):
+            try:
+                pdf.drawImage(
+                    signature_path,
+                    210,
+                    24,
+                    width=190,
+                    height=62,
+                    preserveAspectRatio=True,
+                    mask="auto",
+                )
+                return
+            except Exception:
+                pass
+
+        pdf.line(212, 57, 401, 57)
+        pdf.setFont("Helvetica", 7)
+        pdf.drawCentredString(306, 45, "Firma y Sello")
+
+    page_number = 1
+    draw_static_page(page_number)
+    y = 530
+
+    for item in items:
+        description = pdf_text(row_value(item, "descripcion", ""), "")
+        if not description:
+            continue
+
+        description_paragraph, description_height = make_pdf_paragraph(description, 170, desc_style)
+        row_height = max(description_height + 8, 72)
+
+        if y - row_height < table_bottom + 4:
+            pdf.line(38, table_bottom, 600, table_bottom)
+            pdf.showPage()
+            page_number += 1
+            draw_static_page(page_number)
+            y = 530
+            description_paragraph, description_height = make_pdf_paragraph(description, 170, desc_style)
+            row_height = max(description_height + 8, 72)
+
+        pdf.setFillColor(dark)
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawCentredString((x_left + x_qty) / 2, y - 12, str(row_value(item, "cantidad", "")))
+        pdf.setFont("Helvetica", 12)
+        pdf.drawString(x_qty + 6, y - 12, "-")
+        description_paragraph.drawOn(pdf, x_qty + 24, y - description_height)
+        pdf.drawRightString(x_price - 40, y - 12, pdf_money(row_value(item, "precio", 0)))
+        pdf.drawRightString(x_right - 24, y - 12, pdf_money(row_value(item, "total", 0)))
+        y -= row_height
+
+    draw_footer()
+    pdf.save()
+    buffer.seek(0)
 
 
 def generar_codigo_cotizacion(conn):
@@ -855,6 +1165,7 @@ def facturar(id):
 
     if request.method == "POST":
         rnc = request.form["rnc"]
+        descripciones_factura = request.form.getlist("descripcion[]")
 
         siguiente = config["actual"] + 1
         if siguiente > config["hasta"]:
@@ -885,7 +1196,11 @@ def facturar(id):
 
         factura_id = cursor.lastrowid
 
-        for item in items:
+        for index, item in enumerate(items):
+            descripcion_factura = item["descripcion"]
+            if index < len(descripciones_factura) and descripciones_factura[index].strip():
+                descripcion_factura = descripciones_factura[index].strip()
+
             cursor.execute(
                 """
                 INSERT INTO factura_items (factura_id, descripcion, cantidad, precio, total)
@@ -893,7 +1208,7 @@ def facturar(id):
                 """,
                 (
                     factura_id,
-                    item["descripcion"],
+                    descripcion_factura,
                     item["cantidad"],
                     item["precio"],
                     item["total"],
@@ -914,7 +1229,12 @@ def facturar(id):
         return redirect(url_for("factura_pdf", id=factura_id))
 
     conn.close()
-    return render_template("facturar.html", cotizacion=cotizacion, items=items)
+    return render_template(
+        "facturar.html",
+        cotizacion=cotizacion,
+        items=items,
+        fecha_factura=datetime.now().strftime("%d/%m/%Y"),
+    )
 
 
 @app.route("/configurar_ncf", methods=["GET", "POST"])
@@ -954,10 +1274,25 @@ def factura_pdf(id):
         return "Factura no encontrada"
 
     items = conn.execute("SELECT * FROM factura_items WHERE factura_id=%s", (factura["id"],)).fetchall()
+    cotizacion = conn.execute("SELECT * FROM cotizaciones WHERE id=%s", (factura["cotizacion_id"],)).fetchone()
     empresa = conn.execute("SELECT * FROM empresa LIMIT 1").fetchone()
     conn.close()
 
     buffer = io.BytesIO()
+    draw_pdf_template(buffer, "factura", factura, items, empresa, cotizacion)
+
+    fecha = datetime.now().strftime("%d-%m-%Y")
+    nombre_cliente = factura["cliente"] or "Cliente"
+    nombre_limpio = re.sub(r"[^A-Za-z0-9]", "_", nombre_cliente)
+    nombre_archivo = f"FACT-{nombre_limpio}-{fecha}.pdf"
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=nombre_archivo,
+        mimetype="application/pdf",
+    )
+
     page_width, page_height = letter
     left_margin = 36
     right_margin = 36
@@ -1190,6 +1525,20 @@ def cotizacion_pdf(id):
         return "Cotización no encontrada"
 
     buffer = io.BytesIO()
+    draw_pdf_template(buffer, "cotizacion", cotizacion, items, empresa, cotizacion)
+
+    fecha = datetime.now().strftime("%d-%m-%Y")
+    nombre_cliente = cotizacion["cliente"] or "Cliente"
+    nombre_limpio = re.sub(r"[^A-Za-z0-9]", "_", nombre_cliente)
+    nombre_archivo = f"COT-{nombre_limpio}-{fecha}.pdf"
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=nombre_archivo,
+        mimetype="application/pdf",
+    )
+
     page_width, page_height = letter
     left_margin = 36
     right_margin = 36

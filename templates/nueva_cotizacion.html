@@ -126,9 +126,10 @@ const fila = document.createElement("tr");
 fila.innerHTML = `
 
 <td>
-<select class="form-control servicio" name="descripcion[]">
+<select class="form-control servicio">
 ${opciones}
 </select>
+<textarea class="form-control descripcion-texto mt-2" name="descripcion[]" rows="3" placeholder="Descripcion"></textarea>
 </td>
 
 <td>
@@ -136,7 +137,6 @@ ${opciones}
 <option value="a">A</option>
 <option value="b">B</option>
 <option value="c">C</option>
-<option value="manual">Manual</option>
 </select>
 </td>
 
@@ -162,10 +162,12 @@ tabla.appendChild(fila);
 
 $(fila).find('.servicio').select2({
     placeholder: "Buscar servicio...",
-    width: 'resolve'
+    width: 'resolve',
+    tags: true
 });
 
 $(fila).find('.servicio').on('change', function(){
+    actualizarDescripcionDesdeServicio(fila);
     actualizarPrecio(fila);
 });
 
@@ -175,23 +177,29 @@ fila.querySelector(".tipo_precio").addEventListener("change", function(){
 
 }
 
+function actualizarDescripcionDesdeServicio(fila){
+const select = fila.querySelector(".servicio");
+const descripcion = fila.querySelector(".descripcion-texto");
+const valor = select.value || "";
+
+if(valor){
+descripcion.value = valor;
+}
+}
+
 function actualizarPrecio(fila){
 
 const select = fila.querySelector(".servicio");
-const index = select.options[select.selectedIndex].getAttribute("data-index");
+const servicio = servicios.find(s => s.nombre === select.value);
 
-if(index === null || index === "") return;
-
-const servicio = servicios[index];
+if(!servicio){
+calcular();
+return;
+}
 
 const tipo = fila.querySelector(".tipo_precio").value;
 
 let precio = 0;
-
-if(tipo === "manual"){
-calcular();
-return;
-}
 
 if(tipo === "a") precio = servicio.precio_a || 0;
 if(tipo === "b") precio = servicio.precio_b || 0;
@@ -209,9 +217,6 @@ calcular();
 
 document.addEventListener("input", function(e){
 if(e.target.classList.contains("cantidad") || e.target.classList.contains("precio")){
-if(e.target.classList.contains("precio")){
-e.target.closest("tr").querySelector(".tipo_precio").value = "manual";
-}
 calcular();
 }
 });

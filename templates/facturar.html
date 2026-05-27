@@ -66,7 +66,8 @@
     padding-top: 10px;
 }
 
-input{
+input,
+textarea{
     width: 100%;
     padding: 10px;
     border-radius: 8px;
@@ -74,6 +75,12 @@ input{
     margin-top: 10px;
     background: #0f172a;
     color: white;
+}
+
+.descripcion-input{
+    min-height: 74px;
+    resize: vertical;
+    line-height: 1.35;
 }
 
 .btn{
@@ -111,7 +118,7 @@ input{
     <h2 class="mb-0">Facturar Cotización</h2>
 
 </div>
-            <span>{{ cotizacion.fecha }}</span>
+            <span>{{ fecha_factura }}</span>
         </div>
 
         <p><strong>Cliente:</strong> {{ cotizacion.cliente }}</p>
@@ -126,7 +133,9 @@ input{
 
             {% for item in items %}
             <tr>
-                <td>{{ item.descripcion }}</td>
+                <td>
+                    <textarea class="descripcion-input" name="descripcion[]" form="factura-form" rows="3" placeholder="Descripcion">{{ item.descripcion }}</textarea>
+                </td>
                 <td>{{ item.cantidad }}</td>
                 <td>US$ {{ item.precio }}</td>
                 <td>US$ {{ item.total }}</td>
@@ -146,7 +155,7 @@ input{
             <p class="total"><span>Total:</span> <span>US$ {{ cotizacion.total }}</span></p>
         </div>
 
-        <form method="POST">
+        <form method="POST" id="factura-form">
 
             <label>RNC del cliente</label>
             <input type="text" name="rnc" required>
