@@ -266,7 +266,7 @@ def cargar_clientes_guardados(conn):
         """
         SELECT id, nombre, rnc, telefono, correo, direccion
         FROM clientes
-        ORDER BY nombre
+        ORDER BY LOWER(nombre), nombre
         """
     ).fetchall()
     fields = ("id", "nombre", "rnc", "telefono", "correo", "direccion")
@@ -1942,13 +1942,13 @@ def clientes():
         clientes = conn.execute(
             """
             SELECT * FROM clientes
-            WHERE nombre LIKE %s
-            ORDER BY id DESC
+            WHERE LOWER(nombre) LIKE LOWER(%s)
+            ORDER BY LOWER(nombre), nombre
             """,
             ("%" + buscar + "%",),
         ).fetchall()
     else:
-        clientes = conn.execute("SELECT * FROM clientes ORDER BY id DESC").fetchall()
+        clientes = conn.execute("SELECT * FROM clientes ORDER BY LOWER(nombre), nombre").fetchall()
 
     conn.close()
     return render_template("clientes.html", clientes=clientes)
@@ -1962,10 +1962,11 @@ def buscar_clientes():
     clientes = conn.execute(
         """
         SELECT nombre FROM clientes
-        WHERE nombre LIKE %s
+        WHERE LOWER(nombre) LIKE LOWER(%s)
+        ORDER BY LOWER(nombre), nombre
         LIMIT 10
         """,
-        ("%" + termino + "%",),
+        (termino + "%",),
     ).fetchall()
 
     conn.close()

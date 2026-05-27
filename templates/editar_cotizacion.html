@@ -27,16 +27,6 @@
     <form method="POST">
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label class="form-label">Cliente guardado</label>
-                <select class="form-control" id="cliente_guardado">
-                    <option value="">Seleccionar cliente guardado</option>
-                    {% for cliente in clientes %}
-                    <option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="col-md-6 mb-3">
                 <label class="form-label">Nombre del cliente</label>
                 <input type="text" class="form-control" name="cliente" list="lista_clientes" value="{{ cotizacion.cliente }}" required>
 
@@ -122,10 +112,42 @@
 const servicios = {{ servicios | tojson | safe }};
 const itemsIniciales = {{ items | tojson | safe }};
 const clientesGuardados = {{ clientes | tojson | safe }};
+const clientesOrdenados = [...clientesGuardados].sort((a, b) =>
+    String(a.nombre || "").localeCompare(String(b.nombre || ""), "es", { sensitivity: "base" })
+);
+const inputCliente = document.querySelector('[name="cliente"]');
+const listaClientes = document.getElementById("lista_clientes");
 
-function aplicarClienteGuardado(id){
-    const cliente = clientesGuardados.find(c => String(c.id) === String(id));
+function normalizarCliente(valor){
+    return String(valor || "").trim().toLocaleLowerCase("es");
+}
 
+function renderizarOpcionesClientes(valor = ""){
+    if(!listaClientes){
+        return;
+    }
+
+    const busqueda = normalizarCliente(valor);
+    listaClientes.replaceChildren();
+
+    clientesOrdenados
+        .filter(cliente => {
+            const nombre = normalizarCliente(cliente.nombre);
+            return !busqueda || nombre.startsWith(busqueda);
+        })
+        .forEach(cliente => {
+            const opcion = document.createElement("option");
+            opcion.value = cliente.nombre || "";
+            listaClientes.appendChild(opcion);
+        });
+}
+
+function buscarClientePorNombre(nombre){
+    const nombreNormalizado = normalizarCliente(nombre);
+    return clientesOrdenados.find(cliente => normalizarCliente(cliente.nombre) === nombreNormalizado);
+}
+
+function aplicarClienteGuardado(cliente){
     if(!cliente){
         return;
     }
@@ -136,19 +158,17 @@ function aplicarClienteGuardado(id){
     document.querySelector('[name="correo"]').value = cliente.correo || "";
 }
 
-const clienteGuardadoSelect = document.getElementById("cliente_guardado");
+if(inputCliente){
+    renderizarOpcionesClientes(inputCliente.value);
 
-if(clienteGuardadoSelect){
-    clienteGuardadoSelect.addEventListener("change", function(){
-        aplicarClienteGuardado(this.value);
+    inputCliente.addEventListener("input", function(){
+        renderizarOpcionesClientes(this.value);
+        aplicarClienteGuardado(buscarClientePorNombre(this.value));
     });
 
-    const clienteActual = document.querySelector('[name="cliente"]').value;
-    const clienteEncontrado = clientesGuardados.find(c => c.nombre === clienteActual);
-
-    if(clienteEncontrado){
-        clienteGuardadoSelect.value = clienteEncontrado.id;
-    }
+    inputCliente.addEventListener("change", function(){
+        aplicarClienteGuardado(buscarClientePorNombre(this.value));
+    });
 }
 
 function escaparHtml(valor){
