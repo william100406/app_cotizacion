@@ -27,6 +27,16 @@
     <form method="POST">
         <div class="row">
             <div class="col-md-6 mb-3">
+                <label class="form-label">Cliente guardado</label>
+                <select class="form-control" id="cliente_guardado">
+                    <option value="">Seleccionar cliente guardado</option>
+                    {% for cliente in clientes %}
+                    <option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-6 mb-3">
                 <label class="form-label">Nombre del cliente</label>
                 <input type="text" class="form-control" name="cliente" list="lista_clientes" value="{{ cotizacion.cliente }}" required>
 
@@ -111,6 +121,35 @@
 <script>
 const servicios = {{ servicios | tojson | safe }};
 const itemsIniciales = {{ items | tojson | safe }};
+const clientesGuardados = {{ clientes | tojson | safe }};
+
+function aplicarClienteGuardado(id){
+    const cliente = clientesGuardados.find(c => String(c.id) === String(id));
+
+    if(!cliente){
+        return;
+    }
+
+    document.querySelector('[name="cliente"]').value = cliente.nombre || "";
+    document.querySelector('[name="rnc"]').value = cliente.rnc || "";
+    document.querySelector('[name="telefono"]').value = cliente.telefono || "";
+    document.querySelector('[name="correo"]').value = cliente.correo || "";
+}
+
+const clienteGuardadoSelect = document.getElementById("cliente_guardado");
+
+if(clienteGuardadoSelect){
+    clienteGuardadoSelect.addEventListener("change", function(){
+        aplicarClienteGuardado(this.value);
+    });
+
+    const clienteActual = document.querySelector('[name="cliente"]').value;
+    const clienteEncontrado = clientesGuardados.find(c => c.nombre === clienteActual);
+
+    if(clienteEncontrado){
+        clienteGuardadoSelect.value = clienteEncontrado.id;
+    }
+}
 
 function escaparHtml(valor){
     return String(valor ?? "").replace(/[&<>"']/g, function(caracter){

@@ -258,6 +258,33 @@ def row_value(row, key, default=""):
     return value
 
 
+def cargar_clientes_guardados(conn):
+    add_column_if_missing(conn, "clientes", "correo", "TEXT")
+    conn.commit()
+
+    rows = conn.execute(
+        """
+        SELECT id, nombre, rnc, telefono, correo, direccion
+        FROM clientes
+        ORDER BY nombre
+        """
+    ).fetchall()
+    fields = ("id", "nombre", "rnc", "telefono", "correo", "direccion")
+    return [
+        {field: row_value(row, field, "") for field in fields}
+        for row in rows
+    ]
+
+
+def telefono_para_whatsapp(telefono):
+    numeros = re.sub(r"\D", "", telefono or "")
+
+    if len(numeros) == 10 and numeros[:3] in {"809", "829", "849"}:
+        return "1" + numeros
+
+    return numeros
+
+
 def pdf_text(value, default="-"):
     value = row_value({"value": value}, "value", default)
     text = str(value).replace("\r\n", "\n").replace("\r", "\n").strip()
@@ -352,8 +379,9 @@ def draw_pdf_template(buffer, tipo_documento, documento, items, empresa=None, co
     fecha = pdf_text(row_value(documento, "fecha", datetime.now().strftime("%d/%m/%Y")))
     cliente = pdf_text(row_value(documento, "cliente", "-"))
     rnc = pdf_text(row_value(documento, "rnc", "-"))
-    telefono = pdf_text(row_value(cotizacion, "telefono", row_value(empresa, "telefono", "")), "")
-    correo = "delvallepublicity@gmail.com"
+    telefono = pdf_text(row_value(cotizacion, "telefono", row_value(documento, "telefono", "")), "")
+    correo_cliente = pdf_text(row_value(cotizacion, "correo", row_value(documento, "correo", "")), "")
+    correo_empresa = "delvallepublicity@gmail.com"
     empresa_rnc = "132357604"
     direccion = "Santo Domingo D.N. Rep.Dom."
     telefono_empresa = "829//874//1003"
@@ -420,7 +448,7 @@ def draw_pdf_template(buffer, tipo_documento, documento, items, empresa=None, co
         )
         draw_right_parts(
             pdf,
-            [("Email:", "Helvetica-Bold", red), (correo, "Helvetica", dark)],
+            [("Email:", "Helvetica-Bold", red), (correo_empresa, "Helvetica", dark)],
             right_x,
             693,
             10,
@@ -448,6 +476,7 @@ def draw_pdf_template(buffer, tipo_documento, documento, items, empresa=None, co
         pdf.drawString(116, left_y - 12, f"Nombre: {cliente}")
         pdf.drawString(116, left_y - 24, "Direccion: -")
         pdf.drawString(116, left_y - 36, f"Contacto: {telefono or rnc}")
+        pdf.drawString(116, left_y - 48, f"Correo: {correo_cliente or '-'}")
 
         pdf.drawString(409, left_y, f"{numero_label}: {pdf_text(numero)}")
         pdf.drawString(409, left_y - 12, f"Fecha: {fecha}")
@@ -963,7 +992,7 @@ def nueva_cotizacion():
     conn = get_db()
     cursor = conn.cursor()
 
-    clientes = conn.execute("SELECT nombre FROM clientes").fetchall()
+    clientes = cargar_clientes_guardados(conn)
     servicios_db = conn.execute("SELECT nombre, precio_a, precio_b, precio_c FROM servicios").fetchall()
 
     servicios = []
@@ -1048,7 +1077,7 @@ def editar_cotizacion(id):
     conn = get_db()
     cursor = conn.cursor()
 
-    clientes = conn.execute("SELECT nombre FROM clientes").fetchall()
+    clientes = cargar_clientes_guardados(conn)
     servicios_db = conn.execute("SELECT nombre, precio_a, precio_b, precio_c FROM servicios").fetchall()
     servicios = [
         {
@@ -1784,15 +1813,28 @@ def enviar_cotizacion(id):
     if not cotizacion:
         return "Cotizacion no encontrada"
 
+    medio = request.args.get("medio", "correo")
     destinatario = cotizacion["correo"] or ""
     codigo = cotizacion["codigo"] or f"#{cotizacion['id']}"
-    subject = quote(f"Cotizacion {codigo}")
-    body = quote(
+    mensaje = (
         "Hola,\n\n"
         f"Te comparto la cotizacion {codigo}. "
         "Puedes adjuntar el PDF descargado desde FactuCloud antes de enviar este correo.\n\n"
         "Saludos."
     )
+
+    if medio == "whatsapp":
+        telefono = telefono_para_whatsapp(cotizacion["telefono"])
+        texto = quote(
+            f"Hola, te comparto la cotizacion {codigo}. "
+            "Puedes descargar el PDF desde FactuCloud y adjuntarlo en este chat. "
+            "Saludos."
+        )
+        destino = f"https://wa.me/{telefono}?text={texto}" if telefono else f"https://wa.me/?text={texto}"
+        return redirect(destino)
+
+    subject = quote(f"Cotizacion {codigo}")
+    body = quote(mensaje)
 
     return redirect(f"mailto:{destinatario}?subject={subject}&body={body}")
 
@@ -1881,14 +1923,16 @@ def clientes():
         nombre = request.form["nombre"]
         rnc = request.form["rnc"]
         telefono = request.form["telefono"]
+        correo = request.form.get("correo", "")
         direccion = request.form["direccion"]
 
+        add_column_if_missing(conn, "clientes", "correo", "TEXT")
         conn.execute(
             """
-            INSERT INTO clientes (nombre, rnc, telefono, direccion)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO clientes (nombre, rnc, telefono, correo, direccion)
+            VALUES (%s, %s, %s, %s, %s)
             """,
-            (nombre, rnc, telefono, direccion),
+            (nombre, rnc, telefono, correo, direccion),
         )
         conn.commit()
 

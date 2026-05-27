@@ -25,9 +25,19 @@
 <form method="POST">
 
 <div class="mb-3">
+<label class="form-label">Cliente guardado</label>
+<select class="form-control" id="cliente_guardado">
+<option value="">Seleccionar cliente guardado</option>
+{% for cliente in clientes %}
+<option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
+{% endfor %}
+</select>
+</div>
+
+<div class="mb-3">
 <label class="form-label">Nombre del cliente</label>
 
-<input type="text" class="form-control" name="cliente" list="lista_clientes" required>
+<input type="text" class="form-control" name="cliente" list="lista_clientes" value="{{ data.cliente if data else '' }}" required>
 
 <datalist id="lista_clientes">
 {% for cliente in clientes %}
@@ -110,6 +120,28 @@ Guardar Cotización
 <script>
 
 const servicios = {{ servicios | tojson | safe }};
+const clientesGuardados = {{ clientes | tojson | safe }};
+
+function aplicarClienteGuardado(id){
+const cliente = clientesGuardados.find(c => String(c.id) === String(id));
+
+if(!cliente){
+return;
+}
+
+document.querySelector('[name="cliente"]').value = cliente.nombre || "";
+document.querySelector('[name="rnc"]').value = cliente.rnc || "";
+document.querySelector('[name="telefono"]').value = cliente.telefono || "";
+document.querySelector('[name="correo"]').value = cliente.correo || "";
+}
+
+const clienteGuardadoSelect = document.getElementById("cliente_guardado");
+
+if(clienteGuardadoSelect){
+clienteGuardadoSelect.addEventListener("change", function(){
+aplicarClienteGuardado(this.value);
+});
+}
 
 function agregarFila(){
 

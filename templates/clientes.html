@@ -4,8 +4,6 @@
 
 <div class="container mt-4">
 
-    
-
 <div class="d-flex align-items-center mb-4">
 
     <a href="{{ url_for('index') }}" class="me-3 text-decoration-none">
@@ -35,7 +33,7 @@
 </div>
 
 <div class="col-md-6 mb-3">
-<label class="form-label">Teléfono</label>
+<label class="form-label">Telefono</label>
 <input type="tel"
     name="telefono"
     class="form-control"
@@ -45,7 +43,12 @@
 </div>
 
 <div class="col-md-6 mb-3">
-<label class="form-label">Dirección</label>
+<label class="form-label">Correo</label>
+<input type="email" name="correo" class="form-control">
+</div>
+
+<div class="col-md-6 mb-3">
+<label class="form-label">Direccion</label>
 <input type="text" name="direccion" class="form-control">
 </div>
 
@@ -70,8 +73,9 @@
 <th>ID</th>
 <th>Nombre</th>
 <th>RNC</th>
-<th>Teléfono</th>
-<th>Dirección</th>
+<th>Telefono</th>
+<th>Correo</th>
+<th>Direccion</th>
 <th>Acciones</th>
 </tr>
 </thead>
@@ -85,6 +89,7 @@
 <td>{{ c["nombre"] }}</td>
 <td>{{ c["rnc"] }}</td>
 <td>{{ c["telefono"] }}</td>
+<td>{{ c["correo"] or "" }}</td>
 <td>{{ c["direccion"] }}</td>
 
 <td>
@@ -95,14 +100,13 @@
         Editar
     </a>
 
-
     <form
         action="{{ url_for('eliminar_cliente',
         id=c['id']) }}"
         method="POST"
         style="display:inline;">
-        <button class= "btn btn-danger btn-sm"
-        onclick="return confirm('¿Eliminar cliente?')">
+        <button class="btn btn-danger btn-sm"
+        onclick="return confirm('Eliminar cliente?')">
     Eliminar
 </button>
     </form>
