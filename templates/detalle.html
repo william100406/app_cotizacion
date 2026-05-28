@@ -2,6 +2,61 @@
 
 {% block content %}
 
+<style>
+.send-options{
+    position:relative;
+}
+
+.send-options summary{
+    list-style:none;
+    cursor:pointer;
+}
+
+.send-options summary::-webkit-details-marker{
+    display:none;
+}
+
+.send-options-menu{
+    position:absolute;
+    right:0;
+    top:calc(100% + 6px);
+    z-index:20;
+    min-width:190px;
+    padding:6px;
+    background:#fff;
+    border:1px solid rgba(0,0,0,0.12);
+    border-radius:10px;
+    box-shadow:0 10px 24px rgba(15,23,42,0.16);
+}
+
+.send-options-menu a{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 10px;
+    color:#1f2937;
+    text-decoration:none;
+    border-radius:8px;
+}
+
+.send-options-menu a:hover{
+    background:#f3f4f6;
+}
+
+body.tema-oscuro .send-options-menu{
+    background:#0f172a;
+    border-color:rgba(255,255,255,0.12);
+}
+
+body.tema-oscuro .send-options-menu a{
+    color:#e5e7eb;
+}
+
+body.tema-oscuro .send-options-menu a:hover{
+    background:rgba(255,255,255,0.08);
+}
+</style>
+
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div class="d-flex align-items-center">
         <a href="{{ url_for('index') }}" class="me-3 text-decoration-none">
@@ -17,9 +72,19 @@
         <a href="{{ url_for('cotizacion_pdf', id=cotizacion.id) }}" class="btn btn-dark">
             <i class="fa fa-file-pdf"></i> Descargar PDF
         </a>
-        <a href="{{ url_for('enviar_cotizacion', id=cotizacion.id) }}" class="btn btn-primary">
-            <i class="fa fa-envelope"></i> Enviar
-        </a>
+        <details class="send-options">
+            <summary class="btn btn-primary">
+                <i class="fa fa-paper-plane"></i> Enviar
+            </summary>
+            <div class="send-options-menu">
+                <a href="{{ url_for('enviar_cotizacion', id=cotizacion.id, medio='whatsapp') }}">
+                    <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                </a>
+                <a href="{{ url_for('enviar_cotizacion', id=cotizacion.id, medio='correo') }}">
+                    <i class="fa fa-envelope"></i> Correo
+                </a>
+            </div>
+        </details>
     </div>
 </div>
 

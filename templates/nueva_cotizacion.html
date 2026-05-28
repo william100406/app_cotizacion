@@ -27,7 +27,7 @@
 <div class="mb-3">
 <label class="form-label">Nombre del cliente</label>
 
-<input type="text" class="form-control" name="cliente" list="lista_clientes" required>
+<input type="text" class="form-control" name="cliente" list="lista_clientes" value="{{ data.cliente if data else '' }}" required>
 
 <datalist id="lista_clientes">
 {% for cliente in clientes %}
@@ -46,6 +46,7 @@
 <input type="tel"
     name="telefono"
     class="form-control"
+    value="{{ data.telefono if data else '' }}"
     placeholder="+1 (809) 123-4567"
     inputmode="numeric"
     oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')">
@@ -110,6 +111,65 @@ Guardar Cotización
 <script>
 
 const servicios = {{ servicios | tojson | safe }};
+const clientesGuardados = {{ clientes | tojson | safe }};
+const clientesOrdenados = [...clientesGuardados].sort((a, b) =>
+String(a.nombre || "").localeCompare(String(b.nombre || ""), "es", { sensitivity: "base" })
+);
+const inputCliente = document.querySelector('[name="cliente"]');
+const listaClientes = document.getElementById("lista_clientes");
+
+function normalizarCliente(valor){
+return String(valor || "").trim().toLocaleLowerCase("es");
+}
+
+function renderizarOpcionesClientes(valor = ""){
+if(!listaClientes){
+return;
+}
+
+const busqueda = normalizarCliente(valor);
+listaClientes.replaceChildren();
+
+clientesOrdenados
+.filter(cliente => {
+const nombre = normalizarCliente(cliente.nombre);
+return !busqueda || nombre.startsWith(busqueda);
+})
+.forEach(cliente => {
+const opcion = document.createElement("option");
+opcion.value = cliente.nombre || "";
+listaClientes.appendChild(opcion);
+});
+}
+
+function buscarClientePorNombre(nombre){
+const nombreNormalizado = normalizarCliente(nombre);
+return clientesOrdenados.find(cliente => normalizarCliente(cliente.nombre) === nombreNormalizado);
+}
+
+function aplicarClienteGuardado(cliente){
+if(!cliente){
+return;
+}
+
+document.querySelector('[name="cliente"]').value = cliente.nombre || "";
+document.querySelector('[name="rnc"]').value = cliente.rnc || "";
+document.querySelector('[name="telefono"]').value = cliente.telefono || "";
+document.querySelector('[name="correo"]').value = cliente.correo || "";
+}
+
+if(inputCliente){
+renderizarOpcionesClientes(inputCliente.value);
+
+inputCliente.addEventListener("input", function(){
+renderizarOpcionesClientes(this.value);
+aplicarClienteGuardado(buscarClientePorNombre(this.value));
+});
+
+inputCliente.addEventListener("change", function(){
+aplicarClienteGuardado(buscarClientePorNombre(this.value));
+});
+}
 
 function agregarFila(){
 
@@ -126,9 +186,10 @@ const fila = document.createElement("tr");
 fila.innerHTML = `
 
 <td>
-<select class="form-control servicio" name="descripcion[]">
+<select class="form-control servicio">
 ${opciones}
 </select>
+<textarea class="form-control descripcion-texto mt-2" name="descripcion[]" rows="3" placeholder="Descripcion"></textarea>
 </td>
 
 <td>
@@ -136,7 +197,6 @@ ${opciones}
 <option value="a">A</option>
 <option value="b">B</option>
 <option value="c">C</option>
-<option value="manual">Manual</option>
 </select>
 </td>
 
@@ -162,10 +222,12 @@ tabla.appendChild(fila);
 
 $(fila).find('.servicio').select2({
     placeholder: "Buscar servicio...",
-    width: 'resolve'
+    width: 'resolve',
+    tags: true
 });
 
 $(fila).find('.servicio').on('change', function(){
+    actualizarDescripcionDesdeServicio(fila);
     actualizarPrecio(fila);
 });
 
@@ -175,23 +237,29 @@ fila.querySelector(".tipo_precio").addEventListener("change", function(){
 
 }
 
+function actualizarDescripcionDesdeServicio(fila){
+const select = fila.querySelector(".servicio");
+const descripcion = fila.querySelector(".descripcion-texto");
+const valor = select.value || "";
+
+if(valor){
+descripcion.value = valor;
+}
+}
+
 function actualizarPrecio(fila){
 
 const select = fila.querySelector(".servicio");
-const index = select.options[select.selectedIndex].getAttribute("data-index");
+const servicio = servicios.find(s => s.nombre === select.value);
 
-if(index === null || index === "") return;
-
-const servicio = servicios[index];
+if(!servicio){
+calcular();
+return;
+}
 
 const tipo = fila.querySelector(".tipo_precio").value;
 
 let precio = 0;
-
-if(tipo === "manual"){
-calcular();
-return;
-}
 
 if(tipo === "a") precio = servicio.precio_a || 0;
 if(tipo === "b") precio = servicio.precio_b || 0;
@@ -209,9 +277,6 @@ calcular();
 
 document.addEventListener("input", function(e){
 if(e.target.classList.contains("cantidad") || e.target.classList.contains("precio")){
-if(e.target.classList.contains("precio")){
-e.target.closest("tr").querySelector(".tipo_precio").value = "manual";
-}
 calcular();
 }
 });

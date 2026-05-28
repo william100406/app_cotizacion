@@ -2,6 +2,47 @@
 
         {% block content %}
 
+        <style>
+        .acciones-col,
+        .acciones-celda{
+            min-width: 610px;
+        }
+
+        .acciones-cotizacion{
+            display:flex;
+            align-items:center;
+            gap:6px;
+            flex-wrap:nowrap;
+            white-space:nowrap;
+        }
+
+        .acciones-cotizacion form{
+            display:inline-flex;
+            margin:0;
+        }
+
+        .acciones-cotizacion .btn,
+        .acciones-cotizacion button{
+            width:70px;
+            height:32px;
+            padding:0 8px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            font-size:12px;
+            line-height:1;
+            border-radius:8px;
+            box-shadow:none;
+            white-space:nowrap;
+        }
+
+        @media (max-width: 768px){
+            .acciones-cotizacion button{
+                width:70px;
+            }
+        }
+        </style>
+
         <h3 class="mb-4">Dashboard</h3>
 
         <div class="d-flex justify-content-between mb-4">
@@ -71,7 +112,7 @@
         <th>Fecha</th>
         <th>Total</th>
         <th>Estado</th>
-        <th width="430">Acciones</th>
+        <th class="acciones-col">Acciones</th>
         </tr>
 
         </thead>
@@ -111,8 +152,10 @@
 
         </td>
 
-        <td>
+        <td class="acciones-celda">
 
+
+        <div class="acciones-cotizacion">
 
         <a href="/detalle/{{ cotizacion.id }}" class="btn btn-sm btn-info">
         Ver
@@ -151,13 +194,14 @@
         </a>
         {% endif %}
 
-        <form action="/eliminar_cotizacion/{{ cotizacion.id }}" method="POST" style="display:inline;">
-            <button class="btn-danger" type="submit"
+        <form action="/eliminar_cotizacion/{{ cotizacion.id }}" method="POST">
+            <button class="btn btn-sm btn-danger" type="submit"
                 onclick="return confirm('¿Seguro que deseas eliminar esta cotización?')">
                 Eliminar
             </button>
         </form>
 
+        </div>
 
         </td>
 
