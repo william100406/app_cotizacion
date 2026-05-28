@@ -1,278 +1,597 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-<meta charset="UTF-8">
-<title>Login</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | FactuCloud</title>
 
-<link rel="icon" href="{{ url_for('static', filename='FC.ico') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" href="{{ url_for('static', filename='FC.ico') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<style>
-:root {
-  --bg-dark: #141429;
-  --bg-darker: #0f1020;
-  --card: rgba(20, 20, 41, 0.78);
-  --card-border: rgba(255, 255, 255, 0.10);
-  --text: #f3f4f6;
-  --muted: #a1a1aa;
-  --gray-soft: #2a2b3f;
-  --gray-line: #3a3b52;
-  --primary: #0d6efd;
-  --primary-2: #4f8cff;
-  --primary-glow: rgba(13, 110, 253, 0.28);
-}
+  <style>
+    :root{
+      --bg-1:#070B1A;
+      --bg-2:#0B1330;
+      --panel: rgba(14, 20, 44, 0.72);
+      --panel-2: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.10);
+      --text: #F4F7FB;
+      --muted:#9BA7C2;
+      --primary:#3B82F6;
+      --primary-2:#2563EB;
+      --primary-glow: rgba(59,130,246,.28);
+      --success:#10B981;
+      --danger:#EF4444;
+      --shadow: 0 30px 80px rgba(0,0,0,.45);
+    }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: Inter, system-ui, sans-serif;
-}
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-body {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  color: var(--text);
+    body{
+      min-height:100vh;
+      color:var(--text);
+      overflow-x:hidden;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(59,130,246,.18), transparent 28%),
+        radial-gradient(circle at 80% 80%, rgba(16,185,129,.12), transparent 30%),
+        linear-gradient(135deg, var(--bg-2), var(--bg-1));
+    }
 
-  background:
-    radial-gradient(circle at 20% 20%, rgba(13,110,253,0.25), transparent 30%),
-    radial-gradient(circle at 80% 80%, rgba(79,140,255,0.18), transparent 35%),
-    linear-gradient(135deg, var(--bg-dark), var(--bg-darker));
-}
+    .page{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns: 1.05fr 0.95fr;
+    }
 
-.login-wrapper {
-  width: 100%;
-  max-width: 390px;
-  padding: 16px;
-}
+    .hero{
+      position:relative;
+      padding:56px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      isolation:isolate;
+      overflow:hidden;
+    }
 
-.login-card {
-  padding: 34px 30px;
-  border-radius: 26px;
-  background: linear-gradient(180deg, rgba(20, 20, 41, 0.88), rgba(20, 20, 41, 0.72));
-  border: 1px solid var(--card-border);
-  backdrop-filter: blur(14px);
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
+    .hero::before,
+    .hero::after{
+      content:"";
+      position:absolute;
+      border-radius:999px;
+      filter: blur(18px);
+      opacity:.55;
+      z-index:-1;
+    }
 
-h2 {
-  text-align: center;
-  margin-bottom: 22px;
-  font-size: 1.9rem;
-  font-weight: 800;
-  letter-spacing: 0.2px;
-  color: #ffffff;
-}
+    .hero::before{
+      width:320px;
+      height:320px;
+      background: radial-gradient(circle, rgba(59,130,246,.34), transparent 65%);
+      top:10%;
+      left:8%;
+    }
 
-.alert {
-  padding: 11px 12px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  font-size: 0.92rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.05);
-}
+    .hero::after{
+      width:260px;
+      height:260px;
+      background: radial-gradient(circle, rgba(16,185,129,.22), transparent 65%);
+      bottom:10%;
+      right:12%;
+    }
 
-.input-group {
-  position: relative;
-  margin-bottom: 15px;
-}
+    .hero-content{
+      max-width:560px;
+      width:100%;
+    }
 
-.input-group i {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #b5b7c7;
-}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-bottom:28px;
+    }
 
-input {
-  width: 100%;
-  padding: 12px 12px 12px 40px;
-  border-radius: 12px;
+    .brand-mark{
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      font-weight:800;
+      font-size:1.1rem;
+      background: linear-gradient(135deg, var(--primary), #60A5FA);
+      box-shadow: 0 12px 30px var(--primary-glow);
+    }
 
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.04);
+    .brand-text h1{
+      font-size:1.4rem;
+      line-height:1.1;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
 
-  color: #fff;
-  transition: 0.25s ease;
-}
+    .brand-text p{
+      color:var(--muted);
+      font-size:.95rem;
+      margin-top:4px;
+    }
 
-input::placeholder {
-  color: #9ca3af;
-}
+    .hero h2{
+      font-size:3.2rem;
+      line-height:1.05;
+      letter-spacing:-0.03em;
+      margin-bottom:16px;
+      font-weight:900;
+    }
 
-input:focus {
-  outline: none;
-  border-color: var(--primary);
-  background: rgba(255,255,255,0.06);
-  box-shadow: 0 0 0 3px rgba(13,110,253,0.25);
-}
+    .hero p.lead{
+      font-size:1.05rem;
+      line-height:1.7;
+      color:#C8D3EA;
+      max-width:52ch;
+      margin-bottom:28px;
+    }
 
-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.92rem;
-  color: var(--muted);
-  margin-bottom: 12px;
-  user-select: none;
-}
+    .feature-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:14px;
+      margin-top:22px;
+    }
 
-input[type="checkbox"] {
-  width: auto;
-  accent-color: var(--primary);
-}
+    .feature{
+      background: rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:18px;
+      padding:16px;
+      backdrop-filter: blur(10px);
+    }
 
-.login-btn {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 14px;
-  font-weight: 700;
-  color: #fff;
+    .feature i{
+      color:#93C5FD;
+      font-size:1.05rem;
+      margin-bottom:10px;
+    }
 
-  background: linear-gradient(135deg, var(--primary), var(--primary-2));
-  cursor: pointer;
-  margin-top: 10px;
+    .feature strong{
+      display:block;
+      font-size:.98rem;
+      margin-bottom:6px;
+    }
 
-  box-shadow:
-    0 10px 25px rgba(13, 110, 253, 0.35),
-    inset 0 1px 0 rgba(255,255,255,0.15);
+    .feature span{
+      color:var(--muted);
+      font-size:.9rem;
+      line-height:1.45;
+    }
 
-  transition: all 0.25s ease;
-}
+    .login-side{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+    }
 
-.login-btn:hover {
-  transform: translateY(-2px) scale(1.01);
-  box-shadow:
-    0 14px 35px rgba(13, 110, 253, 0.45),
-    inset 0 1px 0 rgba(255,255,255,0.2);
-}
+    .login-card{
+      width:100%;
+      max-width:440px;
+      background: var(--panel);
+      border:1px solid var(--border);
+      border-radius:28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      padding:34px;
+      position:relative;
+    }
 
-.login-btn:active {
-  transform: scale(0.98);
-}
+    .login-card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:28px;
+      padding:1px;
+      background: linear-gradient(180deg, rgba(255,255,255,.12), transparent 35%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events:none;
+    }
 
-.divider {
-  text-align: center;
-  margin: 22px 0 16px;
-  color: var(--muted);
-  font-size: 0.86rem;
-  position: relative;
-}
+    .card-header{
+      margin-bottom:24px;
+    }
 
-.divider::before,
-.divider::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 28%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
-}
+    .card-header h3{
+      font-size:2rem;
+      line-height:1.15;
+      font-weight:900;
+      margin-bottom:10px;
+    }
 
-.divider::before { left: 0; }
-.divider::after { right: 0; }
+    .card-header p{
+      color:var(--muted);
+      line-height:1.6;
+      font-size:.98rem;
+    }
 
-.social-login {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
+    .alert{
+      padding:13px 14px;
+      border-radius:14px;
+      margin-bottom:14px;
+      font-size:.95rem;
+      border:1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.05);
+    }
 
-.social-login button {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  border: 1px solid var(--gray-line);
-  background: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
-  cursor: pointer;
-  font-size: 18px;
-  transition: 0.2s ease;
-}
+    .alert.success{ border-color: rgba(16,185,129,.35); background: rgba(16,185,129,.10); }
+    .alert.error{ border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.10); }
+    .alert.info{ border-color: rgba(59,130,246,.35); background: rgba(59,130,246,.10); }
 
-.social-login button:hover {
-  background: rgba(13, 110, 253, 0.14);
-  border-color: rgba(13, 110, 253, 0.35);
-  transform: translateY(-1px);
-}
+    form{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
 
-.google:hover { color: #fff; }
-.gmail:hover { color: #fff; }
-.github:hover { color: #fff; }
-</style>
+    .field{
+      position:relative;
+    }
+
+    .input-wrap{
+      position:relative;
+    }
+
+    .input-wrap i.left{
+      position:absolute;
+      left:14px;
+      top:50%;
+      transform:translateY(-50%);
+      color:#AAB5CC;
+      font-size:.95rem;
+      pointer-events:none;
+    }
+
+    .input-wrap input{
+      width:100%;
+      padding:14px 46px 14px 44px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      outline:none;
+      transition:.25s ease;
+      font-size:1rem;
+    }
+
+    .input-wrap input::placeholder{
+      color:#94A3B8;
+    }
+
+    .input-wrap input:focus{
+      border-color: rgba(59,130,246,.95);
+      box-shadow: 0 0 0 4px rgba(59,130,246,.18);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .toggle-btn{
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform:translateY(-50%);
+      border:none;
+      background:transparent;
+      color:#B9C4DA;
+      cursor:pointer;
+      padding:8px;
+      border-radius:10px;
+    }
+
+    .toggle-btn:hover{
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+    }
+
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .remember{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:var(--muted);
+      font-size:.95rem;
+      user-select:none;
+    }
+
+    .remember input{
+      width:16px;
+      height:16px;
+      accent-color: var(--primary);
+      cursor:pointer;
+    }
+
+    .forgot a{
+      color:#93C5FD;
+      text-decoration:none;
+      font-size:.95rem;
+      font-weight:600;
+    }
+
+    .forgot a:hover{
+      text-decoration:underline;
+    }
+
+    .login-btn{
+      width:100%;
+      border:none;
+      border-radius:16px;
+      padding:14px 16px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color:#fff;
+      font-weight:800;
+      font-size:1rem;
+      cursor:pointer;
+      box-shadow: 0 14px 30px rgba(37,99,235,.32);
+      transition: .25s ease;
+      margin-top:4px;
+    }
+
+    .login-btn:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 18px 38px rgba(37,99,235,.40);
+    }
+
+    .login-btn:active{
+      transform: translateY(0);
+    }
+
+    .divider{
+      position:relative;
+      margin:8px 0 4px;
+      text-align:center;
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    .divider::before,
+    .divider::after{
+      content:"";
+      position:absolute;
+      top:50%;
+      width:28%;
+      height:1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
+    }
+
+    .divider::before{ left:0; }
+    .divider::after{ right:0; }
+
+    .social{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .social button{
+      width:48px;
+      height:48px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      color:#fff;
+      cursor:pointer;
+      transition:.2s ease;
+      font-size:1rem;
+    }
+
+    .social button:hover{
+      transform: translateY(-2px);
+      background: rgba(59,130,246,.12);
+      border-color: rgba(59,130,246,.25);
+    }
+
+    .login-footer{
+      margin-top:18px;
+      padding-top:18px;
+      border-top:1px solid rgba(255,255,255,0.08);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border-radius:999px;
+      background: rgba(16,185,129,.10);
+      border:1px solid rgba(16,185,129,.18);
+      color:#BBF7D0;
+      font-weight:600;
+    }
+
+    @media (max-width: 1024px){
+      .page{
+        grid-template-columns: 1fr;
+      }
+
+      .hero{
+        padding:36px 24px 8px;
+      }
+
+      .hero h2{
+        font-size:2.5rem;
+      }
+
+      .login-side{
+        padding:24px;
+      }
+    }
+
+    @media (max-width: 640px){
+      .hero{
+        display:none;
+      }
+
+      .login-card{
+        padding:26px 20px;
+        border-radius:24px;
+      }
+
+      .card-header h3{
+        font-size:1.7rem;
+      }
+
+      .login-footer{
+        justify-content:center;
+        text-align:center;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <div class="page">
+    <section class="hero">
+      <div class="hero-content">
+        <div class="brand">
+          <div class="brand-mark">FC</div>
+          <div class="brand-text">
+            <h1>FactuCloud</h1>
+            <p>Sistema de facturación y gestión</p>
+          </div>
+        </div>
 
-<div class="login-wrapper">
+        <h2>Controla ventas, clientes e inventario en un solo lugar.</h2>
+        <p class="lead">
+          Accede a un panel profesional para administrar tu negocio, enviar facturas,
+          revisar pagos y tomar decisiones más rápido.
+        </p>
 
-<div class="login-card">
+        <div class="feature-grid">
+          <div class="feature">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            <strong>Facturación rápida</strong>
+            <span>Crea y envía facturas en segundos con un flujo claro y simple.</span>
+          </div>
 
-<h2>Iniciar Sesión</h2>
+          <div class="feature">
+            <i class="fa-solid fa-chart-line"></i>
+            <strong>Métricas útiles</strong>
+            <span>Visualiza ventas, ganancias y pendientes sin perder tiempo.</span>
+          </div>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert {{ category }}">
-        {{ message }}
+          <div class="feature">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            <strong>Inventario</strong>
+            <span>Controla stock y evita faltantes antes de que afecten tus ventas.</span>
+          </div>
+
+          <div class="feature">
+            <i class="fa-solid fa-shield-halved"></i>
+            <strong>Acceso seguro</strong>
+            <span>Inicio de sesión protegido con una experiencia limpia y confiable.</span>
+          </div>
+        </div>
       </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+    </section>
 
-<form method="POST">
+    <section class="login-side">
+      <div class="login-card">
+        <div class="card-header">
+          <h3>Iniciar sesión</h3>
+          <p>Ingresa con tu usuario y contraseña para acceder al panel administrativo.</p>
+        </div>
 
-<div class="input-group">
-<i class="fa fa-user"></i>
-<input type="text" name="usuario" placeholder="Usuario" required>
-</div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert {{ category }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
 
-<div class="input-group">
-<i class="fa fa-lock"></i>
-<input type="password" id="password" name="password" placeholder="Contraseña" required>
-</div>
+        <form method="POST">
+          <div class="field">
+            <div class="input-wrap">
+              <i class="fa-solid fa-user left"></i>
+              <input type="text" name="usuario" placeholder="Usuario" required autocomplete="username">
+            </div>
+          </div>
 
-<label>
-<input type="checkbox" name="recordar">
-Recordar sesión
-</label>
+          <div class="field">
+            <div class="input-wrap">
+              <i class="fa-solid fa-lock left"></i>
+              <input type="password" id="password" name="password" placeholder="Contraseña" required autocomplete="current-password">
+              <button type="button" class="toggle-btn" onclick="togglePassword()" aria-label="Mostrar u ocultar contraseña">
+                <i class="fa-solid fa-eye" id="eyeIcon"></i>
+              </button>
+            </div>
+          </div>
 
-<div class="forgot-password">
-<a href="/recuperar">¿Olvidaste tu contraseña?</a>
-</div>
+          <div class="row">
+            <label class="remember">
+              <input type="checkbox" name="recordar">
+              Recordar sesión
+            </label>
 
-<button type="submit" class="login-btn">Entrar</button>
+            <div class="forgot">
+              <a href="/recuperar">¿Olvidaste tu contraseña?</a>
+            </div>
+          </div>
 
-</form>
+          <button type="submit" class="login-btn">Entrar</button>
+        </form>
 
-<div class="divider">
-<span>o iniciar sesión con</span>
-</div>
+        <div class="divider">o iniciar sesión con</div>
 
-<div class="social-login">
-<button class="google"><i class="fab fa-google"></i></button>
-<button class="gmail"><i class="fas fa-envelope"></i></button>
-<button class="github"><i class="fab fa-github"></i></button>
-</div>
+        <div class="social">
+          <button type="button" aria-label="Continuar con Google"><i class="fa-brands fa-google"></i></button>
+          <button type="button" aria-label="Continuar con correo"><i class="fa-solid fa-envelope"></i></button>
+          <button type="button" aria-label="Continuar con GitHub"><i class="fa-brands fa-github"></i></button>
+        </div>
 
-</div>
+        <div class="login-footer">
+          <span class="badge"><i class="fa-solid fa-lock"></i> Conexión segura</span>
+          <span>© 2025 FactuCloud</span>
+        </div>
+      </div>
+    </section>
+  </div>
 
-</div>
+  <script>
+    function togglePassword() {
+      const password = document.getElementById("password");
+      const eyeIcon = document.getElementById("eyeIcon");
 
-<script>
-function togglePassword() {
-const password = document.getElementById("password");
-password.type = password.type === "password" ? "text" : "password";
-}
-</script>
-
+      if (password.type === "password") {
+        password.type = "text";
+        eyeIcon.classList.remove("fa-eye");
+        eyeIcon.classList.add("fa-eye-slash");
+      } else {
+        password.type = "password";
+        eyeIcon.classList.remove("fa-eye-slash");
+        eyeIcon.classList.add("fa-eye");
+      }
+    }
+  </script>
 </body>
 </html>
