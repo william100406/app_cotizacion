@@ -1,220 +1,901 @@
-        {% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FactuCloud | Dashboard</title>
+  <link rel="icon" href="{{ url_for('static', filename='FC.ico') }}">
 
-        {% block content %}
+  <style>
+    :root{
+      --bg:#081120;
+      --bg-2:#0b1730;
+      --panel: rgba(255,255,255,.05);
+      --panel-2: rgba(255,255,255,.08);
+      --border: rgba(255,255,255,.09);
+      --border-strong: rgba(255,255,255,.14);
+      --text:#eef2ff;
+      --muted:#98a6c7;
+      --primary:#3b82f6;
+      --primary-2:#60a5fa;
+      --success:#22c55e;
+      --warning:#fbbf24;
+      --danger:#ef4444;
+      --shadow: 0 18px 50px rgba(0,0,0,.28);
+      --radius:18px;
+    }
 
-        <style>
-        .acciones-col,
-        .acciones-celda{
-            min-width: 610px;
-        }
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
 
-        .acciones-cotizacion{
-            display:flex;
-            align-items:center;
-            gap:6px;
-            flex-wrap:nowrap;
-            white-space:nowrap;
-        }
+    body{
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(59,130,246,.18), transparent 26%),
+        radial-gradient(circle at 85% 85%, rgba(34,197,94,.10), transparent 26%),
+        linear-gradient(135deg, var(--bg-2), var(--bg));
+      color:var(--text);
+      font-size:14px;
+      overflow:hidden;
+    }
 
-        .acciones-cotizacion form{
-            display:inline-flex;
-            margin:0;
-        }
+    .app{
+      display:flex;
+      height:100vh;
+    }
 
-        .acciones-cotizacion .btn,
-        .acciones-cotizacion button{
-            width:70px;
-            height:32px;
-            padding:0 8px;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            font-size:12px;
-            line-height:1;
-            border-radius:8px;
-            box-shadow:none;
-            white-space:nowrap;
-        }
+    /* SIDEBAR */
+    .sidebar{
+      width:228px;
+      background: rgba(8,17,32,.78);
+      border-right:1px solid var(--border);
+      backdrop-filter: blur(18px);
+      padding:18px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
 
-        @media (max-width: 768px){
-            .acciones-cotizacion button{
-                width:70px;
-            }
-        }
-        </style>
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:6px 8px 10px;
+    }
 
-        <h3 class="mb-4">Dashboard</h3>
+    .brand-badge{
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      font-weight:800;
+      color:#fff;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      box-shadow: 0 10px 24px rgba(59,130,246,.28);
+      flex:0 0 auto;
+    }
 
-        <div class="d-flex justify-content-between mb-4">
+    .brand h1{
+      font-size:1.05rem;
+      line-height:1.1;
+      font-weight:800;
+    }
 
+    .brand p{
+      color:var(--muted);
+      font-size:.82rem;
+      margin-top:2px;
+    }
+
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .nav a{
+      text-decoration:none;
+      color:#e8edff;
+      border:1px solid transparent;
+      background:transparent;
+      padding:10px 12px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      transition:.18s ease;
+      font-weight:600;
+      letter-spacing:.01em;
+      white-space:nowrap;
+    }
+
+    .nav a:hover{
+      background: rgba(255,255,255,.05);
+      border-color: rgba(255,255,255,.06);
+    }
+
+    .nav a.active{
+      background: linear-gradient(135deg, rgba(59,130,246,.18), rgba(96,165,250,.10));
+      border-color: rgba(96,165,250,.18);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    .nav .dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background: rgba(255,255,255,.25);
+    }
+
+    .nav a.active .dot{
+      background:#7dd3fc;
+    }
+
+    .sidebar-card{
+      margin-top:auto;
+      border:1px solid var(--border);
+      background: var(--panel);
+      border-radius:16px;
+      padding:14px;
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar-card .small{
+      color:var(--muted);
+      font-size:.84rem;
+      margin-top:2px;
+    }
+
+    .sidebar-card .title{
+      font-weight:800;
+      margin-bottom:4px;
+    }
+
+    .mini-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+      margin-top:10px;
+      padding:9px 12px;
+      border:none;
+      border-radius:12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      transition:.18s ease;
+    }
+
+    .mini-btn:hover{ transform: translateY(-1px); }
+
+    /* MAIN */
+    .main{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      padding:18px 18px 16px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .top-left h2{
+      font-size:1.35rem;
+      font-weight:900;
+      letter-spacing:-.03em;
+    }
+
+    .top-left p{
+      color:var(--muted);
+      font-size:.9rem;
+      margin-top:4px;
+    }
+
+    .top-right{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--border);
+      color:#e9edff;
+      font-weight:600;
+      box-shadow: var(--shadow);
+    }
+
+    .avatar{
+      width:30px;
+      height:30px;
+      border-radius:999px;
+      background: linear-gradient(135deg, #8b5cf6, #60a5fa);
+      display:grid;
+      place-items:center;
+      font-size:.85rem;
+      font-weight:800;
+    }
+
+    .btn{
+      border:none;
+      border-radius:12px;
+      padding:10px 14px;
+      font-size:.92rem;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      transition:.18s ease;
+      white-space:nowrap;
+    }
+
+    .btn:hover{ transform: translateY(-1px); }
+
+    .btn-primary{
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color:#fff;
+      box-shadow: 0 12px 26px rgba(59,130,246,.25);
+    }
+
+    .btn-soft{
+      background: rgba(255,255,255,.06);
+      color:#eef2ff;
+      border:1px solid var(--border);
+    }
+
+    .hero{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:16px 18px;
+      border-radius:22px;
+      border:1px solid var(--border);
+      background:
+        linear-gradient(135deg, rgba(59,130,246,.22), rgba(255,255,255,.04));
+      box-shadow: var(--shadow);
+      margin-bottom:14px;
+    }
+
+    .hero h3{
+      font-size:1.18rem;
+      font-weight:900;
+      margin-bottom:5px;
+      letter-spacing:-.02em;
+    }
+
+    .hero p{
+      color:#d9e4ff;
+      font-size:.92rem;
+      line-height:1.45;
+      max-width:68ch;
+    }
+
+    .hero-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      flex:0 0 auto;
+    }
+
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .kpi{
+      border:1px solid var(--border);
+      background: var(--panel);
+      border-radius:18px;
+      padding:13px 14px;
+      box-shadow: var(--shadow);
+      min-height:96px;
+    }
+
+    .kpi .label{
+      color:#dce3ff;
+      font-size:.86rem;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+
+    .kpi .value{
+      font-size:1.45rem;
+      font-weight:900;
+      letter-spacing:-.02em;
+      line-height:1.05;
+    }
+
+    .kpi .sub{
+      margin-top:8px;
+      color:var(--muted);
+      font-size:.82rem;
+    }
+
+    .content{
+      display:grid;
+      grid-template-columns: 1.45fr .95fr;
+      gap:12px;
+      min-height:0;
+      flex:1;
+    }
+
+    .card{
+      border:1px solid var(--border);
+      background: var(--panel);
+      border-radius:20px;
+      box-shadow: var(--shadow);
+      min-height:0;
+    }
+
+    .card-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:14px 16px 10px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    .card-header h4{
+      font-size:1rem;
+      font-weight:900;
+      letter-spacing:-.01em;
+    }
+
+    .card-header .hint{
+      color:var(--muted);
+      font-size:.85rem;
+    }
+
+    .card-body{
+      padding:14px 16px 16px;
+    }
+
+    .chart{
+      height:220px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .chart-legend{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:.86rem;
+      margin-bottom:4px;
+    }
+
+    .legend-item{
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .legend-dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background: var(--primary);
+    }
+
+    .legend-dot.green{ background: var(--success); }
+    .legend-dot.yellow{ background: var(--warning); }
+
+    .simple-graph{
+      position:relative;
+      height:180px;
+      border-radius:16px;
+      background:
+        linear-gradient(to bottom, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border:1px solid rgba(255,255,255,.05);
+      overflow:hidden;
+    }
+
+    .gridline{
+      position:absolute;
+      left:0;
+      right:0;
+      height:1px;
+      background: rgba(255,255,255,.05);
+    }
+
+    .gridline.g1{ top:25%; }
+    .gridline.g2{ top:50%; }
+    .gridline.g3{ top:75%; }
+
+    .line{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.05);
+    }
+
+    table{
+      width:100%;
+      min-width:920px;
+      border-collapse:collapse;
+      background: rgba(255,255,255,.02);
+    }
+
+    thead th{
+      text-align:left;
+      font-size:.8rem;
+      color:#c9d3f2;
+      font-weight:800;
+      padding:11px 12px;
+      background: rgba(255,255,255,.03);
+      border-bottom:1px solid rgba(255,255,255,.07);
+      white-space:nowrap;
+    }
+
+    tbody td{
+      padding:12px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      color:#eef2ff;
+      vertical-align:middle;
+      white-space:nowrap;
+    }
+
+    tbody tr:hover{
+      background: rgba(255,255,255,.025);
+    }
+
+    .money{
+      font-weight:800;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.76rem;
+      font-weight:800;
+      line-height:1;
+      border:1px solid transparent;
+    }
+
+    .pending{ background: rgba(251,191,36,.12); color:#fbbf24; border-color: rgba(251,191,36,.16); }
+    .approved{ background: rgba(59,130,246,.12); color:#60a5fa; border-color: rgba(59,130,246,.16); }
+    .done{ background: rgba(34,197,94,.12); color:#4ade80; border-color: rgba(34,197,94,.16); }
+
+    .actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      align-items:center;
+      white-space:nowrap;
+    }
+
+    .action{
+      border:none;
+      border-radius:10px;
+      padding:7px 10px;
+      font-size:.76rem;
+      font-weight:800;
+      cursor:pointer;
+      color:#e9edff;
+      background: rgba(255,255,255,.06);
+      text-decoration:none;
+      transition:.16s ease;
+      line-height:1;
+    }
+
+    .action:hover{
+      background: rgba(255,255,255,.11);
+      transform: translateY(-1px);
+    }
+
+    .action.primary{
+      background: linear-gradient(135deg, #2563eb, #4f8cff);
+      color:#fff;
+    }
+
+    .more{
+      width:34px;
+      height:32px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+    }
+
+    .grid-two{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .list-item{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      padding:11px 0;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    .list-item:last-child{ border-bottom:none; padding-bottom:0; }
+
+    .list-item strong{
+      display:block;
+      font-size:.92rem;
+      margin-bottom:3px;
+    }
+
+    .list-item span{
+      color:var(--muted);
+      font-size:.84rem;
+      line-height:1.4;
+    }
+
+    .time{
+      color:#7dd3fc;
+      font-size:.78rem;
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    .footer-note{
+      margin-top:12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      color:var(--muted);
+      font-size:.82rem;
+    }
+
+    @media (max-width: 1200px){
+      .content{
+        grid-template-columns:1fr;
+      }
+      .grid-two{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 980px){
+      body{ overflow:auto; }
+      .app{ height:auto; min-height:100vh; }
+      .sidebar{ display:none; }
+      .main{ overflow:visible; }
+      .kpis{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px){
+      .main{ padding:12px; }
+      .topbar{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+      .hero{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+      .kpis{
+        grid-template-columns:1fr;
+      }
+      .hero-actions,
+      .top-right{
+        width:100%;
+      }
+      .btn,
+      .chip{
+        width:100%;
+        justify-content:center;
+      }
+      .actions{
+        justify-content:flex-start;
+        flex-wrap:wrap;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-badge">FC</div>
+        <div>
+          <h1>FactuCloud</h1>
+          <p>Billing SaaS</p>
+        </div>
+      </div>
+
+      <div class="nav">
+        <a class="active" href="#"><span class="dot"></span> Dashboard</a>
+        <a href="/nueva"><span class="dot"></span> Nueva Cotización</a>
+        <a href="/historial"><span class="dot"></span> Historial</a>
+        <a href="#"><span class="dot"></span> Facturas</a>
+        <a href="#"><span class="dot"></span> Clientes</a>
+        <a href="#"><span class="dot"></span> Ajustes</a>
+      </div>
+
+      <div class="sidebar-card">
+        <div class="title">Plan Profesional</div>
+        <div class="small">Renovación: 25 Jun 2025</div>
+        <a href="#" class="mini-btn">Ver plan</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="top-left">
+          <h2>Dashboard</h2>
+          <p>Resumen compacto con métricas, cotizaciones y acciones rápidas.</p>
+        </div>
+
+        <div class="top-right">
+          <a href="/nueva" class="btn btn-primary">+ Nueva Cotización</a>
+          <div class="chip">
+            <div class="avatar">A</div>
+            admin
+          </div>
+        </div>
+      </div>
+
+      <section class="hero">
+        <div>
+          <h3>Tu operación se ve más profesional.</h3>
+          <p>
+            Controla cotizaciones, facturación y seguimiento en una interfaz limpia,
+            compacta y más cercana a una app premium.
+          </p>
+        </div>
+
+        <div class="hero-actions">
+          <a href="/historial" class="btn btn-soft">Ver historial</a>
+          <a href="#" class="btn btn-primary">Enviar resumen</a>
+        </div>
+      </section>
+
+      <section class="kpis">
+        <div class="kpi">
+          <div class="label">Cotizaciones Pendientes</div>
+          <div class="value">{{ pendientes }}</div>
+          <div class="sub">Necesitan revisión</div>
+        </div>
+
+        <div class="kpi">
+          <div class="label">Cotizaciones Aprobadas</div>
+          <div class="value">{{ aprobadas }}</div>
+          <div class="sub">Listas para facturar</div>
+        </div>
+
+        <div class="kpi">
+          <div class="label">Facturas Emitidas</div>
+          <div class="value">{{ facturadas }}</div>
+          <div class="sub">Documentos generados</div>
+        </div>
+
+        <div class="kpi">
+          <div class="label">Total Facturado</div>
+          <div class="value">US$ {{ "%.2f"|format(total_facturado) }}</div>
+          <div class="sub">Acumulado este periodo</div>
+        </div>
+      </section>
+
+      <section class="content">
+        <div class="card">
+          <div class="card-header">
             <div>
-                <a href="/nueva" class="btn btn-primary">
-                    Nueva Cotización
-                </a>
+              <h4>Actividad de ventas</h4>
+              <div class="hint">Tendencia del periodo actual</div>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item"><span class="legend-dot"></span> Ventas</div>
+              <div class="legend-item"><span class="legend-dot green"></span> Pagos</div>
+              <div class="legend-item"><span class="legend-dot yellow"></span> Pendientes</div>
+            </div>
+          </div>
 
-                <a href="/historial" class="btn btn-secondary">
-                    Historial
-                </a>
+          <div class="card-body">
+            <div class="chart">
+              <div class="simple-graph">
+                <div class="gridline g1"></div>
+                <div class="gridline g2"></div>
+                <div class="gridline g3"></div>
+
+                <svg class="line" viewBox="0 0 900 180" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="lineBlue" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.30"/>
+                      <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.02"/>
+                    </linearGradient>
+                  </defs>
+
+                  <path d="M 0 140 C 70 128, 110 102, 165 110 S 270 70, 330 85 S 420 52, 480 72 S 585 38, 645 48 S 760 95, 900 28"
+                        fill="none" stroke="#60a5fa" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M 0 180 L 0 140 C 70 128, 110 102, 165 110 S 270 70, 330 85 S 420 52, 480 72 S 585 38, 645 48 S 760 95, 900 28 L 900 180 Z"
+                        fill="url(#lineBlue)"/>
+                  <circle cx="645" cy="48" r="5" fill="#60a5fa"/>
+                </svg>
+              </div>
             </div>
 
-            <form method="GET" action="/" class="d-flex">
-
-            </form>
-
-        </div>
-
-
-        <div class="row mb-4">
-
-            <div class="col-md-3">
-                <div class="card shadow text-center p-3">
-                    <h6>Cotizaciones Pendientes</h6>
-                    <h2>{{ pendientes }}</h2>
+            <div class="grid-two">
+              <div class="card" style="box-shadow:none;">
+                <div class="card-header">
+                  <div>
+                    <h4>Productos destacados</h4>
+                    <div class="hint">Más vendidos este mes</div>
+                  </div>
                 </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card shadow text-center p-3">
-                    <h6>Cotizaciones Aprobadas</h6>
-                    <h2>{{ aprobadas }}</h2>
+                <div class="card-body list">
+                  <div class="list-item">
+                    <div>
+                      <strong>Servicio premium</strong>
+                      <span>Acceso a reportes y automatización.</span>
+                    </div>
+                    <div class="time">48 ventas</div>
+                  </div>
+                  <div class="list-item">
+                    <div>
+                      <strong>Plantilla de factura</strong>
+                      <span>Formato limpio y personalizable.</span>
+                    </div>
+                    <div class="time">31 ventas</div>
+                  </div>
+                  <div class="list-item">
+                    <div>
+                      <strong>Soporte prioritario</strong>
+                      <span>Atención rápida para clientes activos.</span>
+                    </div>
+                    <div class="time">19 ventas</div>
+                  </div>
                 </div>
-            </div>
+              </div>
 
-            <div class="col-md-3">
-                <div class="card shadow text-center p-3">
-                    <h6>Facturas Emitidas</h6>
-                    <h2>{{ facturadas }}</h2>
+              <div class="card" style="box-shadow:none;">
+                <div class="card-header">
+                  <div>
+                    <h4>Actividad reciente</h4>
+                    <div class="hint">Eventos importantes</div>
+                  </div>
                 </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card shadow text-center p-3">
-                    <h6>Total Facturado</h6>
-                    <h2>US$ {{ "%.2f"|format(total_facturado) }}</h2>
+                <div class="card-body list">
+                  <div class="list-item">
+                    <div>
+                      <strong>Nueva cotización creada</strong>
+                      <span>Cotización para {{ cotizaciones[0].cliente if cotizaciones else "cliente" }}</span>
+                    </div>
+                    <div class="time">Hace 2h</div>
+                  </div>
+                  <div class="list-item">
+                    <div>
+                      <strong>Pago confirmado</strong>
+                      <span>Factura marcada como pagada.</span>
+                    </div>
+                    <div class="time">Hace 5h</div>
+                  </div>
+                  <div class="list-item">
+                    <div>
+                      <strong>Inventario revisado</strong>
+                      <span>Se actualizó stock de productos clave.</span>
+                    </div>
+                    <div class="time">Ayer</div>
+                  </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h4>Cotizaciones recientes</h4>
+              <div class="hint">Acciones compactas y claras</div>
+            </div>
+          </div>
+
+          <div class="card-body" style="padding-top:10px;">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Código</th>
+                    <th>Cliente</th>
+                    <th>Fecha</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th style="text-align:right;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for cotizacion in cotizaciones %}
+                  <tr>
+                    <td>#{{ cotizacion.id }}</td>
+                    <td>{{ cotizacion.codigo }}</td>
+                    <td>{{ cotizacion.cliente }}</td>
+                    <td>{{ cotizacion.fecha }}</td>
+                    <td class="money">US$ {{ cotizacion.total }}</td>
+                    <td>
+                      {% if cotizacion.estado == "Pendiente" %}
+                        <span class="badge pending">Pendiente</span>
+                      {% elif cotizacion.estado == "Aprobada" %}
+                        <span class="badge approved">Aprobada</span>
+                      {% elif cotizacion.estado == "Facturada" %}
+                        <span class="badge done">Facturada</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="actions">
+                        <a href="/detalle/{{ cotizacion.id }}" class="action">Ver</a>
+                        <a href="/editar_cotizacion/{{ cotizacion.id }}" class="action">Editar</a>
+
+                        {% if cotizacion.estado != "Facturada" %}
+                        <a href="/facturar/{{ cotizacion.id }}" class="action primary">Facturar</a>
+                        {% endif %}
+
+                        <a href="/cotizacion_pdf/{{ cotizacion.id }}" class="action">PDF</a>
+
+                        <div class="dropdown">
+                          <button type="button" class="action more">•••</button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
 
+            <div class="footer-note">
+              <span>Tip: deja las acciones secundarias en un menú para mantener la interfaz limpia.</span>
+              <span>© FactuCloud</span>
+            </div>
+          </div>
         </div>
-
-
-        <div class="card shadow p-4">
-
-        <div class="table-responsive">
-
-        <table class="table table-bordered table-hover align-middle">
-
-        <thead class="table-dark">
-
-        <tr>
-        <th>ID</th>
-        <th>Código</th>
-        <th>Cliente</th>
-        <th>Fecha</th>
-        <th>Total</th>
-        <th>Estado</th>
-        <th class="acciones-col">Acciones</th>
-        </tr>
-
-        </thead>
-
-        <tbody>
-
-        {% for cotizacion in cotizaciones %}
-
-        <tr>
-
-        <td>{{ cotizacion.id }}</td>
-        <td>{{ cotizacion.codigo }}</td>
-        <td>{{ cotizacion.cliente }}</td>
-        <td>{{ cotizacion.fecha }}</td>
-
-        <td>
-        US$ {{ cotizacion.total }}
-        </td>
-
-        <td>
-
-        {% if cotizacion.estado == "Pendiente" %}
-        <span class="badge bg-warning text-dark">
-        Pendiente
-        </span>
-
-        {% elif cotizacion.estado == "Aprobada" %}
-        <span class="badge bg-primary">
-        Aprobada
-        </span>
-
-        {% elif cotizacion.estado == "Facturada" %}
-        <span class="badge bg-success">
-        Facturada
-        </span>
-        {% endif %}
-
-        </td>
-
-        <td class="acciones-celda">
-
-
-        <div class="acciones-cotizacion">
-
-        <a href="/detalle/{{ cotizacion.id }}" class="btn btn-sm btn-info">
-        Ver
-        </a>
-
-        <a href="/editar_cotizacion/{{ cotizacion.id }}" class="btn btn-sm btn-warning">
-        Editar
-        </a>
-
-        {% if cotizacion.estado == "Pendiente" %}
-        <a href="/aprobar/{{ cotizacion.id }}" class="btn btn-sm btn-primary">
-        Aprobar
-        </a>
-        {% endif %}
-
-        {% if cotizacion.estado != "Facturada" %}
-        <a href="/facturar/{{ cotizacion.id }}" class="btn btn-sm btn-success">
-        Facturar
-        </a>
-        {% endif %}
-
-        <a href="/cotizacion_pdf/{{ cotizacion.id }}"
-        class="btn btn-sm btn-dark">
-        PDF
-        </a>
-
-        <a href="/enviar_cotizacion/{{ cotizacion.id }}"
-        class="btn btn-sm btn-primary">
-        Enviar
-        </a>
-
-        {% if cotizacion.estado == "Facturada" %}
-        <a href="/factura_pdf/{{ cotizacion.id }}"
-        class="btn btn-sm btn-secondary">
-        Factura
-        </a>
-        {% endif %}
-
-        <form action="/eliminar_cotizacion/{{ cotizacion.id }}" method="POST">
-            <button class="btn btn-sm btn-danger" type="submit"
-                onclick="return confirm('¿Seguro que deseas eliminar esta cotización?')">
-                Eliminar
-            </button>
-        </form>
-
-        </div>
-
-        </td>
-
-        </tr>
-
-        {% endfor %}
-
-        </tbody>
-
-        </table>
-
-        </div>
-
-        </div>
-
-        {% endblock %}
+      </section>
+    </main>
+  </div>
+</body>
+</html>
