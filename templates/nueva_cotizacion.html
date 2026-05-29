@@ -122,13 +122,6 @@
     border:1px solid rgba(239,68,68,.18);
   }
 
-  .quote-grid{
-    display:grid;
-    grid-template-columns: 1.35fr .65fr;
-    gap:12px;
-    align-items:start;
-  }
-
   .card-dark{
     border:1px solid var(--border);
     background: var(--panel);
@@ -301,12 +294,12 @@
   }
 
   .summary-card{
-    position:sticky;
-    top:16px;
+    margin-top:14px;
   }
 
   .summary-grid{
     display:grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap:10px;
   }
 
@@ -354,22 +347,16 @@
     font-size:.95rem;
   }
 
-  @media (max-width: 1100px){
-    .quote-grid{
-      grid-template-columns:1fr;
-    }
-
-    .summary-card{
-      position:static;
-    }
-  }
-
   @media (max-width: 768px){
     .quote-page{
       padding:12px;
     }
 
     .form-grid{
+      grid-template-columns:1fr;
+    }
+
+    .summary-grid{
       grid-template-columns:1fr;
     }
 
@@ -414,125 +401,123 @@
       {% endif %}
     {% endwith %}
 
-    <div class="quote-grid">
-      <div class="card-dark">
-        <div class="card-head">
-          <div>
-            <h4>Datos del cliente</h4>
-            <p>Elige un cliente guardado o completa los datos manualmente.</p>
-          </div>
-        </div>
-
-        <div class="card-body">
-          <form method="POST" id="formCotizacion">
-            <div class="form-grid">
-              <div class="field full">
-                <label class="form-label">Nombre del cliente</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  name="cliente"
-                  list="lista_clientes"
-                  value="{{ data.cliente if data else '' }}"
-                  required
-                >
-                <datalist id="lista_clientes">
-                  {% for cliente in clientes %}
-                    <option value="{{ cliente.nombre }}"></option>
-                  {% endfor %}
-                </datalist>
-              </div>
-
-              <div class="field">
-                <label class="form-label">RNC / Cédula</label>
-                <input type="text" class="form-control" name="rnc" value="{{ data.rnc if data else '' }}">
-              </div>
-
-              <div class="field">
-                <label class="form-label">Teléfono</label>
-                <input
-                  type="tel"
-                  name="telefono"
-                  class="form-control"
-                  value="{{ data.telefono if data else '' }}"
-                  placeholder="+1 (809) 123-4567"
-                  inputmode="numeric"
-                  oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')"
-                >
-              </div>
-
-              <div class="field full">
-                <label class="form-label">Correo</label>
-                <input type="email" class="form-control" name="correo" value="{{ data.correo if data else '' }}">
-              </div>
-            </div>
-
-            <div class="services-bar">
-              <div>
-                <div style="font-weight:900; font-size:1rem;">Servicios</div>
-                <div class="hint">Agrega una o varias líneas a la cotización.</div>
-              </div>
-
-              <button type="button" class="btn btn-outline-secondary" onclick="agregarFila()">
-                + Agregar servicio
-              </button>
-            </div>
-
-            <div class="table-wrap">
-              <table id="tabla">
-                <thead>
-                  <tr>
-                    <th style="width:30%;">Servicio</th>
-                    <th style="width:14%;">Tipo precio</th>
-                    <th style="width:12%;">Cantidad</th>
-                    <th style="width:14%;">Precio</th>
-                    <th style="width:14%;">Total</th>
-                    <th style="width:10%;"></th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-
-            <div class="actions-row">
-              <button type="submit" class="btn btn-primary mini-btn save-btn">
-                Guardar Cotización
-              </button>
-            </div>
-          </form>
+    <div class="card-dark">
+      <div class="card-head">
+        <div>
+          <h4>Datos del cliente</h4>
+          <p>Elige un cliente guardado o completa los datos manualmente.</p>
         </div>
       </div>
 
-      <div class="card-dark summary-card">
-        <div class="card-head">
-          <div>
-            <h4>Resumen</h4>
-            <p>Valores calculados automáticamente al editar las líneas.</p>
-          </div>
-        </div>
-
-        <div class="card-body">
-          <div class="summary-grid">
-            <div class="stat">
-              <div class="label">Subtotal</div>
-              <div class="value">US$ <input type="number" step="0.01" class="form-control line-input" name="subtotal" readonly></div>
+      <div class="card-body">
+        <form method="POST" id="formCotizacion">
+          <div class="form-grid">
+            <div class="field full">
+              <label class="form-label">Nombre del cliente</label>
+              <input
+                type="text"
+                class="form-control"
+                name="cliente"
+                list="lista_clientes"
+                value="{{ data.cliente if data else '' }}"
+                required
+              >
+              <datalist id="lista_clientes">
+                {% for cliente in clientes %}
+                  <option value="{{ cliente.nombre }}"></option>
+                {% endfor %}
+              </datalist>
             </div>
 
-            <div class="stat">
-              <div class="label">ITBIS (18%)</div>
-              <div class="value">US$ <input type="number" step="0.01" class="form-control line-input" name="itbis" readonly></div>
+            <div class="field">
+              <label class="form-label">RNC / Cédula</label>
+              <input type="text" class="form-control" name="rnc" value="{{ data.rnc if data else '' }}">
             </div>
 
-            <div class="stat total">
-              <div class="label">Total</div>
-              <div class="value">US$ <input type="number" step="0.01" class="form-control line-input" name="total" readonly></div>
+            <div class="field">
+              <label class="form-label">Teléfono</label>
+              <input
+                type="tel"
+                name="telefono"
+                class="form-control"
+                value="{{ data.telefono if data else '' }}"
+                placeholder="+1 (809) 123-4567"
+                inputmode="numeric"
+                oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')"
+              >
+            </div>
+
+            <div class="field full">
+              <label class="form-label">Correo</label>
+              <input type="email" class="form-control" name="correo" value="{{ data.correo if data else '' }}">
             </div>
           </div>
 
-          <div class="summary-note">
-            Tip: cuando seleccionas un servicio, el precio se completa según el tipo A, B o C.
+          <div class="services-bar">
+            <div>
+              <div style="font-weight:900; font-size:1rem;">Servicios</div>
+              <div class="hint">Agrega una o varias líneas a la cotización.</div>
+            </div>
+
+            <button type="button" class="btn btn-outline-secondary" onclick="agregarFila()">
+              + Agregar servicio
+            </button>
           </div>
-        </div>
+
+          <div class="table-wrap">
+            <table id="tabla">
+              <thead>
+                <tr>
+                  <th style="width:30%;">Servicio</th>
+                  <th style="width:14%;">Tipo precio</th>
+                  <th style="width:12%;">Cantidad</th>
+                  <th style="width:14%;">Precio</th>
+                  <th style="width:14%;">Total</th>
+                  <th style="width:10%;"></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="summary-card card-dark">
+            <div class="card-head">
+              <div>
+                <h4>Resumen</h4>
+                <p>Valores calculados automáticamente al editar las líneas.</p>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div class="summary-grid">
+                <div class="stat">
+                  <div class="label">Subtotal</div>
+                  <div class="value">US$ <input type="number" step="0.01" class="form-control line-input" name="subtotal" readonly></div>
+                </div>
+
+                <div class="stat">
+                  <div class="label">ITBIS (18%)</div>
+                  <div class="value">US$ <input type="number" step="0.01" class="form-control line-input" name="itbis" readonly></div>
+                </div>
+
+                <div class="stat total">
+                  <div class="label">Total</div>
+                  <div class="value">US$ <input type="number" step="0.01" class="form-control line-input" name="total" readonly></div>
+                </div>
+              </div>
+
+              <div class="summary-note">
+                Tip: cuando seleccionas un servicio, el precio se completa según el tipo A, B o C.
+              </div>
+            </div>
+          </div>
+
+          <div class="actions-row">
+            <button type="submit" class="btn btn-primary mini-btn save-btn">
+              Guardar Cotización
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
