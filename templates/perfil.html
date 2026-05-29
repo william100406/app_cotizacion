@@ -1,501 +1,724 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="perfil-wrap">
-  <div class="perfil-card">
-    <div class="perfil-header">
-      <div class="avatar-box">
-        <img
-          id="preview"
-          src="{{ url_for('static', filename='uploads/' + (user.foto if user.foto else 'default.png')) }}{% if usuario_foto_version %}?v={{ usuario_foto_version }}{% endif %}"
-          alt="Foto de perfil"
-          class="avatar-img"
-        >
-
-        <label for="foto" class="avatar-edit" title="Cambiar foto">
-          <i class="bi bi-camera-fill"></i>
-        </label>
-      </div>
-
-      <div class="perfil-title">
-        <h2>Perfil de Usuario</h2>
-        <p>Gestiona tu cuenta, la foto de perfil y los datos de la empresa.</p>
-      </div>
-    </div>
-
-    <form method="POST" enctype="multipart/form-data" id="perfilForm" class="perfil-form">
-      <input
-        type="file"
-        id="foto"
-        name="foto"
-        accept="image/*"
-        class="d-none"
-      >
-
-      <div class="section">
-        <h3>Foto de perfil</h3>
-        <p class="section-subtitle">Haz clic sobre la cámara para cambiar la imagen.</p>
-      </div>
-
-      <div class="grid-2">
-        <div class="field">
-          <label>Usuario</label>
-          <input type="text" name="usuario" value="{{ user.usuario }}" required oninput="syncTopbarName(this.value)">
-        </div>
-
-        <div class="field">
-          <label>Nombre de la empresa</label>
-          <input type="text" name="empresa" value="{{ empresa.nombre }}" required>
-          
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <div class="field">
-          <label>Nueva contraseña</label>
-          <div class="password-box">
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="Dejar vacío si no deseas cambiarla"
-              oninput="toggleIcon(this, 'icon-password')"
-            >
-            <i class="bi bi-eye password-icon" id="icon-password" onclick="togglePassword('password', this)"></i>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Confirmar contraseña</label>
-          <div class="password-box">
-            <input
-              type="password"
-              id="confirmar"
-              name="confirmar"
-              placeholder="Repite la nueva contraseña"
-              oninput="toggleIcon(this, 'icon-confirmar')"
-            >
-            <i class="bi bi-eye password-icon" id="icon-confirmar" onclick="togglePassword('confirmar', this)"></i>
-          </div>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="section">
-        <h3>Datos de la empresa</h3>
-        <p class="section-subtitle">Estos datos aparecerán en tus facturas y cotizaciones.</p>
-      </div>
-
-      <div class="grid-2">
-        <div class="field">
-          <label>RNC</label>
-          <input type="text" name="rnc" value="{{ empresa.rnc }}" placeholder="Ej: 132-12345-6">
-        </div>
-
-        <div class="field">
-          <label>Teléfono</label>
-          <input
-            type="tel"
-            name="telefono"
-            value="{{ empresa.telefono }}"
-            placeholder="+1 (809) 123-4567"
-            inputmode="numeric"
-            oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')"
-          >
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <div class="field">
-          <label>Correo</label>
-          <input type="email" name="correo" value="{{ empresa.correo }}" placeholder="Ej: contacto@empresa.com" required>
-        </div>
-
-        <div class="field">
-          <label>Dirección</label>
-          <textarea name="direccion" rows="4" placeholder="Ej: Santo Domingo, República Dominicana">{{ empresa.direccion }}</textarea>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button type="submit" class="btn-save">
-          <i class="bi bi-save"></i>
-          Guardar cambios
-        </button>
-
-        <a href="{{ url_for('index') }}" class="btn-cancel">
-          Cancelar
-        </a>
-      </div>
-    </form>
-  </div>
-</div>
 
 <style>
-  :root {
-  --bg-dark: #141429;
-  --bg-darker: #0f1020;
-  --card: rgba(20, 20, 41, 0.78);
-  --card-border: rgba(255, 255, 255, 0.10);
-  --text: #f3f4f6;
-  --muted: #a1a1aa;
-  --gray-line: #3a3b52;
-  --primary: #0d6efd;
-  --primary-2: #4f8cff;
-  --primary-glow: rgba(13, 110, 253, 0.28);
-  --input-bg: rgba(255,255,255,0.045);
-  --input-border: rgba(255,255,255,0.08);
-  --shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
-}
+  :root{
+    --bg:#081120;
+    --bg-2:#0b1730;
+    --panel: rgba(255,255,255,.05);
+    --panel-2: rgba(255,255,255,.08);
+    --border: rgba(255,255,255,.09);
+    --border-strong: rgba(255,255,255,.14);
+    --text:#eef2ff;
+    --muted:#98a6c7;
+    --primary:#3b82f6;
+    --primary-2:#60a5fa;
+    --success:#22c55e;
+    --warning:#fbbf24;
+    --danger:#ef4444;
+    --shadow: 0 18px 50px rgba(0,0,0,.28);
+    --radius:18px;
+  }
 
-body{
-  min-height: 100vh;
-  color: var(--text);
-  background:
-    radial-gradient(circle at 20% 20%, rgba(13,110,253,0.22), transparent 30%),
-    radial-gradient(circle at 80% 80%, rgba(79,140,255,0.18), transparent 35%),
-    linear-gradient(135deg, var(--bg-dark), var(--bg-darker));
-}
+  .perfil-page{
+    min-height: calc(100vh - 80px);
+    padding: 18px;
+    background:
+      radial-gradient(circle at 15% 15%, rgba(59,130,246,.18), transparent 26%),
+      radial-gradient(circle at 85% 85%, rgba(34,197,94,.10), transparent 26%),
+      linear-gradient(135deg, var(--bg-2), var(--bg));
+    color: var(--text);
+  }
 
-body.tema-claro{
-  --card: rgba(255,255,255,0.78);
-  --card-border: rgba(15,23,42,0.10);
-  --text: #1e293b;
-  --muted: #64748b;
-  --gray-line: rgba(15,23,42,0.14);
-  --input-bg: rgba(255,255,255,0.72);
-  --input-border: rgba(15,23,42,0.10);
-  --primary-glow: rgba(13,110,253,0.18);
-  background:
-    radial-gradient(circle at 20% 20%, rgba(13,110,253,0.10), transparent 30%),
-    radial-gradient(circle at 80% 80%, rgba(79,140,255,0.08), transparent 35%),
-    linear-gradient(135deg, #f8fafc, #e2e8f0);
-}
+  .perfil-shell{
+    max-width: 1500px;
+    margin: 0 auto;
+  }
 
-body.tema-oscuro{
-  --card: rgba(20, 20, 41, 0.78);
-  --card-border: rgba(255, 255, 255, 0.10);
-  --text: #f3f4f6;
-  --muted: #a1a1aa;
-  --gray-line: #3a3b52;
-  --input-bg: rgba(255,255,255,0.045);
-  --input-border: rgba(255,255,255,0.08);
-  --primary-glow: rgba(13,110,253,0.28);
-  background:
-    radial-gradient(circle at 20% 20%, rgba(13,110,253,0.22), transparent 30%),
-    radial-gradient(circle at 80% 80%, rgba(79,140,255,0.18), transparent 35%),
-    linear-gradient(135deg, var(--bg-dark), var(--bg-darker));
-}
+  .perfil-topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
 
-.perfil-wrap{
-  min-height: calc(100vh - 80px);
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  padding: 32px 16px;
-}
+  .perfil-back{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    color:#7dd3fc;
+    text-decoration:none;
+    font-weight:700;
+    font-size:.92rem;
+    margin-bottom:8px;
+    transition:.15s ease;
+  }
 
-.perfil-card{
-  width:100%;
-  max-width: 900px;
-  
-  background: rgba(255, 255, 255, 0.05);
+  .perfil-back:hover{
+    transform: translateX(-2px);
+  }
 
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  .perfil-title{
+    font-size:1.55rem;
+    font-weight:900;
+    letter-spacing:-.03em;
+    line-height:1.1;
+    margin-bottom:6px;
+  }
 
-  border-radius: 24px;
+  .perfil-subtitle{
+    color:var(--muted);
+    font-size:.94rem;
+    line-height:1.45;
+  }
 
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  .perfil-user{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 14px;
+    border-radius:999px;
+    background: rgba(255,255,255,.06);
+    border:1px solid var(--border);
+    box-shadow: var(--shadow);
+    font-weight:700;
+    white-space:nowrap;
+  }
 
-  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  .perfil-user-avatar{
+    width:30px;
+    height:30px;
+    border-radius:999px;
+    display:grid;
+    place-items:center;
+    background: linear-gradient(135deg, #8b5cf6, #60a5fa);
+    font-size:.85rem;
+    font-weight:800;
+    flex:0 0 auto;
+  }
 
-  padding: 28px;
-  color: var(--text);
-}
-
-.perfil-card::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:24px;
-  padding:1px;
-  background: linear-gradient(120deg, rgba(255,255,255,0.45), rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events:none;
-}
-
-.perfil-header{
-  display:flex;
-  gap: 24px;
-  align-items:center;
-  margin-bottom: 26px;
-  flex-wrap: wrap;
-}
-
-.avatar-box{
-  position: relative;
-  width: 130px;
-  height: 130px;
-  flex: 0 0 130px;
-}
-
-.avatar-img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  border-radius: 50%;
-  border: 4px solid rgba(96,165,250,0.9);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-  background:#0f172a;
-}
-
-.avatar-edit{
-  position:absolute;
-  right: 4px;
-  bottom: 4px;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
-  color: white;
-  cursor:pointer;
-  border: 2px solid rgba(255,255,255,0.9);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
-  transition: .2s ease;
-}
-
-.perfil-title h2,
-.section h3,
-.field label{
-  color: var(--text);
-}
-
-.perfil-title p,
-.section-subtitle{
-  margin: 8px 0 0;
-  color: var(--muted);
-}
-
-.perfil-form{
-  display:flex;
-  flex-direction:column;
-  gap: 18px;
-}
-
-.grid-2{
-  display:grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.field{
-  display:flex;
-  flex-direction:column;
-  gap: 8px;
-}
-
-.field input,
-.field textarea{
-  width:100%;
-  border: 1px solid var(--input-border);
-  border-radius: 14px;
-  background: var(--input-bg);
-  color: var(--text);
-  padding: 12px 14px;
-  outline: none;
-  transition: .2s ease;
-}
-
-.field input::placeholder,
-.field textarea::placeholder{
-  color: var(--muted);
-}
-
-.field input:focus,
-.field textarea:focus{
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px var(--primary-glow);
-  background: rgba(255,255,255,0.065);
-}
-
-.password-box{
-  position: relative;
-}
-
-.password-box input{
-  padding-right: 46px;
-}
-
-.password-icon{
-  position:absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--muted);
-  cursor:pointer;
-  font-size: 18px;
-  display:none;
-}
-
-.divider{
-  height:1px;
-  background: rgba(255,255,255,0.10);
-  margin: 6px 0;
-}
-
-.actions{
-  display:flex;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.btn-save,
-.btn-cancel{
-  flex:1;
-  border-radius: 14px;
-  padding: 12px 16px;
-  font-weight: 700;
-  text-decoration:none;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap: 8px;
-  transition: .2s ease;
-}
-
-.btn-save{
-  border: none;
-  color:#fff;
-  background: linear-gradient(135deg, var(--primary), var(--primary-2));
-  box-shadow: 0 10px 25px rgba(13,110,253,0.28);
-}
-
-.btn-save:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 14px 34px rgba(13,110,253,0.38);
-}
-
-.btn-cancel{
-  border: 1px solid var(--gray-line);
-  color: var(--text);
-  background: rgba(255,255,255,0.06);
-}
-
-.btn-cancel:hover,
-.avatar-edit:hover{
-  transform: translateY(-1px);
-  opacity: .95;
-}
-
-@media (max-width: 768px){
   .perfil-card{
-    padding: 20px;
+    border:1px solid var(--border);
+    background: var(--panel);
+    border-radius:22px;
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+
+  .perfil-header{
+    padding:18px;
+    border-bottom:1px solid rgba(255,255,255,.05);
+    display:flex;
+    align-items:center;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+
+  .avatar-box{
+    position:relative;
+    width:122px;
+    height:122px;
+    flex:0 0 122px;
+  }
+
+  .avatar-img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:50%;
+    border:4px solid rgba(96,165,250,.9);
+    background:#0f172a;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+
+  .avatar-edit{
+    position:absolute;
+    right:4px;
+    bottom:4px;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color:#fff;
+    cursor:pointer;
+    border:2px solid rgba(255,255,255,.92);
+    box-shadow: 0 8px 20px rgba(0,0,0,.35);
+    transition:.2s ease;
+  }
+
+  .avatar-edit:hover{
+    transform: translateY(-1px);
+  }
+
+  .perfil-copy h2{
+    margin:0;
+    font-size:1.15rem;
+    font-weight:900;
+    letter-spacing:-.02em;
+  }
+
+  .perfil-copy p{
+    margin:6px 0 0;
+    color:var(--muted);
+    font-size:.9rem;
+    line-height:1.45;
+  }
+
+  .perfil-form{
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  .section{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    margin-bottom:2px;
+  }
+
+  .section h3{
+    font-size:1rem;
+    font-weight:900;
+    letter-spacing:-.01em;
+    margin:0;
+  }
+
+  .section-subtitle{
+    color:var(--muted);
+    font-size:.84rem;
+    margin:0;
   }
 
   .grid-2{
-    grid-template-columns: 1fr;
+    display:grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap:12px;
+  }
+
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+
+  .field label{
+    color:#e8edff;
+    font-weight:700;
+    font-size:.9rem;
+  }
+
+  .field input,
+  .field textarea{
+    width:100%;
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:12px;
+    background: rgba(9,16,34,.75);
+    color:var(--text);
+    padding:11px 12px;
+    outline:none;
+    transition:.18s ease;
+    box-shadow:none;
+  }
+
+  .field input::placeholder,
+  .field textarea::placeholder{
+    color:#7281a7;
+  }
+
+  .field input:focus,
+  .field textarea:focus{
+    border-color: rgba(96,165,250,.45);
+    box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+  }
+
+  .field textarea{
+    min-height:110px;
+    resize:vertical;
+  }
+
+  .password-box{
+    position:relative;
+  }
+
+  .password-box input{
+    padding-right:46px;
+  }
+
+  .password-icon{
+    position:absolute;
+    right:14px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--muted);
+    cursor:pointer;
+    font-size:18px;
+    display:none;
+    z-index:2;
+  }
+
+  .divider{
+    height:1px;
+    background: rgba(255,255,255,.08);
+    margin: 4px 0;
+  }
+
+  .layout-2{
+    display:grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap:12px;
+    align-items:start;
+  }
+
+  .summary-card{
+    border:1px solid var(--border);
+    background: linear-gradient(135deg, rgba(59,130,246,.14), rgba(255,255,255,.04));
+    border-radius:20px;
+    box-shadow: var(--shadow);
+    padding:16px;
+    position:sticky;
+    top:16px;
+  }
+
+  .summary-card h4{
+    font-size:1rem;
+    font-weight:900;
+    margin:0 0 6px;
+  }
+
+  .summary-card p{
+    color:var(--muted);
+    font-size:.85rem;
+    line-height:1.45;
+    margin:0 0 14px;
+  }
+
+  .summary-item{
+    padding:12px 0;
+    border-top:1px solid rgba(255,255,255,.06);
+  }
+
+  .summary-item:first-of-type{
+    border-top:none;
+    padding-top:0;
+  }
+
+  .summary-label{
+    color:var(--muted);
+    font-size:.82rem;
+    margin-bottom:6px;
+  }
+
+  .summary-value{
+    font-weight:800;
+    font-size:.96rem;
+    color:#eef2ff;
   }
 
   .actions{
-    flex-direction: column;
+    display:flex;
+    gap:12px;
+    margin-top:2px;
+    flex-wrap:wrap;
   }
 
-  .perfil-title h2{
-    font-size: 1.5rem;
+  .btn-save,
+  .btn-cancel{
+    flex:1;
+    border-radius:14px;
+    padding:12px 16px;
+    font-weight:800;
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:.2s ease;
+    min-width:180px;
   }
-}
+
+  .btn-save{
+    border:none;
+    color:#fff;
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    box-shadow: 0 12px 26px rgba(59,130,246,.22);
+  }
+
+  .btn-save:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 14px 34px rgba(59,130,246,.32);
+  }
+
+  .btn-cancel{
+    border:1px solid rgba(255,255,255,.10);
+    color:var(--text);
+    background: rgba(255,255,255,.05);
+  }
+
+  .btn-cancel:hover{
+    transform: translateY(-1px);
+  }
+
+  .alert{
+    border:none;
+    border-radius:14px;
+    padding:12px 14px;
+    margin-bottom:12px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+  }
+
+  .alert.success{
+    background: rgba(34,197,94,.12);
+    color:#bbf7d0;
+    border:1px solid rgba(34,197,94,.18);
+  }
+
+  .alert.danger,
+  .alert.error{
+    background: rgba(239,68,68,.12);
+    color:#fecaca;
+    border:1px solid rgba(239,68,68,.18);
+  }
+
+  .mini-note{
+    margin-top:12px;
+    color:var(--muted);
+    font-size:.84rem;
+    line-height:1.5;
+  }
+
+  @media (max-width: 1100px){
+    .layout-2{
+      grid-template-columns:1fr;
+    }
+
+    .summary-card{
+      position:static;
+    }
+  }
+
+  @media (max-width: 768px){
+    .perfil-page{
+      padding:12px;
+    }
+
+    .grid-2{
+      grid-template-columns:1fr;
+    }
+
+    .actions{
+      flex-direction:column;
+    }
+
+    .btn-save,
+    .btn-cancel{
+      width:100%;
+      min-width:0;
+    }
+
+    .perfil-title{
+      font-size:1.3rem;
+    }
+
+    .perfil-header{
+      padding:14px;
+    }
+
+    .perfil-form{
+      padding:14px;
+    }
+  }
 </style>
 
+<div class="perfil-page">
+  <div class="perfil-shell">
+
+    <div class="perfil-topbar">
+      <div>
+        <a href="{{ url_for('index') }}" class="perfil-back">
+          <i class="bi bi-arrow-left"></i>
+          Volver al dashboard
+        </a>
+        <div class="perfil-title">Perfil de Usuario</div>
+        <div class="perfil-subtitle">
+          Gestiona tu cuenta, la foto de perfil y los datos de la empresa.
+        </div>
+      </div>
+
+      <div class="perfil-user">
+        <div class="perfil-user-avatar">A</div>
+        admin
+      </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="perfil-card">
+      <div class="perfil-header">
+        <div class="avatar-box">
+          <img
+            id="preview"
+            src="{{ url_for('static', filename='uploads/' + (user.foto if user.foto else 'default.png')) }}{% if usuario_foto_version %}?v={{ usuario_foto_version }}{% endif %}"
+            alt="Foto de perfil"
+            class="avatar-img"
+          >
+
+          <label for="foto" class="avatar-edit" title="Cambiar foto">
+            <i class="bi bi-camera-fill"></i>
+          </label>
+        </div>
+
+        <div class="perfil-copy">
+          <h2>Foto de perfil y cuenta</h2>
+          <p>Haz clic sobre la cámara para cambiar la imagen y actualizar tu información.</p>
+        </div>
+      </div>
+
+      <form method="POST" enctype="multipart/form-data" id="perfilForm" class="perfil-form">
+        <input
+          type="file"
+          id="foto"
+          name="foto"
+          accept="image/*"
+          class="d-none"
+        >
+
+        <div class="layout-2">
+          <div>
+            <div class="section">
+              <h3>Datos de acceso</h3>
+              <p class="section-subtitle">Estos campos controlan tu usuario y contraseña.</p>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label>Usuario</label>
+                <input type="text" name="usuario" value="{{ user.usuario }}" required oninput="syncTopbarName(this.value)">
+              </div>
+
+              <div class="field">
+                <label>Nombre de la empresa</label>
+                <input type="text" name="empresa" value="{{ empresa.nombre }}" required>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label>Nueva contraseña</label>
+                <div class="password-box">
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Dejar vacío si no deseas cambiarla"
+                    oninput="toggleIcon(this, 'icon-password')"
+                  >
+                  <i class="bi bi-eye password-icon" id="icon-password" onclick="togglePassword('password', this)"></i>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Confirmar contraseña</label>
+                <div class="password-box">
+                  <input
+                    type="password"
+                    id="confirmar"
+                    name="confirmar"
+                    placeholder="Repite la nueva contraseña"
+                    oninput="toggleIcon(this, 'icon-confirmar')"
+                  >
+                  <i class="bi bi-eye password-icon" id="icon-confirmar" onclick="togglePassword('confirmar', this)"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="section">
+              <h3>Datos de la empresa</h3>
+              <p class="section-subtitle">Estos datos aparecerán en tus facturas y cotizaciones.</p>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label>RNC</label>
+                <input type="text" name="rnc" value="{{ empresa.rnc }}" placeholder="Ej: 132-12345-6">
+              </div>
+
+              <div class="field">
+                <label>Teléfono</label>
+                <input
+                  type="tel"
+                  name="telefono"
+                  value="{{ empresa.telefono }}"
+                  placeholder="+1 (809) 123-4567"
+                  inputmode="numeric"
+                  oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')"
+                >
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label>Correo</label>
+                <input type="email" name="correo" value="{{ empresa.correo }}" placeholder="Ej: contacto@empresa.com" required>
+              </div>
+
+              <div class="field">
+                <label>Dirección</label>
+                <textarea name="direccion" rows="4" placeholder="Ej: Santo Domingo, República Dominicana">{{ empresa.direccion }}</textarea>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="submit" class="btn-save">
+                <i class="bi bi-save"></i>
+                Guardar cambios
+              </button>
+
+              <a href="{{ url_for('index') }}" class="btn-cancel">
+                Cancelar
+              </a>
+            </div>
+          </div>
+
+          <aside class="summary-card">
+            <h4>Vista rápida</h4>
+            <p>Un resumen simple de los datos que se reflejan en tu cuenta y documentos.</p>
+
+            <div class="summary-item">
+              <div class="summary-label">Usuario actual</div>
+              <div class="summary-value" id="topbarProfileName">{{ user.usuario }}</div>
+            </div>
+
+            <div class="summary-item">
+              <div class="summary-label">Empresa</div>
+              <div class="summary-value">{{ empresa.nombre }}</div>
+            </div>
+
+            <div class="summary-item">
+              <div class="summary-label">Correo</div>
+              <div class="summary-value">{{ empresa.correo }}</div>
+            </div>
+
+            <div class="summary-item">
+              <div class="summary-label">Foto de perfil</div>
+              <div class="summary-value">Actualizable desde la cámara</div>
+            </div>
+
+            <div class="mini-note">
+              Tip: si dejas la contraseña vacía, solo se guardan los demás cambios.
+            </div>
+          </aside>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
-function togglePassword(id, icon) {
-  const input = document.getElementById(id);
-  if (input.type === "password") {
-    input.type = "text";
-    icon.classList.remove("bi-eye");
-    icon.classList.add("bi-eye-slash");
-  } else {
-    input.type = "password";
-    icon.classList.remove("bi-eye-slash");
-    icon.classList.add("bi-eye");
-  }
-}
-
-function toggleIcon(input, iconId) {
-  const icon = document.getElementById(iconId);
-  icon.style.display = input.value.length > 0 ? "block" : "none";
-}
-
-function previewImage(event) {
-  const file = event.target.files && event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function () {
-    const preview = document.getElementById("preview");
-    if (preview) {
-      preview.src = reader.result;
+  function togglePassword(id, icon) {
+    const input = document.getElementById(id);
+    if (input.type === "password") {
+      input.type = "text";
+      icon.classList.remove("bi-eye");
+      icon.classList.add("bi-eye-slash");
+    } else {
+      input.type = "password";
+      icon.classList.remove("bi-eye-slash");
+      icon.classList.add("bi-eye");
     }
-    syncTopbarImage(reader.result);
-  };
-  reader.readAsDataURL(file);
-}
-
-function syncTopbarName(value) {
-  const topbarName = document.getElementById("topbarProfileName");
-  if (!topbarName) return;
-
-  const cleanValue = value.trim();
-  topbarName.textContent = cleanValue || "Usuario";
-}
-
-function syncTopbarImage(src) {
-  const topbarImage = document.getElementById("topbarProfileImage");
-  if (!topbarImage) return;
-
-  topbarImage.src = src;
-}
-
-const fotoInput = document.getElementById("foto");
-if (fotoInput) {
-  fotoInput.addEventListener("change", previewImage);
-}
-
-document.querySelector("#perfilForm").addEventListener("submit", function(e) {
-  const usuario = document.querySelector("[name='usuario']").value.trim();
-  const empresa = document.querySelector("[name='empresa']").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const confirmar = document.getElementById("confirmar").value.trim();
-
-  if (!usuario && !empresa && !password) {
-    alert("Debes modificar al menos un campo");
-    e.preventDefault();
-    return;
   }
 
-  if (password || confirmar) {
-    if (password !== confirmar) {
-      alert("Las contraseñas no coinciden");
+  function toggleIcon(input, iconId) {
+    const icon = document.getElementById(iconId);
+    icon.style.display = input.value.length > 0 ? "block" : "none";
+  }
+
+  function previewImage(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function () {
+      const preview = document.getElementById("preview");
+      if (preview) preview.src = reader.result;
+      syncTopbarImage(reader.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function syncTopbarName(value) {
+    const topbarName = document.getElementById("topbarProfileName");
+    if (!topbarName) return;
+
+    const cleanValue = value.trim();
+    topbarName.textContent = cleanValue || "Usuario";
+  }
+
+  function syncTopbarImage(src) {
+    const topbarImage = document.getElementById("topbarProfileImage");
+    if (!topbarImage) return;
+
+    topbarImage.src = src;
+  }
+
+  const fotoInput = document.getElementById("foto");
+  if (fotoInput) {
+    fotoInput.addEventListener("change", previewImage);
+  }
+
+  document.querySelector("#perfilForm").addEventListener("submit", function(e) {
+    const usuario = document.querySelector("[name='usuario']").value.trim();
+    const empresa = document.querySelector("[name='empresa']").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const confirmar = document.getElementById("confirmar").value.trim();
+
+    if (!usuario && !empresa && !password) {
+      alert("Debes modificar al menos un campo");
       e.preventDefault();
       return;
     }
 
-    if (password.length > 0 && password.length < 4) {
-      alert("La contraseña debe tener al menos 4 caracteres");
-      e.preventDefault();
-    }
-  }
-});
+    if (password || confirmar) {
+      if (password !== confirmar) {
+        alert("Las contraseñas no coinciden");
+        e.preventDefault();
+        return;
+      }
 
-window.onload = function(){
-  let tema = localStorage.getItem("tema") || "auto";
-  cambiarTema(tema);
-}
+      if (password.length > 0 && password.length < 4) {
+        alert("La contraseña debe tener al menos 4 caracteres");
+        e.preventDefault();
+      }
+    }
+  });
+
+  window.onload = function(){
+    let tema = localStorage.getItem("tema") || "auto";
+    cambiarTema(tema);
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const password = document.getElementById("password");
+    const confirmar = document.getElementById("confirmar");
+    if (password) toggleIcon(password, "icon-password");
+    if (confirmar) toggleIcon(confirmar, "icon-confirmar");
+  });
 </script>
+
 {% endblock %}
