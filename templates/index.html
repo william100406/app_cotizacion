@@ -32,6 +32,10 @@
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     }
 
+    html, body{
+      min-height:100%;
+    }
+
     body{
       min-height:100vh;
       background:
@@ -40,12 +44,13 @@
         linear-gradient(135deg, var(--bg-2), var(--bg));
       color:var(--text);
       font-size:14px;
-      overflow:hidden;
+      overflow:auto;
     }
 
     .app{
       display:flex;
-      height:100vh;
+      min-height:100vh;
+      width:100%;
     }
 
     /* SIDEBAR */
@@ -58,6 +63,7 @@
       display:flex;
       flex-direction:column;
       gap:16px;
+      flex-shrink:0;
     }
 
     .brand{
@@ -130,6 +136,7 @@
       height:8px;
       border-radius:999px;
       background: rgba(255,255,255,.25);
+      flex:0 0 auto;
     }
 
     .nav a.active .dot{
@@ -173,15 +180,18 @@
       transition:.18s ease;
     }
 
-    .mini-btn:hover{ transform: translateY(-1px); }
+    .mini-btn:hover{
+      transform: translateY(-1px);
+    }
 
     /* MAIN */
     .main{
       flex:1;
       display:flex;
       flex-direction:column;
-      overflow:hidden;
-      padding:18px 18px 16px;
+      overflow:auto;
+      padding:14px;
+      min-width:0;
     }
 
     .topbar{
@@ -189,11 +199,12 @@
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      margin-bottom:14px;
+      margin-bottom:12px;
+      flex-wrap:wrap;
     }
 
     .top-left h2{
-      font-size:1.35rem;
+      font-size:1.25rem;
       font-weight:900;
       letter-spacing:-.03em;
     }
@@ -209,6 +220,7 @@
       align-items:center;
       gap:10px;
       flex-wrap:wrap;
+      margin-left:auto;
     }
 
     .chip{
@@ -233,6 +245,7 @@
       place-items:center;
       font-size:.85rem;
       font-weight:800;
+      flex:0 0 auto;
     }
 
     .btn{
@@ -251,7 +264,9 @@
       white-space:nowrap;
     }
 
-    .btn:hover{ transform: translateY(-1px); }
+    .btn:hover{
+      transform: translateY(-1px);
+    }
 
     .btn-primary{
       background: linear-gradient(135deg, var(--primary), var(--primary-2));
@@ -269,18 +284,18 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:16px;
-      padding:16px 18px;
+      gap:14px;
+      padding:12px 16px;
       border-radius:22px;
       border:1px solid var(--border);
       background:
         linear-gradient(135deg, rgba(59,130,246,.22), rgba(255,255,255,.04));
       box-shadow: var(--shadow);
-      margin-bottom:14px;
+      margin-bottom:12px;
     }
 
     .hero h3{
-      font-size:1.18rem;
+      font-size:1.08rem;
       font-weight:900;
       margin-bottom:5px;
       letter-spacing:-.02em;
@@ -311,9 +326,9 @@
       border:1px solid var(--border);
       background: var(--panel);
       border-radius:18px;
-      padding:13px 14px;
+      padding:12px 14px;
       box-shadow: var(--shadow);
-      min-height:96px;
+      min-height:84px;
     }
 
     .kpi .label{
@@ -324,7 +339,7 @@
     }
 
     .kpi .value{
-      font-size:1.45rem;
+      font-size:1.25rem;
       font-weight:900;
       letter-spacing:-.02em;
       line-height:1.05;
@@ -338,10 +353,11 @@
 
     .content{
       display:grid;
-      grid-template-columns: 1.45fr .95fr;
+      grid-template-columns: 1.25fr .95fr;
       gap:12px;
       min-height:0;
       flex:1;
+      align-items:start;
     }
 
     .card{
@@ -350,6 +366,7 @@
       border-radius:20px;
       box-shadow: var(--shadow);
       min-height:0;
+      min-width:0;
     }
 
     .card-header{
@@ -359,6 +376,7 @@
       gap:10px;
       padding:14px 16px 10px;
       border-bottom:1px solid rgba(255,255,255,.05);
+      flex-wrap:wrap;
     }
 
     .card-header h4{
@@ -377,7 +395,7 @@
     }
 
     .chart{
-      height:220px;
+      height:170px;
       display:flex;
       flex-direction:column;
       gap:12px;
@@ -403,6 +421,7 @@
       height:8px;
       border-radius:999px;
       background: var(--primary);
+      flex:0 0 auto;
     }
 
     .legend-dot.green{ background: var(--success); }
@@ -410,7 +429,7 @@
 
     .simple-graph{
       position:relative;
-      height:180px;
+      height:140px;
       border-radius:16px;
       background:
         linear-gradient(to bottom, rgba(255,255,255,.03), rgba(255,255,255,.01));
@@ -441,11 +460,12 @@
       overflow:auto;
       border-radius:16px;
       border:1px solid rgba(255,255,255,.05);
+      max-width:100%;
     }
 
     table{
       width:100%;
-      min-width:920px;
+      min-width:760px;
       border-collapse:collapse;
       background: rgba(255,255,255,.02);
     }
@@ -499,6 +519,7 @@
       gap:8px;
       align-items:center;
       white-space:nowrap;
+      flex-wrap:wrap;
     }
 
     .action{
@@ -556,7 +577,10 @@
       border-bottom:1px solid rgba(255,255,255,.05);
     }
 
-    .list-item:last-child{ border-bottom:none; padding-bottom:0; }
+    .list-item:last-child{
+      border-bottom:none;
+      padding-bottom:0;
+    }
 
     .list-item strong{
       display:block;
@@ -575,6 +599,7 @@
       font-size:.78rem;
       font-weight:700;
       white-space:nowrap;
+      flex:0 0 auto;
     }
 
     .footer-note{
@@ -585,6 +610,7 @@
       gap:10px;
       color:var(--muted);
       font-size:.82rem;
+      flex-wrap:wrap;
     }
 
     @media (max-width: 1200px){
@@ -597,40 +623,64 @@
     }
 
     @media (max-width: 980px){
-      body{ overflow:auto; }
-      .app{ height:auto; min-height:100vh; }
-      .sidebar{ display:none; }
-      .main{ overflow:visible; }
+      .sidebar{
+        display:none;
+      }
+
       .kpis{
         grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .content{
+        grid-template-columns:1fr;
       }
     }
 
     @media (max-width: 640px){
-      .main{ padding:12px; }
+      .main{
+        padding:12px;
+      }
+
       .topbar{
         flex-direction:column;
         align-items:flex-start;
       }
+
+      .top-right{
+        width:100%;
+      }
+
       .hero{
         flex-direction:column;
         align-items:flex-start;
       }
+
       .kpis{
         grid-template-columns:1fr;
       }
+
       .hero-actions,
       .top-right{
         width:100%;
       }
+
       .btn,
       .chip{
         width:100%;
         justify-content:center;
       }
+
       .actions{
         justify-content:flex-start;
-        flex-wrap:wrap;
+      }
+
+      .card-header{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .chart{
+        height:auto;
       }
     }
   </style>
