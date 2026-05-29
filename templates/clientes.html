@@ -2,128 +2,111 @@
 
 {% block content %}
 
-<div class="container mt-4">
+<div class="container">
+  <div class="page-header">
+    <div>
+      <a href="{{ url_for('index') }}" class="back-btn">
+        <i class="bi bi-arrow-left"></i>
+        Volver al dashboard
+      </a>
+      <h2 class="page-title">Clientes</h2>
+      <div class="page-subtitle">Administra los datos que reutilizas en cotizaciones y facturas.</div>
+    </div>
+  </div>
 
-<div class="d-flex align-items-center mb-4">
+  <div class="card shadow p-4 mb-3">
+    <h5 class="mb-3">Agregar nuevo cliente</h5>
 
-    <a href="{{ url_for('index') }}" class="me-3 text-decoration-none">
-        <i class="bi bi-arrow-left fs-4"></i>
-    </a>
+    <form method="POST">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Nombre</label>
+          <input type="text" name="nombre" class="form-control" required>
+        </div>
 
-    <h2 class="mb-0">Clientes</h2>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">RNC</label>
+          <input type="text" name="rnc" class="form-control">
+        </div>
 
-</div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Telefono</label>
+          <input
+            type="tel"
+            name="telefono"
+            class="form-control"
+            placeholder="+1 (809) 123-4567"
+            inputmode="numeric"
+            oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')"
+          >
+        </div>
 
-<div class="card shadow p-4 mb-4">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Correo</label>
+          <input type="email" name="correo" class="form-control">
+        </div>
 
-<h5 class="mb-3">Agregar nuevo cliente</h5>
+        <div class="col-md-12 mb-3">
+          <label class="form-label">Direccion</label>
+          <input type="text" name="direccion" class="form-control">
+        </div>
+      </div>
 
-<form method="POST">
-
-<div class="row">
-
-<div class="col-md-6 mb-3">
-<label class="form-label">Nombre</label>
-<input type="text" name="nombre" class="form-control" required>
-</div>
-
-<div class="col-md-6 mb-3">
-<label class="form-label">RNC</label>
-<input type="text" name="rnc" class="form-control">
-</div>
-
-<div class="col-md-6 mb-3">
-<label class="form-label">Telefono</label>
-<input type="tel"
-    name="telefono"
-    class="form-control"
-    placeholder="+1 (809) 123-4567"
-    inputmode="numeric"
-    oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')">
-</div>
-
-<div class="col-md-6 mb-3">
-<label class="form-label">Correo</label>
-<input type="email" name="correo" class="form-control">
-</div>
-
-<div class="col-md-6 mb-3">
-<label class="form-label">Direccion</label>
-<input type="text" name="direccion" class="form-control">
-</div>
-
-</div>
-
-<button class="btn btn-primary">Guardar Cliente</button>
-
-</form>
-
-</div>
-
-<div class="card shadow p-3">
-
-<h5 class="mb-3">Lista de clientes</h5>
-
-<div class="table-responsive">
-
-<table class="table table-bordered table-hover align-middle">
-
-<thead class="table-dark">
-<tr>
-<th>ID</th>
-<th>Nombre</th>
-<th>RNC</th>
-<th>Telefono</th>
-<th>Correo</th>
-<th>Direccion</th>
-<th>Acciones</th>
-</tr>
-</thead>
-
-<tbody>
-
-{% for c in clientes %}
-
-<tr>
-<td>{{ c["id"] }}</td>
-<td>{{ c["nombre"] }}</td>
-<td>{{ c["rnc"] }}</td>
-<td>{{ c["telefono"] }}</td>
-<td>{{ c["correo"] or "" }}</td>
-<td>{{ c["direccion"] }}</td>
-
-<td>
-    <a
-    href="{{ url_for('editar_cliente',
-        id=c['id']) }}"
-        class="btn btn-warning btn-sm">
-        Editar
-    </a>
-
-    <form
-        action="{{ url_for('eliminar_cliente',
-        id=c['id']) }}"
-        method="POST"
-        style="display:inline;">
-        <button class="btn btn-danger btn-sm"
-        onclick="return confirm('Eliminar cliente?')">
-    Eliminar
-</button>
+      <button class="btn btn-primary" type="submit">
+        <i class="fa fa-save"></i>
+        Guardar cliente
+      </button>
     </form>
+  </div>
 
-</td>
-</tr>
+  <div class="card shadow p-4">
+    <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
+      <div>
+        <h5 class="mb-1">Lista de clientes</h5>
+        <div class="hint">Consulta, edita o elimina clientes guardados.</div>
+      </div>
+    </div>
 
-{% endfor %}
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>RNC</th>
+            <th>Telefono</th>
+            <th>Correo</th>
+            <th>Direccion</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in clientes %}
+          <tr>
+            <td>#{{ c["id"] }}</td>
+            <td>{{ c["nombre"] }}</td>
+            <td>{{ c["rnc"] }}</td>
+            <td>{{ c["telefono"] }}</td>
+            <td>{{ c["correo"] or "" }}</td>
+            <td>{{ c["direccion"] }}</td>
+            <td>
+              <div class="d-flex gap-2 justify-content-end flex-wrap">
+                <a href="{{ url_for('editar_cliente', id=c['id']) }}" class="action">
+                  Editar
+                </a>
+                <form action="{{ url_for('eliminar_cliente', id=c['id']) }}" method="POST">
+                  <button class="action" type="submit" onclick="return confirm('Eliminar cliente?')">
+                    Eliminar
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 {% endblock %}

@@ -179,6 +179,174 @@
       transform: translateY(-1px);
     }
 
+    .plan-status{
+      cursor:default;
+      background:rgba(34,197,94,.12);
+      color:#bbf7d0;
+      border:1px solid rgba(34,197,94,.18);
+    }
+
+    .plan-status:hover{
+      transform:none;
+    }
+
+    .plan-price{
+      margin-top:8px;
+      font-size:1rem;
+      font-weight:900;
+      color:#fff;
+    }
+
+    .plans-modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(2,6,23,.68);
+      backdrop-filter:blur(10px);
+      z-index:100;
+    }
+
+    .plans-modal.show{
+      display:flex;
+    }
+
+    .plans-dialog{
+      width:min(920px, 100%);
+      max-height:90vh;
+      overflow:auto;
+      border:1px solid var(--border);
+      background:linear-gradient(135deg, rgba(11,23,48,.98), rgba(8,17,32,.98));
+      border-radius:22px;
+      box-shadow:0 28px 80px rgba(0,0,0,.46);
+      padding:18px;
+    }
+
+    .plans-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:14px;
+    }
+
+    .plans-head h3{
+      margin:0 0 4px;
+      font-size:1.2rem;
+      font-weight:900;
+    }
+
+    .plans-head p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .plans-close{
+      width:36px;
+      height:36px;
+      border:none;
+      border-radius:12px;
+      background:rgba(255,255,255,.06);
+      color:#eef2ff;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 auto;
+      cursor:pointer;
+    }
+
+    .plans-grid{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0, 1fr));
+      gap:12px;
+    }
+
+    .plan-card{
+      border:1px solid rgba(255,255,255,.09);
+      background:rgba(255,255,255,.05);
+      border-radius:18px;
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .plan-card.featured{
+      background:linear-gradient(135deg, rgba(59,130,246,.18), rgba(255,255,255,.06));
+      border-color:rgba(96,165,250,.28);
+    }
+
+    .plan-name{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      font-weight:900;
+      margin-bottom:8px;
+    }
+
+    .plan-tag{
+      padding:5px 8px;
+      border-radius:999px;
+      background:rgba(34,197,94,.12);
+      color:#bbf7d0;
+      font-size:.72rem;
+      font-weight:800;
+      border:1px solid rgba(34,197,94,.18);
+    }
+
+    .plan-amount{
+      font-size:1.55rem;
+      font-weight:900;
+      margin-bottom:10px;
+    }
+
+    .plan-amount span{
+      color:var(--muted);
+      font-size:.85rem;
+      font-weight:700;
+    }
+
+    .plan-benefits{
+      list-style:none;
+      padding:0;
+      margin:0;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      color:#d9e4ff;
+      line-height:1.35;
+      flex:1;
+    }
+
+    .plan-benefits li{
+      display:flex;
+      gap:8px;
+    }
+
+    .plan-benefits i{
+      color:#7dd3fc;
+      margin-top:2px;
+      flex:0 0 auto;
+    }
+
+    .plan-action{
+      margin-top:14px;
+    }
+
+    .plan-current{
+      cursor:default;
+      background:rgba(255,255,255,.06);
+      color:#cbd5e1;
+      border:1px solid rgba(255,255,255,.1);
+    }
+
+    .plan-current:hover{
+      transform:none;
+    }
+
     /* MAIN */
     .main{
       flex:1;
@@ -612,6 +780,10 @@
         align-items:flex-start;
       }
 
+      .plans-grid{
+        grid-template-columns:1fr;
+      }
+
       .dropdown-menu{
         width:100%;
         min-width:unset;
@@ -636,17 +808,83 @@
         <a class="active" href="#"><span class="dot"></span> Dashboard</a>
         <a href="/nueva"><span class="dot"></span> Nueva Cotización</a>
         <a href="/historial"><span class="dot"></span> Historial</a>
-        <a href="#"><span class="dot"></span> Facturas</a>
-        <a href="#"><span class="dot"></span> Clientes</a>
-        <a href="#"><span class="dot"></span> Ajustes</a>
+        <a href="/facturas"><span class="dot"></span> Facturas</a>
+        <a href="/clientes"><span class="dot"></span> Clientes</a>
+        <a href="/configurar_ncf"><span class="dot"></span> NCF</a>
+        <a href="/usuarios"><span class="dot"></span> Cuentas</a>
       </div>
 
       <div class="sidebar-card">
-        <div class="title">Plan Profesional</div>
-        <div class="small">Renovación: 25 Jun 2025</div>
-        <a href="#" class="mini-btn">Ver plan</a>
+        <div class="title">Plan Mensual</div>
+        <div class="small">Plan actual: Normal</div>
+        <div class="plan-price">US$ 19 / mes</div>
+        <button type="button" class="mini-btn" onclick="openPlansModal()">Ver planes</button>
       </div>
     </aside>
+
+    <div class="plans-modal" id="plansModal" aria-hidden="true">
+      <div class="plans-dialog" role="dialog" aria-modal="true" aria-labelledby="plansTitle">
+        <div class="plans-head">
+          <div>
+            <h3 id="plansTitle">Planes mensuales</h3>
+            <p>Elige el nivel que mejor encaje con tu volumen de cotizaciones y facturacion.</p>
+          </div>
+          <button type="button" class="plans-close" onclick="closePlansModal()" aria-label="Cerrar planes">
+            <i class="fa fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="plans-grid">
+          <div class="plan-card">
+            <div class="plan-name">Gratis</div>
+            <div class="plan-amount">US$ 0 <span>/ mes</span></div>
+            <ul class="plan-benefits">
+              <li><i class="fa fa-check"></i> Hasta 5 cotizaciones mensuales</li>
+              <li><i class="fa fa-check"></i> Hasta 3 clientes guardados</li>
+              <li><i class="fa fa-check"></i> PDF con marca FactuCloud</li>
+              <li><i class="fa fa-check"></i> Sin facturacion NCF</li>
+            </ul>
+            <button type="button" class="mini-btn plan-action" onclick="acquirePlan('Gratis')">Adquirir plan</button>
+          </div>
+
+          <div class="plan-card">
+            <div class="plan-name">Basico</div>
+            <div class="plan-amount">US$ 9 <span>/ mes</span></div>
+            <ul class="plan-benefits">
+              <li><i class="fa fa-check"></i> Hasta 50 cotizaciones mensuales</li>
+              <li><i class="fa fa-check"></i> Clientes ilimitados</li>
+              <li><i class="fa fa-check"></i> Descarga de PDF</li>
+              <li><i class="fa fa-check"></i> Soporte por correo</li>
+            </ul>
+            <button type="button" class="mini-btn plan-action" onclick="acquirePlan('Basico')">Adquirir plan</button>
+          </div>
+
+          <div class="plan-card featured">
+            <div class="plan-name">Normal <span class="plan-tag">Actual</span></div>
+            <div class="plan-amount">US$ 19 <span>/ mes</span></div>
+            <ul class="plan-benefits">
+              <li><i class="fa fa-check"></i> Cotizaciones ilimitadas</li>
+              <li><i class="fa fa-check"></i> Facturas con NCF</li>
+              <li><i class="fa fa-check"></i> Historial y seguimiento</li>
+              <li><i class="fa fa-check"></i> Soporte prioritario</li>
+            </ul>
+            <button type="button" class="mini-btn plan-action plan-current" disabled>Plan actual</button>
+          </div>
+
+          <div class="plan-card">
+            <div class="plan-name">Full</div>
+            <div class="plan-amount">US$ 39 <span>/ mes</span></div>
+            <ul class="plan-benefits">
+              <li><i class="fa fa-check"></i> Todo lo del plan Normal</li>
+              <li><i class="fa fa-check"></i> Multiusuario avanzado</li>
+              <li><i class="fa fa-check"></i> Reportes de ventas</li>
+              <li><i class="fa fa-check"></i> Personalizacion de documentos</li>
+            </ul>
+            <button type="button" class="mini-btn plan-action" onclick="acquirePlan('Full')">Adquirir plan</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <main class="main">
       <div class="topbar">
@@ -660,15 +898,18 @@
 
           <div class="user-dropdown">
             <button class="user-btn" id="userBtn" type="button">
-              <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="admin">
-              <span>admin</span>
+              <img
+                src="{{ url_for('static', filename='uploads/' + (usuario_foto if usuario_foto else 'default.png')) }}{% if usuario_foto_version %}?v={{ usuario_foto_version }}{% endif %}"
+                alt="Foto de perfil"
+              >
+              <span>{{ usuario if usuario else "Usuario" }}</span>
               <i class="fa-solid fa-chevron-down"></i>
             </button>
 
             <div class="dropdown-menu" id="userMenu">
               <a href="/usuarios">
                 <i class="fa-solid fa-user-group"></i>
-                <span>Usuarios</span>
+                <span>Cambiar cuenta</span>
               </a>
 
               <a href="/perfil">
@@ -698,7 +939,7 @@
 
         <div class="hero-actions">
           <a href="/historial" class="btn btn-soft">Ver historial</a>
-          <a href="#" class="btn btn-primary">Enviar resumen</a>
+          <a href="/facturas" class="btn btn-primary">Ver facturas</a>
         </div>
       </section>
 
@@ -779,7 +1020,6 @@
 
                         <a href="/cotizacion_pdf/{{ cotizacion.id }}" class="action">PDF</a>
 
-                        <button type="button" class="action more">•••</button>
                       </div>
                     </td>
                   </tr>
@@ -813,6 +1053,37 @@
 
     userMenu.addEventListener('click', (e) => {
       e.stopPropagation();
+    });
+
+    function openPlansModal(){
+      const modal = document.getElementById('plansModal');
+      if(!modal) return;
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closePlansModal(){
+      const modal = document.getElementById('plansModal');
+      if(!modal) return;
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    function acquirePlan(plan){
+      alert('Seleccionaste el plan ' + plan + '. Aqui se conectaria el pago o la activacion del plan.');
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if(event.key === 'Escape'){
+        closePlansModal();
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      const modal = document.getElementById('plansModal');
+      if(modal && event.target === modal){
+        closePlansModal();
+      }
     });
   </script>
 </body>

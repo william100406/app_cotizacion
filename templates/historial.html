@@ -2,52 +2,60 @@
 
 {% block content %}
 
-<div class="d-flex align-items-center mb-4">
-
-    <a href="{{ url_for('index') }}" class="me-3 text-decoration-none">
-        <i class="bi bi-arrow-left fs-4"></i>
+<div class="container">
+  <div class="page-header">
+    <div>
+      <a href="{{ url_for('index') }}" class="back-btn">
+        <i class="bi bi-arrow-left"></i>
+        Volver al dashboard
+      </a>
+      <h3 class="page-title">Historial de cotizaciones</h3>
+      <div class="page-subtitle">Revisa documentos emitidos y su estado actual.</div>
+    </div>
+    <a href="{{ url_for('nueva_cotizacion') }}" class="btn btn-primary">
+      <i class="fa fa-plus"></i>
+      Nueva cotizacion
     </a>
+  </div>
 
-    <h3 class="mb-0">Historial de Cotizaciones</h3>
-
-</div>
-
-<div class="card shadow p-4">
-
-<table class="table table-bordered table-hover">
-
-<thead class="table-dark">
-<tr>
-<th>ID</th>
-<th>Código</th>
-<th>Cliente</th>
-<th>Fecha</th>
-<th>Total</th>
-<th>Estado</th>
-</tr>
-</thead>
-
-<tbody>
-
-{% for cotizacion in cotizaciones %}
-
-<tr>
-
-<td>{{ cotizacion.id }}</td>
-<td>{{ cotizacion.codigo }}</td>
-<td>{{ cotizacion.cliente }}</td>
-<td>{{ cotizacion.fecha }}</td>
-<td>US$ {{ cotizacion.total }}</td>
-<td>{{ cotizacion.estado }}</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
+  <div class="card shadow p-4">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Codigo</th>
+            <th>Cliente</th>
+            <th>Fecha</th>
+            <th>Total</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cotizacion in cotizaciones %}
+          <tr>
+            <td>#{{ cotizacion.id }}</td>
+            <td>{{ cotizacion.codigo }}</td>
+            <td>{{ cotizacion.cliente }}</td>
+            <td>{{ cotizacion.fecha }}</td>
+            <td class="money">US$ {{ cotizacion.total }}</td>
+            <td>
+              {% if cotizacion.estado == "Pendiente" %}
+                <span class="status-badge pending">Pendiente</span>
+              {% elif cotizacion.estado == "Aprobada" %}
+                <span class="status-badge approved">Aprobada</span>
+              {% elif cotizacion.estado == "Facturada" %}
+                <span class="status-badge done">Facturada</span>
+              {% else %}
+                <span class="status-badge">{{ cotizacion.estado }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 {% endblock %}

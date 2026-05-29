@@ -599,7 +599,7 @@
 
             <div class="summary-item">
               <div class="summary-label">Usuario actual</div>
-              <div class="summary-value" id="topbarProfileName">{{ user.usuario }}</div>
+              <div class="summary-value" id="summaryProfileName">{{ user.usuario }}</div>
             </div>
 
             <div class="summary-item">
@@ -661,10 +661,10 @@
 
   function syncTopbarName(value) {
     const topbarName = document.getElementById("topbarProfileName");
-    if (!topbarName) return;
-
+    const summaryName = document.getElementById("summaryProfileName");
     const cleanValue = value.trim();
-    topbarName.textContent = cleanValue || "Usuario";
+    if (topbarName) topbarName.textContent = cleanValue || "Usuario";
+    if (summaryName) summaryName.textContent = cleanValue || "Usuario";
   }
 
   function syncTopbarImage(src) {
@@ -704,11 +704,6 @@
       }
     }
   });
-
-  window.onload = function(){
-    let tema = localStorage.getItem("tema") || "auto";
-    cambiarTema(tema);
-  }
 
   document.addEventListener("DOMContentLoaded", function () {
     const password = document.getElementById("password");

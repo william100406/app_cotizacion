@@ -3,148 +3,188 @@
 {% block content %}
 
 <style>
-.send-options{
+  .send-options{
     position:relative;
-}
+  }
 
-.send-options summary{
+  .send-options summary{
     list-style:none;
     cursor:pointer;
-}
+  }
 
-.send-options summary::-webkit-details-marker{
+  .send-options summary::-webkit-details-marker{
     display:none;
-}
+  }
 
-.send-options-menu{
+  .send-options-menu{
     position:absolute;
     right:0;
-    top:calc(100% + 6px);
+    top:calc(100% + 8px);
     z-index:20;
     min-width:190px;
-    padding:6px;
-    background:#fff;
-    border:1px solid rgba(0,0,0,0.12);
-    border-radius:10px;
-    box-shadow:0 10px 24px rgba(15,23,42,0.16);
-}
+    padding:8px;
+    background:#1b1c31;
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:16px;
+    box-shadow:0 18px 40px rgba(0,0,0,.35);
+  }
 
-.send-options-menu a{
+  .send-options-menu a{
     display:flex;
     align-items:center;
-    gap:8px;
-    padding:8px 10px;
-    color:#1f2937;
+    gap:10px;
+    padding:10px 12px;
+    color:#eef2ff;
     text-decoration:none;
-    border-radius:8px;
-}
+    border-radius:12px;
+    font-weight:600;
+  }
 
-.send-options-menu a:hover{
-    background:#f3f4f6;
-}
+  .send-options-menu a:hover{
+    background:rgba(255,255,255,.05);
+  }
 
-body.tema-oscuro .send-options-menu{
-    background:#0f172a;
-    border-color:rgba(255,255,255,0.12);
-}
+  .info-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-bottom:18px;
+  }
 
-body.tema-oscuro .send-options-menu a{
-    color:#e5e7eb;
-}
+  .info-box{
+    border:1px solid rgba(255,255,255,.06);
+    background:rgba(255,255,255,.03);
+    border-radius:16px;
+    padding:14px;
+  }
 
-body.tema-oscuro .send-options-menu a:hover{
-    background:rgba(255,255,255,0.08);
-}
+  .totals-box{
+    max-width:420px;
+    margin-left:auto;
+  }
+
+  .total-line{
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    padding:8px 0;
+    color:#d9e4ff;
+  }
+
+  .total-line.final{
+    margin-top:4px;
+    border-top:1px solid rgba(255,255,255,.1);
+    color:#fff;
+    font-size:1.05rem;
+    font-weight:900;
+  }
+
+  @media (max-width: 768px){
+    .info-grid{
+      grid-template-columns:1fr;
+    }
+
+    .totals-box{
+      max-width:none;
+    }
+  }
 </style>
 
-<div class="d-flex align-items-center justify-content-between mb-4">
-    <div class="d-flex align-items-center">
-        <a href="{{ url_for('index') }}" class="me-3 text-decoration-none">
-            <i class="bi bi-arrow-left fs-4"></i>
-        </a>
-        <h3 class="mb-0">Cotizacion {{ cotizacion.codigo or ("#" ~ cotizacion.id) }}</h3>
+<div class="container">
+  <div class="page-header">
+    <div>
+      <a href="{{ url_for('index') }}" class="back-btn">
+        <i class="bi bi-arrow-left"></i>
+        Volver al dashboard
+      </a>
+      <h3 class="page-title">Cotizacion {{ cotizacion.codigo or ("#" ~ cotizacion.id) }}</h3>
+      <div class="page-subtitle">Detalle completo del documento y sus servicios.</div>
     </div>
 
-    <div class="d-flex gap-2">
-        <a href="{{ url_for('editar_cotizacion', id=cotizacion.id) }}" class="btn btn-warning">
-            <i class="fa fa-pen"></i> Editar
-        </a>
-        <a href="{{ url_for('cotizacion_pdf', id=cotizacion.id) }}" class="btn btn-dark">
-            <i class="fa fa-file-pdf"></i> Descargar PDF
-        </a>
-        <details class="send-options">
-            <summary class="btn btn-primary">
-                <i class="fa fa-paper-plane"></i> Enviar
-            </summary>
-            <div class="send-options-menu">
-                <a href="{{ url_for('enviar_cotizacion', id=cotizacion.id, medio='whatsapp') }}">
-                    <i class="fa-brands fa-whatsapp"></i> WhatsApp
-                </a>
-                <a href="{{ url_for('enviar_cotizacion', id=cotizacion.id, medio='correo') }}">
-                    <i class="fa fa-envelope"></i> Correo
-                </a>
-            </div>
-        </details>
-    </div>
-</div>
-
-<div class="card shadow p-4">
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h5>Cliente</h5>
-            <p class="mb-1"><strong>Nombre:</strong> {{ cotizacion.cliente }}</p>
-            <p class="mb-1"><strong>RNC / Cedula:</strong> {{ cotizacion.rnc or "-" }}</p>
-            <p class="mb-1"><strong>Telefono:</strong> {{ cotizacion.telefono or "-" }}</p>
-            <p class="mb-0"><strong>Correo:</strong> {{ cotizacion.correo or "-" }}</p>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('editar_cotizacion', id=cotizacion.id) }}" class="btn btn-warning">
+        <i class="fa fa-pen"></i>
+        Editar
+      </a>
+      <a href="{{ url_for('cotizacion_pdf', id=cotizacion.id) }}" class="btn btn-secondary">
+        <i class="fa fa-file-pdf"></i>
+        PDF
+      </a>
+      <details class="send-options">
+        <summary class="btn btn-primary">
+          <i class="fa fa-paper-plane"></i>
+          Enviar
+        </summary>
+        <div class="send-options-menu">
+          <a href="{{ url_for('enviar_cotizacion', id=cotizacion.id, medio='whatsapp') }}">
+            <i class="fa-brands fa-whatsapp"></i>
+            WhatsApp
+          </a>
+          <a href="{{ url_for('enviar_cotizacion', id=cotizacion.id, medio='correo') }}">
+            <i class="fa fa-envelope"></i>
+            Correo
+          </a>
         </div>
+      </details>
+    </div>
+  </div>
 
-        <div class="col-md-6 text-md-end">
-            <h5>Documento</h5>
-            <p class="mb-1"><strong>Codigo:</strong> {{ cotizacion.codigo or "-" }}</p>
-            <p class="mb-1"><strong>Fecha:</strong> {{ cotizacion.fecha }}</p>
-            <p class="mb-0"><strong>Estado:</strong> {{ cotizacion.estado }}</p>
-        </div>
+  <div class="card shadow p-4">
+    <div class="info-grid">
+      <div class="info-box">
+        <h5>Cliente</h5>
+        <p class="mb-1"><strong>Nombre:</strong> {{ cotizacion.cliente }}</p>
+        <p class="mb-1"><strong>RNC / Cedula:</strong> {{ cotizacion.rnc or "-" }}</p>
+        <p class="mb-1"><strong>Telefono:</strong> {{ cotizacion.telefono or "-" }}</p>
+        <p class="mb-0"><strong>Correo:</strong> {{ cotizacion.correo or "-" }}</p>
+      </div>
+
+      <div class="info-box">
+        <h5>Documento</h5>
+        <p class="mb-1"><strong>Codigo:</strong> {{ cotizacion.codigo or "-" }}</p>
+        <p class="mb-1"><strong>Fecha:</strong> {{ cotizacion.fecha }}</p>
+        <p class="mb-0"><strong>Estado:</strong> {{ cotizacion.estado }}</p>
+      </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-bordered align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>Servicio</th>
-                    <th class="text-end">Cant.</th>
-                    <th class="text-end">Precio</th>
-                    <th class="text-end">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for s in servicios %}
-                <tr>
-                    <td>{{ s.descripcion }}</td>
-                    <td class="text-end">{{ "%.2f"|format(s.cantidad) }}</td>
-                    <td class="text-end">{{ money(s.precio) }}</td>
-                    <td class="text-end">{{ money(s.total) }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="table-responsive mb-3">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Servicio</th>
+            <th class="text-end">Cant.</th>
+            <th class="text-end">Precio</th>
+            <th class="text-end">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in servicios %}
+          <tr>
+            <td>{{ s.descripcion }}</td>
+            <td class="text-end">{{ "%.2f"|format(s.cantidad) }}</td>
+            <td class="text-end">{{ money(s.precio) }}</td>
+            <td class="text-end">{{ money(s.total) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
 
-    <div class="row justify-content-end">
-        <div class="col-md-4">
-            <div class="d-flex justify-content-between mb-2">
-                <span>Subtotal:</span>
-                <strong>{{ money(cotizacion.subtotal) }}</strong>
-            </div>
-            <div class="d-flex justify-content-between mb-2">
-                <span>ITBIS (18%):</span>
-                <strong>{{ money(cotizacion.itbis) }}</strong>
-            </div>
-            <div class="d-flex justify-content-between fs-5 border-top pt-2">
-                <span>Total:</span>
-                <strong>{{ money(cotizacion.total) }}</strong>
-            </div>
-        </div>
+    <div class="totals-box">
+      <div class="total-line">
+        <span>Subtotal</span>
+        <strong>{{ money(cotizacion.subtotal) }}</strong>
+      </div>
+      <div class="total-line">
+        <span>ITBIS (18%)</span>
+        <strong>{{ money(cotizacion.itbis) }}</strong>
+      </div>
+      <div class="total-line final">
+        <span>Total</span>
+        <strong>{{ money(cotizacion.total) }}</strong>
+      </div>
     </div>
+  </div>
 </div>
 
 {% endblock %}

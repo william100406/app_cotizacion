@@ -355,6 +355,23 @@
       transform: translateY(0);
     }
 
+    .create-account{
+      text-align:center;
+      color:var(--muted);
+      font-size:.95rem;
+      margin-top:-4px;
+    }
+
+    .create-account a{
+      color:#93C5FD;
+      font-weight:800;
+      text-decoration:none;
+    }
+
+    .create-account a:hover{
+      text-decoration:underline;
+    }
+
     .divider{
       position:relative;
       margin:8px 0 4px;
@@ -559,6 +576,11 @@
           </div>
 
           <button type="submit" class="login-btn">Entrar</button>
+
+          <div class="create-account">
+            No tienes cuenta?
+            <a href="{{ url_for('registro') }}">Crear cuenta</a>
+          </div>
         </form>
 
         <div class="divider">o iniciar sesión con</div>
