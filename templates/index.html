@@ -13,15 +13,13 @@
       --panel: rgba(255,255,255,.05);
       --panel-2: rgba(255,255,255,.08);
       --border: rgba(255,255,255,.09);
-      --border-strong: rgba(255,255,255,.14);
       --text:#eef2ff;
       --muted:#98a6c7;
       --primary:#3b82f6;
       --primary-2:#60a5fa;
       --success:#22c55e;
       --warning:#fbbf24;
-      --danger:#ef4444;
-      --shadow: 0 18px 50px rgba(0,0,0,.28);
+      --shadow: 0 18px 50px rgba(0,0,0,.24);
       --radius:18px;
     }
 
@@ -39,12 +37,12 @@
     body{
       min-height:100vh;
       background:
-        radial-gradient(circle at 15% 15%, rgba(59,130,246,.18), transparent 26%),
-        radial-gradient(circle at 85% 85%, rgba(34,197,94,.10), transparent 26%),
+        radial-gradient(circle at 15% 15%, rgba(59,130,246,.16), transparent 26%),
+        radial-gradient(circle at 85% 85%, rgba(34,197,94,.08), transparent 26%),
         linear-gradient(135deg, var(--bg-2), var(--bg));
       color:var(--text);
       font-size:14px;
-      overflow:auto;
+      overflow:hidden;
     }
 
     .app{
@@ -55,14 +53,14 @@
 
     /* SIDEBAR */
     .sidebar{
-      width:228px;
+      width:220px;
       background: rgba(8,17,32,.78);
       border-right:1px solid var(--border);
       backdrop-filter: blur(18px);
-      padding:18px 14px;
+      padding:16px 12px;
       display:flex;
       flex-direction:column;
-      gap:16px;
+      gap:14px;
       flex-shrink:0;
     }
 
@@ -70,7 +68,7 @@
       display:flex;
       align-items:center;
       gap:10px;
-      padding:6px 8px 10px;
+      padding:6px 8px 8px;
     }
 
     .brand-badge{
@@ -87,14 +85,14 @@
     }
 
     .brand h1{
-      font-size:1.05rem;
+      font-size:1.02rem;
       line-height:1.1;
       font-weight:800;
     }
 
     .brand p{
       color:var(--muted);
-      font-size:.82rem;
+      font-size:.8rem;
       margin-top:2px;
     }
 
@@ -107,17 +105,15 @@
     .nav a{
       text-decoration:none;
       color:#e8edff;
-      border:1px solid transparent;
-      background:transparent;
-      padding:10px 12px;
+      padding:9px 11px;
       border-radius:14px;
       display:flex;
       align-items:center;
       gap:10px;
-      transition:.18s ease;
+      transition:.16s ease;
       font-weight:600;
-      letter-spacing:.01em;
       white-space:nowrap;
+      border:1px solid transparent;
     }
 
     .nav a:hover{
@@ -128,7 +124,6 @@
     .nav a.active{
       background: linear-gradient(135deg, rgba(59,130,246,.18), rgba(96,165,250,.10));
       border-color: rgba(96,165,250,.18);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
     }
 
     .nav .dot{
@@ -152,15 +147,14 @@
       box-shadow: var(--shadow);
     }
 
-    .sidebar-card .small{
-      color:var(--muted);
-      font-size:.84rem;
-      margin-top:2px;
-    }
-
     .sidebar-card .title{
       font-weight:800;
       margin-bottom:4px;
+    }
+
+    .sidebar-card .small{
+      color:var(--muted);
+      font-size:.84rem;
     }
 
     .mini-btn{
@@ -189,8 +183,8 @@
       flex:1;
       display:flex;
       flex-direction:column;
-      overflow:auto;
-      padding:14px;
+      padding:12px;
+      overflow:hidden;
       min-width:0;
     }
 
@@ -199,20 +193,20 @@
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      margin-bottom:12px;
+      margin-bottom:10px;
       flex-wrap:wrap;
     }
 
     .top-left h2{
-      font-size:1.25rem;
+      font-size:1.16rem;
       font-weight:900;
       letter-spacing:-.03em;
     }
 
     .top-left p{
       color:var(--muted);
-      font-size:.9rem;
-      margin-top:4px;
+      font-size:.88rem;
+      margin-top:3px;
     }
 
     .top-right{
@@ -252,7 +246,7 @@
       border:none;
       border-radius:12px;
       padding:10px 14px;
-      font-size:.92rem;
+      font-size:.9rem;
       font-weight:700;
       cursor:pointer;
       text-decoration:none;
@@ -271,7 +265,7 @@
     .btn-primary{
       background: linear-gradient(135deg, var(--primary), var(--primary-2));
       color:#fff;
-      box-shadow: 0 12px 26px rgba(59,130,246,.25);
+      box-shadow: 0 12px 26px rgba(59,130,246,.22);
     }
 
     .btn-soft{
@@ -285,27 +279,26 @@
       align-items:center;
       justify-content:space-between;
       gap:14px;
-      padding:12px 16px;
-      border-radius:22px;
+      padding:11px 14px;
+      border-radius:20px;
       border:1px solid var(--border);
-      background:
-        linear-gradient(135deg, rgba(59,130,246,.22), rgba(255,255,255,.04));
+      background: linear-gradient(135deg, rgba(59,130,246,.18), rgba(255,255,255,.04));
       box-shadow: var(--shadow);
-      margin-bottom:12px;
+      margin-bottom:10px;
     }
 
     .hero h3{
-      font-size:1.08rem;
+      font-size:1.02rem;
       font-weight:900;
-      margin-bottom:5px;
+      margin-bottom:4px;
       letter-spacing:-.02em;
     }
 
     .hero p{
       color:#d9e4ff;
-      font-size:.92rem;
-      line-height:1.45;
-      max-width:68ch;
+      font-size:.9rem;
+      line-height:1.4;
+      max-width:70ch;
     }
 
     .hero-actions{
@@ -319,45 +312,45 @@
       display:grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap:10px;
-      margin-bottom:12px;
+      margin-bottom:10px;
     }
 
     .kpi{
       border:1px solid var(--border);
       background: var(--panel);
       border-radius:18px;
-      padding:12px 14px;
+      padding:11px 12px;
       box-shadow: var(--shadow);
-      min-height:84px;
+      min-height:78px;
     }
 
     .kpi .label{
       color:#dce3ff;
-      font-size:.86rem;
+      font-size:.84rem;
       font-weight:700;
-      margin-bottom:8px;
+      margin-bottom:7px;
     }
 
     .kpi .value{
-      font-size:1.25rem;
+      font-size:1.18rem;
       font-weight:900;
       letter-spacing:-.02em;
       line-height:1.05;
     }
 
     .kpi .sub{
-      margin-top:8px;
+      margin-top:7px;
       color:var(--muted);
-      font-size:.82rem;
+      font-size:.8rem;
     }
 
     .content{
       display:grid;
-      grid-template-columns: 1.25fr .95fr;
-      gap:12px;
+      grid-template-columns: .92fr 1.08fr;
+      gap:10px;
       min-height:0;
       flex:1;
-      align-items:start;
+      align-items:stretch;
     }
 
     .card{
@@ -365,8 +358,8 @@
       background: var(--panel);
       border-radius:20px;
       box-shadow: var(--shadow);
-      min-height:0;
       min-width:0;
+      overflow:hidden;
     }
 
     .card-header{
@@ -374,86 +367,71 @@
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      padding:14px 16px 10px;
+      padding:12px 14px 9px;
       border-bottom:1px solid rgba(255,255,255,.05);
       flex-wrap:wrap;
     }
 
     .card-header h4{
-      font-size:1rem;
+      font-size:.98rem;
       font-weight:900;
       letter-spacing:-.01em;
     }
 
     .card-header .hint{
       color:var(--muted);
-      font-size:.85rem;
+      font-size:.83rem;
+      margin-top:2px;
     }
 
     .card-body{
-      padding:14px 16px 16px;
+      padding:12px 14px 14px;
     }
 
-    .chart{
-      height:170px;
+    .grid-two{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+
+    .mini-list{
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:10px;
     }
 
-    .chart-legend{
+    .list-item{
       display:flex;
-      gap:12px;
-      flex-wrap:wrap;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 0;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    .list-item:last-child{
+      border-bottom:none;
+      padding-bottom:0;
+    }
+
+    .list-item strong{
+      display:block;
+      font-size:.92rem;
+      margin-bottom:3px;
+    }
+
+    .list-item span{
       color:var(--muted);
-      font-size:.86rem;
-      margin-bottom:4px;
+      font-size:.84rem;
+      line-height:1.35;
     }
 
-    .legend-item{
-      display:flex;
-      align-items:center;
-      gap:6px;
-    }
-
-    .legend-dot{
-      width:8px;
-      height:8px;
-      border-radius:999px;
-      background: var(--primary);
+    .time{
+      color:#7dd3fc;
+      font-size:.78rem;
+      font-weight:700;
+      white-space:nowrap;
       flex:0 0 auto;
-    }
-
-    .legend-dot.green{ background: var(--success); }
-    .legend-dot.yellow{ background: var(--warning); }
-
-    .simple-graph{
-      position:relative;
-      height:140px;
-      border-radius:16px;
-      background:
-        linear-gradient(to bottom, rgba(255,255,255,.03), rgba(255,255,255,.01));
-      border:1px solid rgba(255,255,255,.05);
-      overflow:hidden;
-    }
-
-    .gridline{
-      position:absolute;
-      left:0;
-      right:0;
-      height:1px;
-      background: rgba(255,255,255,.05);
-    }
-
-    .gridline.g1{ top:25%; }
-    .gridline.g2{ top:50%; }
-    .gridline.g3{ top:75%; }
-
-    .line{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
     }
 
     .table-wrap{
@@ -472,17 +450,17 @@
 
     thead th{
       text-align:left;
-      font-size:.8rem;
+      font-size:.79rem;
       color:#c9d3f2;
       font-weight:800;
-      padding:11px 12px;
+      padding:10px 11px;
       background: rgba(255,255,255,.03);
       border-bottom:1px solid rgba(255,255,255,.07);
       white-space:nowrap;
     }
 
     tbody td{
-      padding:12px;
+      padding:11px;
       border-bottom:1px solid rgba(255,255,255,.05);
       color:#eef2ff;
       vertical-align:middle;
@@ -503,7 +481,7 @@
       justify-content:center;
       padding:6px 10px;
       border-radius:999px;
-      font-size:.76rem;
+      font-size:.75rem;
       font-weight:800;
       line-height:1;
       border:1px solid transparent;
@@ -526,7 +504,7 @@
       border:none;
       border-radius:10px;
       padding:7px 10px;
-      font-size:.76rem;
+      font-size:.75rem;
       font-weight:800;
       cursor:pointer;
       color:#e9edff;
@@ -555,61 +533,14 @@
       padding:0;
     }
 
-    .grid-two{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-      margin-top:12px;
-    }
-
-    .list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-
-    .list-item{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:10px;
-      padding:11px 0;
-      border-bottom:1px solid rgba(255,255,255,.05);
-    }
-
-    .list-item:last-child{
-      border-bottom:none;
-      padding-bottom:0;
-    }
-
-    .list-item strong{
-      display:block;
-      font-size:.92rem;
-      margin-bottom:3px;
-    }
-
-    .list-item span{
-      color:var(--muted);
-      font-size:.84rem;
-      line-height:1.4;
-    }
-
-    .time{
-      color:#7dd3fc;
-      font-size:.78rem;
-      font-weight:700;
-      white-space:nowrap;
-      flex:0 0 auto;
-    }
-
     .footer-note{
-      margin-top:12px;
+      margin-top:10px;
       display:flex;
       justify-content:space-between;
       align-items:center;
       gap:10px;
       color:var(--muted);
-      font-size:.82rem;
+      font-size:.8rem;
       flex-wrap:wrap;
     }
 
@@ -617,14 +548,23 @@
       .content{
         grid-template-columns:1fr;
       }
-      .grid-two{
-        grid-template-columns:1fr;
-      }
     }
 
     @media (max-width: 980px){
+      body{
+        overflow:auto;
+      }
+
+      .app{
+        min-height:auto;
+      }
+
       .sidebar{
         display:none;
+      }
+
+      .main{
+        overflow:visible;
       }
 
       .kpis{
@@ -637,8 +577,12 @@
     }
 
     @media (max-width: 640px){
+      body{
+        overflow:auto;
+      }
+
       .main{
-        padding:12px;
+        padding:10px;
       }
 
       .topbar{
@@ -677,10 +621,6 @@
       .card-header{
         flex-direction:column;
         align-items:flex-start;
-      }
-
-      .chart{
-        height:auto;
       }
     }
   </style>
@@ -775,102 +715,61 @@
         <div class="card">
           <div class="card-header">
             <div>
-              <h4>Actividad de ventas</h4>
-              <div class="hint">Tendencia del periodo actual</div>
-            </div>
-            <div class="chart-legend">
-              <div class="legend-item"><span class="legend-dot"></span> Ventas</div>
-              <div class="legend-item"><span class="legend-dot green"></span> Pagos</div>
-              <div class="legend-item"><span class="legend-dot yellow"></span> Pendientes</div>
+              <h4>Productos destacados</h4>
+              <div class="hint">Más vendidos este mes</div>
             </div>
           </div>
-
-          <div class="card-body">
-            <div class="chart">
-              <div class="simple-graph">
-                <div class="gridline g1"></div>
-                <div class="gridline g2"></div>
-                <div class="gridline g3"></div>
-
-                <svg class="line" viewBox="0 0 900 180" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="lineBlue" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.30"/>
-                      <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.02"/>
-                    </linearGradient>
-                  </defs>
-
-                  <path d="M 0 140 C 70 128, 110 102, 165 110 S 270 70, 330 85 S 420 52, 480 72 S 585 38, 645 48 S 760 95, 900 28"
-                        fill="none" stroke="#60a5fa" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M 0 180 L 0 140 C 70 128, 110 102, 165 110 S 270 70, 330 85 S 420 52, 480 72 S 585 38, 645 48 S 760 95, 900 28 L 900 180 Z"
-                        fill="url(#lineBlue)"/>
-                  <circle cx="645" cy="48" r="5" fill="#60a5fa"/>
-                </svg>
+          <div class="card-body mini-list">
+            <div class="list-item">
+              <div>
+                <strong>Servicio premium</strong>
+                <span>Acceso a reportes y automatización.</span>
               </div>
+              <div class="time">48 ventas</div>
+            </div>
+            <div class="list-item">
+              <div>
+                <strong>Plantilla de factura</strong>
+                <span>Formato limpio y personalizable.</span>
+              </div>
+              <div class="time">31 ventas</div>
+            </div>
+            <div class="list-item">
+              <div>
+                <strong>Soporte prioritario</strong>
+                <span>Atención rápida para clientes activos.</span>
+              </div>
+              <div class="time">19 ventas</div>
             </div>
 
-            <div class="grid-two">
-              <div class="card" style="box-shadow:none;">
-                <div class="card-header">
-                  <div>
-                    <h4>Productos destacados</h4>
-                    <div class="hint">Más vendidos este mes</div>
-                  </div>
-                </div>
-                <div class="card-body list">
-                  <div class="list-item">
-                    <div>
-                      <strong>Servicio premium</strong>
-                      <span>Acceso a reportes y automatización.</span>
-                    </div>
-                    <div class="time">48 ventas</div>
-                  </div>
-                  <div class="list-item">
-                    <div>
-                      <strong>Plantilla de factura</strong>
-                      <span>Formato limpio y personalizable.</span>
-                    </div>
-                    <div class="time">31 ventas</div>
-                  </div>
-                  <div class="list-item">
-                    <div>
-                      <strong>Soporte prioritario</strong>
-                      <span>Atención rápida para clientes activos.</span>
-                    </div>
-                    <div class="time">19 ventas</div>
-                  </div>
+            <div class="card" style="box-shadow:none; margin-top:4px;">
+              <div class="card-header">
+                <div>
+                  <h4>Actividad reciente</h4>
+                  <div class="hint">Eventos importantes</div>
                 </div>
               </div>
-
-              <div class="card" style="box-shadow:none;">
-                <div class="card-header">
+              <div class="card-body mini-list">
+                <div class="list-item">
                   <div>
-                    <h4>Actividad reciente</h4>
-                    <div class="hint">Eventos importantes</div>
+                    <strong>Nueva cotización creada</strong>
+                    <span>Cotización para {{ cotizaciones[0].cliente if cotizaciones else "cliente" }}</span>
                   </div>
+                  <div class="time">Hace 2h</div>
                 </div>
-                <div class="card-body list">
-                  <div class="list-item">
-                    <div>
-                      <strong>Nueva cotización creada</strong>
-                      <span>Cotización para {{ cotizaciones[0].cliente if cotizaciones else "cliente" }}</span>
-                    </div>
-                    <div class="time">Hace 2h</div>
+                <div class="list-item">
+                  <div>
+                    <strong>Pago confirmado</strong>
+                    <span>Factura marcada como pagada.</span>
                   </div>
-                  <div class="list-item">
-                    <div>
-                      <strong>Pago confirmado</strong>
-                      <span>Factura marcada como pagada.</span>
-                    </div>
-                    <div class="time">Hace 5h</div>
+                  <div class="time">Hace 5h</div>
+                </div>
+                <div class="list-item">
+                  <div>
+                    <strong>Inventario revisado</strong>
+                    <span>Se actualizó stock de productos clave.</span>
                   </div>
-                  <div class="list-item">
-                    <div>
-                      <strong>Inventario revisado</strong>
-                      <span>Se actualizó stock de productos clave.</span>
-                    </div>
-                    <div class="time">Ayer</div>
-                  </div>
+                  <div class="time">Ayer</div>
                 </div>
               </div>
             </div>
