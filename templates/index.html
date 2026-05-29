@@ -11,7 +11,6 @@
       --bg:#081120;
       --bg-2:#0b1730;
       --panel: rgba(255,255,255,.05);
-      --panel-2: rgba(255,255,255,.08);
       --border: rgba(255,255,255,.09);
       --text:#eef2ff;
       --muted:#98a6c7;
@@ -20,7 +19,6 @@
       --success:#22c55e;
       --warning:#fbbf24;
       --shadow: 0 18px 50px rgba(0,0,0,.24);
-      --radius:18px;
     }
 
     *{
@@ -42,7 +40,7 @@
         linear-gradient(135deg, var(--bg-2), var(--bg));
       color:var(--text);
       font-size:14px;
-      overflow:hidden;
+      overflow:auto;
     }
 
     .app{
@@ -184,7 +182,7 @@
       display:flex;
       flex-direction:column;
       padding:12px;
-      overflow:hidden;
+      overflow:auto;
       min-width:0;
     }
 
@@ -346,11 +344,10 @@
 
     .content{
       display:grid;
-      grid-template-columns: .92fr 1.08fr;
+      grid-template-columns:1fr;
       gap:10px;
-      min-height:0;
       flex:1;
-      align-items:stretch;
+      min-height:0;
     }
 
     .card{
@@ -386,52 +383,6 @@
 
     .card-body{
       padding:12px 14px 14px;
-    }
-
-    .grid-two{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-    }
-
-    .mini-list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-
-    .list-item{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:10px;
-      padding:10px 0;
-      border-bottom:1px solid rgba(255,255,255,.05);
-    }
-
-    .list-item:last-child{
-      border-bottom:none;
-      padding-bottom:0;
-    }
-
-    .list-item strong{
-      display:block;
-      font-size:.92rem;
-      margin-bottom:3px;
-    }
-
-    .list-item span{
-      color:var(--muted);
-      font-size:.84rem;
-      line-height:1.35;
-    }
-
-    .time{
-      color:#7dd3fc;
-      font-size:.78rem;
-      font-weight:700;
-      white-space:nowrap;
-      flex:0 0 auto;
     }
 
     .table-wrap{
@@ -544,43 +495,17 @@
       flex-wrap:wrap;
     }
 
-    @media (max-width: 1200px){
-      .content{
-        grid-template-columns:1fr;
-      }
-    }
-
     @media (max-width: 980px){
-      body{
-        overflow:auto;
-      }
-
-      .app{
-        min-height:auto;
-      }
-
       .sidebar{
         display:none;
-      }
-
-      .main{
-        overflow:visible;
       }
 
       .kpis{
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
-
-      .content{
-        grid-template-columns:1fr;
-      }
     }
 
     @media (max-width: 640px){
-      body{
-        overflow:auto;
-      }
-
       .main{
         padding:10px;
       }
@@ -715,76 +640,12 @@
         <div class="card">
           <div class="card-header">
             <div>
-              <h4>Productos destacados</h4>
-              <div class="hint">Más vendidos este mes</div>
-            </div>
-          </div>
-          <div class="card-body mini-list">
-            <div class="list-item">
-              <div>
-                <strong>Servicio premium</strong>
-                <span>Acceso a reportes y automatización.</span>
-              </div>
-              <div class="time">48 ventas</div>
-            </div>
-            <div class="list-item">
-              <div>
-                <strong>Plantilla de factura</strong>
-                <span>Formato limpio y personalizable.</span>
-              </div>
-              <div class="time">31 ventas</div>
-            </div>
-            <div class="list-item">
-              <div>
-                <strong>Soporte prioritario</strong>
-                <span>Atención rápida para clientes activos.</span>
-              </div>
-              <div class="time">19 ventas</div>
-            </div>
-
-            <div class="card" style="box-shadow:none; margin-top:4px;">
-              <div class="card-header">
-                <div>
-                  <h4>Actividad reciente</h4>
-                  <div class="hint">Eventos importantes</div>
-                </div>
-              </div>
-              <div class="card-body mini-list">
-                <div class="list-item">
-                  <div>
-                    <strong>Nueva cotización creada</strong>
-                    <span>Cotización para {{ cotizaciones[0].cliente if cotizaciones else "cliente" }}</span>
-                  </div>
-                  <div class="time">Hace 2h</div>
-                </div>
-                <div class="list-item">
-                  <div>
-                    <strong>Pago confirmado</strong>
-                    <span>Factura marcada como pagada.</span>
-                  </div>
-                  <div class="time">Hace 5h</div>
-                </div>
-                <div class="list-item">
-                  <div>
-                    <strong>Inventario revisado</strong>
-                    <span>Se actualizó stock de productos clave.</span>
-                  </div>
-                  <div class="time">Ayer</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <div>
               <h4>Cotizaciones recientes</h4>
-              <div class="hint">Acciones compactas y claras</div>
+              <div class="hint">Gestión rápida de cotizaciones</div>
             </div>
           </div>
 
-          <div class="card-body" style="padding-top:10px;">
+          <div class="card-body">
             <div class="table-wrap">
               <table>
                 <thead>
