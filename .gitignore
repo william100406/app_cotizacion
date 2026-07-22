@@ -4,3 +4,9 @@ pass.env
 __pycache__/
 *.py[cod]
 .venv/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
