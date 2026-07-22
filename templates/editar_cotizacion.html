@@ -2,15 +2,18 @@
 
 {% block content %}
 
-<div class="d-flex align-items-center justify-content-between mb-4">
-    <div class="d-flex align-items-center">
-        <a href="{{ url_for('detalle', id=cotizacion.id) }}" class="me-3 text-decoration-none">
-            <i class="bi bi-arrow-left fs-4"></i>
+<div class="container">
+<div class="page-header">
+    <div>
+        <a href="{{ url_for('detalle', id=cotizacion.id) }}" class="back-btn">
+            <i class="bi bi-arrow-left"></i>
+            Volver al detalle
         </a>
-        <h3 class="mb-0">Editar Cotizacion</h3>
+        <h3 class="page-title">Editar cotizacion</h3>
+        <div class="page-subtitle">Actualiza el cliente, servicios y totales del documento.</div>
     </div>
 
-    <a href="{{ url_for('cotizacion_pdf', id=cotizacion.id) }}" class="btn btn-dark">
+    <a href="{{ url_for('cotizacion_pdf', id=cotizacion.id) }}" class="btn btn-secondary">
         <i class="fa fa-file-pdf"></i> Descargar PDF
     </a>
 </div>
@@ -106,6 +109,7 @@
             <a href="{{ url_for('detalle', id=cotizacion.id) }}" class="btn btn-secondary">Cancelar</a>
         </div>
     </form>
+</div>
 </div>
 
 <script>

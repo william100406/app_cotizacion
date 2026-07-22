@@ -1,220 +1,1133 @@
-        {% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FactuCloud | Dashboard</title>
+  <link rel="icon" href="{{ url_for('static', filename='FC.ico') }}">
 
-        {% block content %}
+  <!-- Iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-        <style>
-        .acciones-col,
-        .acciones-celda{
-            min-width: 610px;
-        }
+  <style>
+    :root{
+      --bg:#081120;
+      --bg-2:#0b1730;
+      --panel: rgba(255,255,255,.05);
+      --border: rgba(255,255,255,.09);
+      --text:#eef2ff;
+      --muted:#98a6c7;
+      --primary:#3b82f6;
+      --primary-2:#60a5fa;
+      --success:#22c55e;
+      --warning:#fbbf24;
+      --shadow: 0 18px 50px rgba(0,0,0,.24);
+    }
 
-        .acciones-cotizacion{
-            display:flex;
-            align-items:center;
-            gap:6px;
-            flex-wrap:nowrap;
-            white-space:nowrap;
-        }
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
 
-        .acciones-cotizacion form{
-            display:inline-flex;
-            margin:0;
-        }
+    html, body{
+      min-height:100%;
+    }
 
-        .acciones-cotizacion .btn,
-        .acciones-cotizacion button{
-            width:70px;
-            height:32px;
-            padding:0 8px;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            font-size:12px;
-            line-height:1;
-            border-radius:8px;
-            box-shadow:none;
-            white-space:nowrap;
-        }
+    body{
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(59,130,246,.16), transparent 26%),
+        radial-gradient(circle at 85% 85%, rgba(34,197,94,.08), transparent 26%),
+        linear-gradient(135deg, var(--bg-2), var(--bg));
+      color:var(--text);
+      font-size:14px;
+      overflow:auto;
+    }
 
-        @media (max-width: 768px){
-            .acciones-cotizacion button{
-                width:70px;
-            }
-        }
-        </style>
+    .app{
+      display:flex;
+      min-height:100vh;
+      width:100%;
+    }
 
-        <h3 class="mb-4">Dashboard</h3>
+    /* SIDEBAR */
+    .sidebar{
+      width:220px;
+      background: rgba(8,17,32,.78);
+      border-right:1px solid var(--border);
+      backdrop-filter: blur(18px);
+      padding:16px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      flex-shrink:0;
+    }
 
-        <div class="d-flex justify-content-between mb-4">
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:6px 8px 8px;
+    }
 
-            <div>
-                <a href="/nueva" class="btn btn-primary">
-                    Nueva Cotización
-                </a>
+    .brand-badge{
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      font-weight:800;
+      color:#fff;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      box-shadow: 0 10px 24px rgba(59,130,246,.28);
+      flex:0 0 auto;
+    }
 
-                <a href="/historial" class="btn btn-secondary">
-                    Historial
-                </a>
-            </div>
+    .brand h1{
+      font-size:1.02rem;
+      line-height:1.1;
+      font-weight:800;
+    }
 
-            <form method="GET" action="/" class="d-flex">
+    .brand p{
+      color:var(--muted);
+      font-size:.8rem;
+      margin-top:2px;
+    }
 
-            </form>
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
 
+    .nav a{
+      text-decoration:none;
+      color:#e8edff;
+      padding:9px 11px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      transition:.16s ease;
+      font-weight:600;
+      white-space:nowrap;
+      border:1px solid transparent;
+    }
+
+    .nav a:hover{
+      background: rgba(255,255,255,.05);
+      border-color: rgba(255,255,255,.06);
+    }
+
+    .nav a.active{
+      background: linear-gradient(135deg, rgba(59,130,246,.18), rgba(96,165,250,.10));
+      border-color: rgba(96,165,250,.18);
+    }
+
+    .nav .dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background: rgba(255,255,255,.25);
+      flex:0 0 auto;
+    }
+
+    .nav a.active .dot{
+      background:#7dd3fc;
+    }
+
+    .sidebar-card{
+      margin-top:auto;
+      border:1px solid var(--border);
+      background: var(--panel);
+      border-radius:16px;
+      padding:14px;
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar-card .title{
+      font-weight:800;
+      margin-bottom:4px;
+    }
+
+    .sidebar-card .small{
+      color:var(--muted);
+      font-size:.84rem;
+    }
+
+    .mini-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+      margin-top:10px;
+      padding:9px 12px;
+      border:none;
+      border-radius:12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      transition:.18s ease;
+    }
+
+    .mini-btn:hover{
+      transform: translateY(-1px);
+    }
+
+    .plan-status{
+      cursor:default;
+      background:rgba(34,197,94,.12);
+      color:#bbf7d0;
+      border:1px solid rgba(34,197,94,.18);
+    }
+
+    .plan-status:hover{
+      transform:none;
+    }
+
+    .plan-price{
+      margin-top:8px;
+      font-size:1rem;
+      font-weight:900;
+      color:#fff;
+    }
+
+    .plans-modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(2,6,23,.68);
+      backdrop-filter:blur(10px);
+      z-index:100;
+    }
+
+    .plans-modal.show{
+      display:flex;
+    }
+
+    .plans-dialog{
+      width:min(1180px, 100%);
+      max-height:90vh;
+      overflow:auto;
+      border:1px solid var(--border);
+      background:linear-gradient(135deg, rgba(11,23,48,.98), rgba(8,17,32,.98));
+      border-radius:22px;
+      box-shadow:0 28px 80px rgba(0,0,0,.46);
+      padding:18px;
+    }
+
+    .plans-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:14px;
+    }
+
+    .plans-head h3{
+      margin:0 0 4px;
+      font-size:1.2rem;
+      font-weight:900;
+    }
+
+    .plans-head p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .plans-close{
+      width:36px;
+      height:36px;
+      border:none;
+      border-radius:12px;
+      background:rgba(255,255,255,.06);
+      color:#eef2ff;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 auto;
+      cursor:pointer;
+    }
+
+    .plans-grid{
+      display:grid;
+      grid-template-columns:repeat(5, minmax(0, 1fr));
+      gap:12px;
+    }
+
+    .plan-card{
+      border:1px solid rgba(255,255,255,.09);
+      background:rgba(255,255,255,.05);
+      border-radius:18px;
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .plan-card.featured{
+      background:linear-gradient(135deg, rgba(59,130,246,.18), rgba(255,255,255,.06));
+      border-color:rgba(96,165,250,.28);
+    }
+
+    .plan-card.anchor{
+      background:linear-gradient(135deg, rgba(34,197,94,.16), rgba(255,255,255,.06));
+      border-color:rgba(34,197,94,.26);
+    }
+
+    .plan-name{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      font-weight:900;
+      margin-bottom:8px;
+    }
+
+    .plan-tag{
+      padding:5px 8px;
+      border-radius:999px;
+      background:rgba(34,197,94,.12);
+      color:#bbf7d0;
+      font-size:.72rem;
+      font-weight:800;
+      border:1px solid rgba(34,197,94,.18);
+    }
+
+    .plan-amount{
+      font-size:1.55rem;
+      font-weight:900;
+      margin-bottom:10px;
+    }
+
+    .plan-amount span{
+      color:var(--muted);
+      font-size:.85rem;
+      font-weight:700;
+    }
+
+    .plan-benefits{
+      list-style:none;
+      padding:0;
+      margin:0;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      color:#d9e4ff;
+      line-height:1.35;
+      flex:1;
+    }
+
+    .plan-benefits li{
+      display:flex;
+      gap:8px;
+    }
+
+    .plan-benefits i{
+      color:#7dd3fc;
+      margin-top:2px;
+      flex:0 0 auto;
+    }
+
+    .plan-action{
+      margin-top:14px;
+    }
+
+    .plan-current{
+      cursor:default;
+      background:rgba(255,255,255,.06);
+      color:#cbd5e1;
+      border:1px solid rgba(255,255,255,.1);
+    }
+
+    .plan-current:hover{
+      transform:none;
+    }
+
+    /* MAIN */
+    .main{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      padding:12px;
+      overflow:auto;
+      min-width:0;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .top-left h2{
+      font-size:1.16rem;
+      font-weight:900;
+      letter-spacing:-.03em;
+    }
+
+    .top-left p{
+      color:var(--muted);
+      font-size:.88rem;
+      margin-top:3px;
+    }
+
+    .top-right{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-left:auto;
+    }
+
+    .btn{
+      border:none;
+      border-radius:12px;
+      padding:10px 14px;
+      font-size:.9rem;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      transition:.18s ease;
+      white-space:nowrap;
+    }
+
+    .btn:hover{
+      transform: translateY(-1px);
+    }
+
+    .btn-primary{
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color:#fff;
+      box-shadow: 0 12px 26px rgba(59,130,246,.22);
+    }
+
+    .btn-soft{
+      background: rgba(255,255,255,.06);
+      color:#eef2ff;
+      border:1px solid var(--border);
+    }
+
+    .hero{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding:11px 14px;
+      border-radius:20px;
+      border:1px solid var(--border);
+      background: linear-gradient(135deg, rgba(59,130,246,.18), rgba(255,255,255,.04));
+      box-shadow: var(--shadow);
+      margin-bottom:10px;
+    }
+
+    .hero h3{
+      font-size:1.02rem;
+      font-weight:900;
+      margin-bottom:4px;
+      letter-spacing:-.02em;
+    }
+
+    .hero p{
+      color:#d9e4ff;
+      font-size:.9rem;
+      line-height:1.4;
+      max-width:70ch;
+    }
+
+    .hero-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      flex:0 0 auto;
+    }
+
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap:10px;
+      margin-bottom:10px;
+    }
+
+    .kpi{
+      border:1px solid var(--border);
+      background: var(--panel);
+      border-radius:18px;
+      padding:11px 12px;
+      box-shadow: var(--shadow);
+      min-height:78px;
+    }
+
+    .kpi .label{
+      color:#dce3ff;
+      font-size:.84rem;
+      font-weight:700;
+      margin-bottom:7px;
+    }
+
+    .kpi .value{
+      font-size:1.18rem;
+      font-weight:900;
+      letter-spacing:-.02em;
+      line-height:1.05;
+    }
+
+    .kpi .sub{
+      margin-top:7px;
+      color:var(--muted);
+      font-size:.8rem;
+    }
+
+    .content{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      flex:1;
+      min-height:0;
+    }
+
+    .card{
+      border:1px solid var(--border);
+      background: var(--panel);
+      border-radius:20px;
+      box-shadow: var(--shadow);
+      min-width:0;
+      overflow:hidden;
+    }
+
+    .card-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 14px 9px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      flex-wrap:wrap;
+    }
+
+    .card-header h4{
+      font-size:.98rem;
+      font-weight:900;
+      letter-spacing:-.01em;
+    }
+
+    .card-header .hint{
+      color:var(--muted);
+      font-size:.83rem;
+      margin-top:2px;
+    }
+
+    .card-body{
+      padding:12px 14px 14px;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.05);
+      max-width:100%;
+    }
+
+    table{
+      width:100%;
+      min-width:760px;
+      border-collapse:collapse;
+      background: rgba(255,255,255,.02);
+    }
+
+    thead th{
+      text-align:left;
+      font-size:.79rem;
+      color:#c9d3f2;
+      font-weight:800;
+      padding:10px 11px;
+      background: rgba(255,255,255,.03);
+      border-bottom:1px solid rgba(255,255,255,.07);
+      white-space:nowrap;
+    }
+
+    tbody td{
+      padding:11px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      color:#eef2ff;
+      vertical-align:middle;
+      white-space:nowrap;
+    }
+
+    tbody tr:hover{
+      background: rgba(255,255,255,.025);
+    }
+
+    .money{
+      font-weight:800;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.75rem;
+      font-weight:800;
+      line-height:1;
+      border:1px solid transparent;
+    }
+
+    .pending{ background: rgba(251,191,36,.12); color:#fbbf24; border-color: rgba(251,191,36,.16); }
+    .approved{ background: rgba(59,130,246,.12); color:#60a5fa; border-color: rgba(59,130,246,.16); }
+    .done{ background: rgba(34,197,94,.12); color:#4ade80; border-color: rgba(34,197,94,.16); }
+
+    .actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      align-items:center;
+      white-space:nowrap;
+      flex-wrap:wrap;
+    }
+
+    .action{
+      border:none;
+      border-radius:10px;
+      padding:7px 10px;
+      font-size:.75rem;
+      font-weight:800;
+      cursor:pointer;
+      color:#e9edff;
+      background: rgba(255,255,255,.06);
+      text-decoration:none;
+      transition:.16s ease;
+      line-height:1;
+    }
+
+    .action:hover{
+      background: rgba(255,255,255,.11);
+      transform: translateY(-1px);
+    }
+
+    .action.primary{
+      background: linear-gradient(135deg, #2563eb, #4f8cff);
+      color:#fff;
+    }
+
+    .action.danger{
+      background:#dc2626;
+      color:#fff;
+    }
+
+    .action.danger:hover{
+      background:#b91c1c;
+    }
+
+    .more{
+      width:34px;
+      height:32px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+    }
+
+    .footer-note{
+      margin-top:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      color:var(--muted);
+      font-size:.8rem;
+      flex-wrap:wrap;
+    }
+
+    /* USER DROPDOWN */
+    .user-dropdown{
+      position:relative;
+      display:inline-block;
+    }
+
+    .user-btn{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      background: linear-gradient(135deg, #5b63f6, #4f46e5);
+      color:white;
+      border:none;
+      padding:10px 14px;
+      border-radius:16px;
+      cursor:pointer;
+      font-weight:700;
+      box-shadow: 0 10px 24px rgba(79,70,229,.28);
+      transition:.18s ease;
+    }
+
+    .user-btn:hover{
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .user-btn img{
+      width:26px;
+      height:26px;
+      border-radius:999px;
+      object-fit:cover;
+      flex:0 0 auto;
+    }
+
+    .user-btn i{
+      font-size:12px;
+      opacity:.95;
+    }
+
+    .dropdown-menu{
+      position:absolute;
+      right:0;
+      top:calc(100% + 10px);
+      min-width:230px;
+      background:#1b1c31;
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:18px;
+      padding:10px;
+      box-shadow:0 18px 40px rgba(0,0,0,.35);
+      display:none;
+      z-index:50;
+    }
+
+    .dropdown-menu.open{
+      display:block;
+    }
+
+    .dropdown-menu a{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 12px;
+      border-radius:12px;
+      color:#eef2ff;
+      text-decoration:none;
+      font-weight:500;
+    }
+
+    .dropdown-menu a:hover{
+      background: rgba(255,255,255,.05);
+    }
+
+    .dropdown-menu a.danger{
+      color:#ff6b6b;
+    }
+
+    .dropdown-menu a.danger:hover{
+      background: rgba(255,107,107,.08);
+    }
+
+    .menu-divider{
+      height:1px;
+      background: rgba(255,255,255,.08);
+      margin:8px 0;
+    }
+
+    @media (max-width: 1100px){
+      .plans-grid{
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 980px){
+      .sidebar{
+        display:none;
+      }
+
+      .kpis{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px){
+      .main{
+        padding:10px;
+      }
+
+      .topbar{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .top-right{
+        width:100%;
+      }
+
+      .hero{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .kpis{
+        grid-template-columns:1fr;
+      }
+
+      .hero-actions,
+      .top-right{
+        width:100%;
+      }
+
+      .btn,
+      .user-btn{
+        width:100%;
+        justify-content:center;
+      }
+
+      .actions{
+        justify-content:flex-start;
+      }
+
+      .card-header{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .plans-grid{
+        grid-template-columns:1fr;
+      }
+
+      .dropdown-menu{
+        width:100%;
+        min-width:unset;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-badge">FC</div>
+        <div>
+          <h1>FactuCloud</h1>
+          <p>Billing SaaS</p>
+        </div>
+      </div>
+
+      <div class="nav">
+        <a class="active" href="#"><span class="dot"></span> Dashboard</a>
+        <a href="/nueva"><span class="dot"></span> Nueva Cotización</a>
+        <a href="/historial"><span class="dot"></span> Historial</a>
+        <a href="/facturas"><span class="dot"></span> Facturas</a>
+        <a href="/clientes"><span class="dot"></span> Clientes</a>
+        <a href="/configurar_ncf"><span class="dot"></span> NCF</a>
+        <a href="/usuarios"><span class="dot"></span> Cuentas</a>
+      </div>
+
+      <div class="sidebar-card">
+        <div class="title">Plan Mensual</div>
+        <div class="small">Plan actual: Profesional</div>
+        <div class="plan-price">US$ 39 / mes</div>
+        <button type="button" class="mini-btn" onclick="openPlansModal()">Ver planes</button>
+      </div>
+    </aside>
+
+    <div class="plans-modal" id="plansModal" aria-hidden="true">
+      <div class="plans-dialog" role="dialog" aria-modal="true" aria-labelledby="plansTitle">
+        <div class="plans-head">
+          <div>
+            <h3 id="plansTitle">Planes mensuales</h3>
+            <p>Elige el nivel que mejor encaje con tu volumen de cotizaciones y facturacion.</p>
+          </div>
+          <button type="button" class="plans-close" onclick="closePlansModal()" aria-label="Cerrar planes">
+            <i class="fa fa-xmark"></i>
+          </button>
         </div>
 
+        <div class="plans-grid">
+          <div class="plan-card">
+            <div class="plan-name">Gratis</div>
+            <div class="plan-amount">US$ 0 <span>/ mes</span></div>
+            <ul class="plan-benefits">
+              <li><i class="fa fa-check"></i> Para probar sin compromiso</li>
+              <li><i class="fa fa-check"></i> 5 cotizaciones al mes</li>
+              <li><i class="fa fa-check"></i> 3 clientes guardados</li>
+              <li><i class="fa fa-check"></i> Facturas con marca FactuCloud</li>
+              <li><i class="fa fa-check"></i> Soporte por correo</li>
+            </ul>
+            <button type="button" class="mini-btn plan-action" onclick="acquirePlan('Gratis')">Empezar Gratis</button>
+          </div>
 
-        <div class="row mb-4">
+          <div class="plan-card">
+            <div class="plan-name">Basico</div>
+            <div class="plan-amount">US$ 9 <span>/ mes</span></div>
+            <ul class="plan-benefits">
+              <li><i class="fa fa-check"></i> Para freelancers y servicios</li>
+              <li><i class="fa fa-check"></i> 100 cotizaciones al mes</li>
+              <li><i class="fa fa-check"></i> 50 clientes guardados</li>
+              <li><i class="fa fa-check"></i> PDF sin marca</li>
+              <li><i class="fa fa-check"></i> Historial basico</li>
+            </ul>
+            <button type="button" class="mini-btn plan-action" onclick="acquirePlan('Basico')">Elegir Basico</button>
+          </div>
 
-            <div class="col-md-3">
-                <div class="card shadow text-center p-3">
-                    <h6>Cotizaciones Pendientes</h6>
-                    <h2>{{ pendientes }}</h2>
-                </div>
-            </div>
+          <div class="plan-card featured">
+            <div class="plan-name">Profesional <span class="plan-tag">Mas elegido</span></div>
+            <div class="plan-amount">US$ 39 <span>/ mes</span></div>
+            <ul class="plan-benefits">
+              <li><i class="fa fa-check"></i> Para PYMEs que facturan en serio</li>
+              <li><i class="fa fa-check"></i> Facturas y cotizaciones ilimitadas</li>
+              <li><i class="fa fa-check"></i> Hasta 5 usuarios</li>
+              <li><i class="fa fa-check"></i> NCF E31, E32, E33 y E34</li>
+              <li><i class="fa fa-check"></i> Reportes de ventas y clientes</li>
+            </ul>
+            <button type="button" class="mini-btn plan-action plan-current" disabled>Plan actual</button>
+          </div>
 
-            <div class="col-md-3">
-                <div class="card shadow text-center p-3">
-                    <h6>Cotizaciones Aprobadas</h6>
-                    <h2>{{ aprobadas }}</h2>
-                </div>
-            </div>
+          <div class="plan-card">
+            <div class="plan-name">Empresa <span class="plan-tag">Mejor valor</span></div>
+            <div class="plan-amount">US$ 79 <span>/ mes</span></div>
+            <ul class="plan-benefits">
+              <li><i class="fa fa-check"></i> Todo lo del plan Profesional</li>
+              <li><i class="fa fa-check"></i> Hasta 15 usuarios</li>
+              <li><i class="fa fa-check"></i> Multiples sucursales y NCF</li>
+              <li><i class="fa fa-check"></i> Roles y permisos por usuario</li>
+              <li><i class="fa fa-check"></i> API e integraciones</li>
+              <li><i class="fa fa-check"></i> Soporte WhatsApp prioritario</li>
+            </ul>
+            <button type="button" class="mini-btn plan-action" onclick="acquirePlan('Empresa')">Solicitar Demo</button>
+          </div>
 
-            <div class="col-md-3">
-                <div class="card shadow text-center p-3">
-                    <h6>Facturas Emitidas</h6>
-                    <h2>{{ facturadas }}</h2>
-                </div>
-            </div>
+          <div class="plan-card anchor">
+            <div class="plan-name">Corporativo <span class="plan-tag">Ahorra 40%</span></div>
+            <div class="plan-amount">US$ 199 <span>/ mes</span></div>
+            <ul class="plan-benefits">
+              <li><i class="fa fa-check"></i> Todo lo del plan Empresa</li>
+              <li><i class="fa fa-check"></i> Usuarios ilimitados</li>
+              <li><i class="fa fa-check"></i> Soporte WhatsApp y llamadas</li>
+              <li><i class="fa fa-check"></i> Onboarding inicial incluido</li>
+              <li><i class="fa fa-check"></i> Contabilidad basica y libro de ventas</li>
+              <li><i class="fa fa-check"></i> Seguridad empresarial</li>
+            </ul>
+            <button type="button" class="mini-btn plan-action" onclick="acquirePlan('Corporativo')">Hablar con Ventas</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-            <div class="col-md-3">
-                <div class="card shadow text-center p-3">
-                    <h6>Total Facturado</h6>
-                    <h2>US$ {{ "%.2f"|format(total_facturado) }}</h2>
-                </div>
-            </div>
-
+    <main class="main">
+      <div class="topbar">
+        <div class="top-left">
+          <h2>Dashboard</h2>
+          <p>Resumen compacto con métricas, cotizaciones y acciones rápidas.</p>
         </div>
 
+        <div class="top-right">
+          <a href="/nueva" class="btn btn-primary">+ Nueva Cotización</a>
 
-        <div class="card shadow p-4">
-
-        <div class="table-responsive">
-
-        <table class="table table-bordered table-hover align-middle">
-
-        <thead class="table-dark">
-
-        <tr>
-        <th>ID</th>
-        <th>Código</th>
-        <th>Cliente</th>
-        <th>Fecha</th>
-        <th>Total</th>
-        <th>Estado</th>
-        <th class="acciones-col">Acciones</th>
-        </tr>
-
-        </thead>
-
-        <tbody>
-
-        {% for cotizacion in cotizaciones %}
-
-        <tr>
-
-        <td>{{ cotizacion.id }}</td>
-        <td>{{ cotizacion.codigo }}</td>
-        <td>{{ cotizacion.cliente }}</td>
-        <td>{{ cotizacion.fecha }}</td>
-
-        <td>
-        US$ {{ cotizacion.total }}
-        </td>
-
-        <td>
-
-        {% if cotizacion.estado == "Pendiente" %}
-        <span class="badge bg-warning text-dark">
-        Pendiente
-        </span>
-
-        {% elif cotizacion.estado == "Aprobada" %}
-        <span class="badge bg-primary">
-        Aprobada
-        </span>
-
-        {% elif cotizacion.estado == "Facturada" %}
-        <span class="badge bg-success">
-        Facturada
-        </span>
-        {% endif %}
-
-        </td>
-
-        <td class="acciones-celda">
-
-
-        <div class="acciones-cotizacion">
-
-        <a href="/detalle/{{ cotizacion.id }}" class="btn btn-sm btn-info">
-        Ver
-        </a>
-
-        <a href="/editar_cotizacion/{{ cotizacion.id }}" class="btn btn-sm btn-warning">
-        Editar
-        </a>
-
-        {% if cotizacion.estado == "Pendiente" %}
-        <a href="/aprobar/{{ cotizacion.id }}" class="btn btn-sm btn-primary">
-        Aprobar
-        </a>
-        {% endif %}
-
-        {% if cotizacion.estado != "Facturada" %}
-        <a href="/facturar/{{ cotizacion.id }}" class="btn btn-sm btn-success">
-        Facturar
-        </a>
-        {% endif %}
-
-        <a href="/cotizacion_pdf/{{ cotizacion.id }}"
-        class="btn btn-sm btn-dark">
-        PDF
-        </a>
-
-        <a href="/enviar_cotizacion/{{ cotizacion.id }}"
-        class="btn btn-sm btn-primary">
-        Enviar
-        </a>
-
-        {% if cotizacion.estado == "Facturada" %}
-        <a href="/factura_pdf/{{ cotizacion.id }}"
-        class="btn btn-sm btn-secondary">
-        Factura
-        </a>
-        {% endif %}
-
-        <form action="/eliminar_cotizacion/{{ cotizacion.id }}" method="POST">
-            <button class="btn btn-sm btn-danger" type="submit"
-                onclick="return confirm('¿Seguro que deseas eliminar esta cotización?')">
-                Eliminar
+          <div class="user-dropdown">
+            <button class="user-btn" id="userBtn" type="button">
+              <img
+                src="{{ url_for('static', filename='uploads/' + (usuario_foto if usuario_foto else 'default.png')) }}{% if usuario_foto_version %}?v={{ usuario_foto_version }}{% endif %}"
+                alt="Foto de perfil"
+              >
+              <span>{{ usuario if usuario else "Usuario" }}</span>
+              <i class="fa-solid fa-chevron-down"></i>
             </button>
-        </form>
 
+            <div class="dropdown-menu" id="userMenu">
+              <a href="/usuarios">
+                <i class="fa-solid fa-user-group"></i>
+                <span>Cambiar cuenta</span>
+              </a>
+
+              <a href="/perfil">
+                <i class="fa-solid fa-gear"></i>
+                <span>Editar Perfil</span>
+              </a>
+
+              <div class="menu-divider"></div>
+
+              <a href="/logout" class="danger">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar sesión</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="hero">
+        <div>
+          <h3>Tu operación se ve más profesional.</h3>
+          <p>
+            Controla cotizaciones, facturación y seguimiento en una interfaz limpia,
+            compacta y más cercana a una app premium.
+          </p>
         </div>
 
-        </td>
+        <div class="hero-actions">
+          <a href="/historial" class="btn btn-soft">Ver historial</a>
+          <a href="/facturas" class="btn btn-primary">Ver facturas</a>
+        </div>
+      </section>
 
-        </tr>
-
-        {% endfor %}
-
-        </tbody>
-
-        </table>
-
+      <section class="kpis">
+        <div class="kpi">
+          <div class="label">Cotizaciones Pendientes</div>
+          <div class="value">{{ pendientes }}</div>
+          <div class="sub">Necesitan revisión</div>
         </div>
 
+        <div class="kpi">
+          <div class="label">Cotizaciones Aprobadas</div>
+          <div class="value">{{ aprobadas }}</div>
+          <div class="sub">Listas para facturar</div>
         </div>
 
-        {% endblock %}
+        <div class="kpi">
+          <div class="label">Facturas Emitidas</div>
+          <div class="value">{{ facturadas }}</div>
+          <div class="sub">Documentos generados</div>
+        </div>
+
+        <div class="kpi">
+          <div class="label">Total Facturado</div>
+          <div class="value">US$ {{ "%.2f"|format(total_facturado) }}</div>
+          <div class="sub">Acumulado este periodo</div>
+        </div>
+      </section>
+
+      <section class="content">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h4>Cotizaciones recientes</h4>
+              <div class="hint">Gestión rápida de cotizaciones</div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Código</th>
+                    <th>Cliente</th>
+                    <th>Fecha</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th style="text-align:right;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for cotizacion in cotizaciones %}
+                  <tr>
+                    <td>#{{ cotizacion.id }}</td>
+                    <td>{{ cotizacion.codigo }}</td>
+                    <td>{{ cotizacion.cliente }}</td>
+                    <td>{{ cotizacion.fecha }}</td>
+                    <td class="money">US$ {{ cotizacion.total }}</td>
+                    <td>
+                      {% if cotizacion.estado == "Pendiente" %}
+                        <span class="badge pending">Pendiente</span>
+                      {% elif cotizacion.estado == "Aprobada" %}
+                        <span class="badge approved">Aprobada</span>
+                      {% elif cotizacion.estado == "Facturada" %}
+                        <span class="badge done">Facturada</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="actions">
+                        <a href="/detalle/{{ cotizacion.id }}" class="action">Ver</a>
+                        <a href="/editar_cotizacion/{{ cotizacion.id }}" class="action">Editar</a>
+
+                        {% if cotizacion.estado != "Facturada" %}
+                        <a href="/facturar/{{ cotizacion.id }}" class="action primary">Facturar</a>
+                        {% endif %}
+
+                        <a href="/cotizacion_pdf/{{ cotizacion.id }}" class="action">PDF</a>
+
+                        <form action="/eliminar_cotizacion/{{ cotizacion.id }}" method="POST">
+                          <button type="submit" class="action danger">Eliminar</button>
+                        </form>
+
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="footer-note">
+              <span>Tip: deja las acciones secundarias en un menú para mantener la interfaz limpia.</span>
+              <span>© FactuCloud</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const userBtn = document.getElementById('userBtn');
+    const userMenu = document.getElementById('userMenu');
+
+    userBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userMenu.classList.toggle('open');
+    });
+
+    document.addEventListener('click', () => {
+      userMenu.classList.remove('open');
+    });
+
+    userMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    function openPlansModal(){
+      const modal = document.getElementById('plansModal');
+      if(!modal) return;
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closePlansModal(){
+      const modal = document.getElementById('plansModal');
+      if(!modal) return;
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    function acquirePlan(plan){
+      alert('Seleccionaste el plan ' + plan + '. Aqui se conectaria el pago o la activacion del plan.');
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if(event.key === 'Escape'){
+        closePlansModal();
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      const modal = document.getElementById('plansModal');
+      if(modal && event.target === modal){
+        closePlansModal();
+      }
+    });
+  </script>
+</body>
+</html>

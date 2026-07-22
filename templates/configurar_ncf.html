@@ -2,41 +2,43 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-<div class="main-content">
-    <div class="center-container">
-
-    <a href="{{ url_for('index') }}" class="back-btn">
+<div class="container">
+  <div class="page-header">
+    <div>
+      <a href="{{ url_for('index') }}" class="back-btn">
         <i class="bi bi-arrow-left"></i>
-    </a>
-
-    <div class="form-card">
-
-        <h1>Configurar NCF</h1>
-
-        <form method="POST">
-
-    <div class="form-group">
-        <label>Tipo de NCF</label>
-        <input type="text" name="tipo" required>
+        Volver al dashboard
+      </a>
+      <h1 class="page-title">Configurar NCF</h1>
+      <div class="page-subtitle">Define el rango disponible para la facturacion fiscal.</div>
     </div>
+  </div>
 
-    <div class="form-group">
-        <label>Desde</label>
-        <input type="number" name="desde" required>
-    </div>
-
-    <div class="form-group">
-        <label>Hasta</label>
-        <input type="number" name="hasta" required>
-    </div>
-
-    <button type="submit">Guardar Configuración</button>
-
-</form>
+  <div class="form-card p-4">
+    <form method="POST">
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label>Tipo de NCF</label>
+          <input type="text" name="tipo" required>
         </div>
-    </div>
+
+        <div class="col-md-4 mb-3">
+          <label>Desde</label>
+          <input type="number" name="desde" required>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label>Hasta</label>
+          <input type="number" name="hasta" required>
+        </div>
+      </div>
+
+      <button type="submit">
+        <i class="fa fa-save"></i>
+        Guardar configuracion
+      </button>
+    </form>
+  </div>
 </div>
 
 {% endblock %}

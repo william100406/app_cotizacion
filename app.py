@@ -1880,6 +1880,50 @@ def login():
     return render_template("login.html")
 
 
+@app.route("/registro", methods=["GET", "POST"])
+def registro():
+    if request.method == "POST":
+        usuario = request.form.get("usuario", "").strip()
+        password = request.form.get("password", "")
+        confirmar = request.form.get("confirmar", "")
+
+        if not usuario or not password:
+            flash("Completa usuario y contrasena.", "error")
+            return render_template("registro.html")
+
+        if password != confirmar:
+            flash("Las contrasenas no coinciden.", "error")
+            return render_template("registro.html")
+
+        if len(password) < 4:
+            flash("La contrasena debe tener al menos 4 caracteres.", "error")
+            return render_template("registro.html")
+
+        conn = get_db()
+        existente = conn.execute(
+            "SELECT id FROM usuarios WHERE usuario=%s",
+            (usuario,),
+        ).fetchone()
+
+        if existente:
+            conn.close()
+            flash("Ese usuario ya existe.", "error")
+            return render_template("registro.html")
+
+        conn.execute(
+            "INSERT INTO usuarios (usuario, password) VALUES (%s, %s)",
+            (usuario, generate_password_hash(password)),
+        )
+        conn.commit()
+        conn.close()
+
+        session["usuario"] = usuario
+        flash("Cuenta creada correctamente.", "success")
+        return redirect(url_for("index"))
+
+    return render_template("registro.html")
+
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -1894,22 +1938,28 @@ def usuarios():
     conn = get_db()
 
     if request.method == "POST":
-        nuevo_usuario = request.form["usuario"]
-        nueva_password = request.form["password"]
-        conn.execute(
-            """
-            UPDATE usuarios
-            SET usuario=%s, password=%s
-            WHERE id=1
-            """,
-            (nuevo_usuario, generate_password_hash(nueva_password)),
-        )
-        conn.commit()
+        user_id = request.form.get("user_id")
+        user = conn.execute(
+            "SELECT * FROM usuarios WHERE id=%s",
+            (user_id,),
+        ).fetchone()
 
-    user = conn.execute("SELECT * FROM usuarios LIMIT 1").fetchone()
+        if user:
+            session["usuario"] = user["usuario"]
+            conn.close()
+            flash(f"Cuenta activa: {user['usuario']}", "success")
+            return redirect(url_for("index"))
+
+        flash("No se encontro la cuenta seleccionada.", "error")
+
+    users = conn.execute("SELECT id, usuario, foto FROM usuarios ORDER BY id").fetchall()
     conn.close()
 
-    return render_template("usuarios.html", user=user)
+    return render_template(
+        "usuarios.html",
+        users=users,
+        current_usuario=session.get("usuario"),
+    )
 
 
 @app.route("/clientes", methods=["GET", "POST"])
@@ -2034,8 +2084,7 @@ def arreglar_db():
 @app.route("/eliminar_cotizacion/<int:id>", methods=["POST"])
 def eliminar_cotizacion(id):
     conn = get_db()
-    conn.execute("DELETE FROM cotizacion_items WHERE cotizacion_id=%s", (id,))
-    conn.execute("DELETE FROM cotizaciones WHERE id=%s", (id,))
+    conn.execute("UPDATE cotizaciones SET estado=%s WHERE id=%s", ("Eliminada", id))
     conn.commit()
     conn.close()
     return redirect(url_for("index"))
@@ -2050,7 +2099,12 @@ def inject_user():
     if usuario_actual:
         try:
             conn = get_db()
-            user = conn.execute("SELECT usuario, foto FROM usuarios LIMIT 1").fetchone()
+            user = conn.execute(
+                "SELECT usuario, foto FROM usuarios WHERE usuario=%s",
+                (usuario_actual,),
+            ).fetchone()
+            if not user:
+                user = conn.execute("SELECT usuario, foto FROM usuarios LIMIT 1").fetchone()
             conn.close()
 
             if user:
@@ -2076,7 +2130,12 @@ def perfil():
         return redirect(url_for("login"))
 
     conn = get_db()
-    user = conn.execute("SELECT * FROM usuarios LIMIT 1").fetchone()
+    user = conn.execute(
+        "SELECT * FROM usuarios WHERE usuario=%s",
+        (session["usuario"],),
+    ).fetchone()
+    if not user:
+        user = conn.execute("SELECT * FROM usuarios LIMIT 1").fetchone()
     empresa = conn.execute("SELECT * FROM empresa LIMIT 1").fetchone()
 
     if request.method == "POST":
@@ -2163,4 +2222,5 @@ if __name__ == "__main__":
         except Exception as e:
             print("Error arreglando tabla:", e)
 
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

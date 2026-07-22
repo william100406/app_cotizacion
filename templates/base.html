@@ -1,843 +1,1184 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link rel="manifest" href="/static/manifest.json">
-<link rel="icon" href="/static/FC.ico">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-<meta name="theme-color" content="#1e1e2f">
-<meta charset="UTF-8">
-<title>FactuCloud</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<style>
-
-body{
-background-color:#f4f6f9;
-}
-
-
-
-.sidebar{
-position:fixed;
-left: 0;
-top: 0;
-width: 250px;
-height:100vh;
-background-color:#1e293b;
-color:white;
-padding:20px;
-}
-
-.sidebar h4{
-margin-bottom:20px;
-}
-
-
-.sidebar a{
-color:white;
-text-decoration:none;
-display:flex;
-align-items:center;
-gap:10px;
-width:100%;
-margin-bottom:6px;
-padding:10px 14px;
-border-radius:8px;
-transition:0.25s ease;
-}
-
-.sidebar a i{
-width:18px;
-text-align:center;
-opacity:0.9;
-}
-
-.sidebar a:hover{
-background:rgba(255,255,255,0.10);
-color:white;
-transform:translateX(6px);
-} 
-
-.submenu{
-display:none;
-list-style:none;
-margin-top:8px;
-padding:10px;
-border-radius:12px;
-background:rgba(255,255,255,0.05);
-border:1px solid rgba(255,255,255,0.05);
-animation:fadeIn 0.3s ease;
-}
-
-.submenu li{
-margin-bottom:8px;
-}
-
-.submenu li:last-child{
-margin-bottom:0;
-}
-
-.submenu a{
-display:flex;
-align-items:center;
-gap:8px;
-padding:8px 10px;
-border-radius:8px;
-font-size:14px;
-transition:0.2s;
-}
-
-.submenu a:hover{
-background:rgba(255,255,255,0.08);
-transform:translateX(4px);
-}
-
-.tema-box{
-display:flex;
-flex-direction:column;
-gap:5px;
-font-size:13px;
-color:#cbd5e1;
-}
-
-.tema-box span{
-display:flex;
-align-items:center;
-gap:6px;
-}
-
-.tema-box select{
-background:rgba(255,255,255,0.05);
-border:1px solid rgba(255,255,255,0.1);
-color:#fff;
-border-radius:8px;
-padding:6px;
-font-size:13px;
-}
-
-.tema-box select:focus{
-outline:none;
-border-color:#f59e0b;
-}
-
-@keyframes fadeIn{
-from{
-opacity:0;
-transform:translateY(-5px);
-}
-to{
-opacity:1;
-transform:translateY(0);
-}
-}
-
-
-.content{
-    margin-left: 250px;
-    padding:30px;
-    width: calc(100% - 250px);
-    min-height: 100vh; /* 🔥 esto arregla el corte */
-    background: transparent !important; /* 🔥 CLAVE */
-}
-
-.card{
-border-radius:12px;
-}
-
-
-body.tema-claro{
-background:#f4f6f9;
-color:#000;
-}
-
-body.tema-oscuro{
-    background:
-        radial-gradient(circle at 20% 30%, rgba(79,140,255,0.25), transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(13,110,253,0.18), transparent 40%),
-        linear-gradient(135deg, #0f1020, #141429);
-}
-
-body.tema-oscuro .sidebar{
-    background: rgba(15,23,42,0.6);
-    backdrop-filter: blur(12px);
-}
-
-body.tema-oscuro .card{
-    background: rgba(255,255,255,0.04) !important;
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border-radius: 16px;
-    border: 1px solid rgba(255,255,255,0.08);
-    color: white !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-}
-
-body.tema-oscuro .form-card{
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(20px);
-    color: #fff;
-}
-
-body.tema-oscuro table{
-    background: transparent !important;
-}
-
-body.tema-oscuro thead{
-    background: rgba(255,255,255,0.05) !important;
-}
-
-body.tema-oscuro tr:hover{
-    background: rgba(255,255,255,0.05);
-}
-
-body.tema-oscuro th{
-    background: #0f172a;
-    color: #fff;
-}
-
-body.tema-oscuro td{
-    background: transparent;
-    color: #e5e7eb;
-    border-color: rgba(255,255,255,0.1);
-}
-
-body.tema-oscuro input,
-body.tema-oscuro select{
-    background: #0f172a;
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.2);
-}
-
-body.tema-oscuro button{
-    background: #4f46e5;
-    color: white;
-    border: none;
-}
-
-body.tema-oscuro .btn-danger{
-    background:#e74c3c !important;
-    color:white !important;
-    border: none;
-    border-radius: 8px;
-}
-
-body.tema-oscuro .btn-danger:hover{
-    background:#c0392b !important;
-    border: none;
-    border-radius: 8px;
-}
-
-body.tema-oscuro button:hover{
-    background: #6366f1;
-}
-
-body.tema-oscuro h1,
-body.tema-oscuro h2,
-body.tema-oscuro h3,
-body.tema-oscuro h4,
-body.tema-oscuro p,
-body.tema-oscuro label{
-    color: #ffffff;
-}
-
-body.tema-oscuro ::placeholder{
-    color: #9ca3af;
-}
-
-body.tema-claro .submenu{
-    background:#ffffff;
-    border:1px solid rgba(0,0,0,0.08);
-}
-
-body.tema-claro .submenu a{
-    color:#1e293b;
-}
-
-body.tema-claro .submenu a:hover{
-    background:rgba(0,0,0,0.05);
-}
-
-body.tema-claro .tema-box{
-    color:#1e293b;
-}
-
-body.tema-claro .tema-box select{
-    background:#ffffff;
-    color:#1e293b;
-    border:1px solid rgba(0,0,0,0.2);
-}
-
-body.tema-claro .sidebar{
-    background:#ffffff;
-    color:#1e293b;
-}
-
-body.tema-claro .sidebar a{
-    color:#1e293b;
-}
-
-body.tema-claro .sidebar a:hover{
-    background:rgba(0,0,0,0.05);
-}
-
-body.tema-claro .submenu{
-    background:#ffffff;
-    border:1px solid rgba(0,0,0,0.08);
-}
-
-body.tema-claro .submenu a{
-    color:#1e293b;
-}
-
-body.tema-claro .submenu a:hover{
-    background:rgba(0,0,0,0.05);
-}
-
-body.tema-claro .tema-box{
-    color:#1e293b;
-}
-
-body.tema-claro .tema-box select{
-    background:#ffffff;
-    color:#1e293b;
-    border:1px solid rgba(0,0,0,0.2);
-}
-
-body.tema-claro .sidebar{
-    background:#ffffff !important;
-    color:#1e293b !important;
-}
-
-body.tema-claro .sidebar h4{
-    color:#0f172a;
-}
-
-body.tema-claro .sidebar a{
-    color:#1e293b !important;
-    font-weight:500;
-    opacity:1;
-}
-
-body.tema-claro .sidebar a i{
-    color:#1e293b !important;
-    opacity:1;
-}
-
-body.tema-claro .sidebar a:hover{
-    background:rgba(0,0,0,0.05);
-    color:#000 !important;
-}
-
-body.tema-claro .submenu{
-    background:#ffffff;
-    border:1px solid rgba(0,0,0,0.1);
-}
-
-body.tema-claro .submenu a{
-    color:#1e293b !important;
-}
-
-body.tema-claro .tema-box{
-    color:#1e293b;
-}
-
-body.tema-claro select{
-    background:#ffffff !important;
-    color:#1e293b !important;
-    border:1px solid rgba(0,0,0,0.2);
-}
-
-body.tema-claro button{
-    opacity:1;
-}
-
-.topbar{
-display:flex;
-justify-content:flex-end;
-margin-bottom:20px;
-}
-
-.profile-dropdown{
-position:relative;
-}
-
-.profile-btn{
-display:flex;
-align-items:center;
-gap:8px;
-background:rgba(255,255,255,0.08);
-border:1px solid rgba(255,255,255,0.1);
-color:inherit;
-padding:8px 12px;
-border-radius:10px;
-cursor:pointer;
-transition:0.2s;
-}
-
-.profile-avatar-img{
-width:24px;
-height:24px;
-border-radius:50%;
-object-fit:cover;
-background:#0f172a;
-border:1px solid rgba(255,255,255,0.45);
-}
-
-.profile-name{
-max-width:160px;
-overflow:hidden;
-text-overflow:ellipsis;
-white-space:nowrap;
-}
-
-.profile-btn:hover{
-background:rgba(255,255,255,0.15);
-}
-
-.profile-menu{
-position:absolute;
-top:110%;
-right:0;
-background:#1e1e2f;
-border-radius:12px;
-padding:8px;
-min-width:200px;
-display:none;
-box-shadow:0 10px 25px rgba(0,0,0,0.3);
-z-index:1000;
-}
-
-.profile-menu a{
-display:flex;
-align-items:center;
-gap:8px;
-padding:10px;
-border-radius:8px;
-text-decoration:none;
-color:#e5e7eb;
-transition:0.2s;
-}
-
-.profile-menu a:hover{
-background:rgba(255,255,255,0.1);
-}
-
-.profile-menu .logout{
-color:#f87171;
-}
-
-.profile-menu .divider{
-height:1px;
-background:rgba(255,255,255,0.1);
-margin:5px 0;
-}
-
-.profile-menu.show{
-display:block;
-}
-
-body.tema-claro .profile-menu{
-background:#ffffff;
-color:#1e293b;
-border:1px solid rgba(0,0,0,0.1);
-}
-
-body.tema-claro .profile-menu a{
-color:#1e293b;
-}
-
-body.tema-claro .profile-menu a:hover{
-background:rgba(0,0,0,0.05);
-}
-
-.profile-card{
-border-radius:14px;
-}
-
-.profile-header .avatar{
-width:60px;
-height:60px;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-background:linear-gradient(135deg,#4f46e5,#6366f1);
-color:white;
-font-size:22px;
-}
-
-.cuenta-item{
-padding:10px;
-border-radius:10px;
-transition:0.2s;
-}
-
-.cuenta-item:hover{
-background:rgba(255,255,255,0.05);
-}
-
-body.tema-oscuro .select2-container--default .select2-selection--single {
-    background-color: #0f172a;
-    border: 1px solid #334155;
-    height: 38px;
-    display: flex;
-    align-items: center;
-}
-
-body.tema-oscuro .select2-container--default .select2-selection__rendered {
-    color: white !important;
-}
-
-body.tema-oscuro .select2-container--default .select2-selection__arrow b {
-    border-color: #fff transparent transparent transparent;
-}
-
-body.tema-oscuro .select2-dropdown {
-    background-color: #0f172a;
-    color: white;
-    border: 1px solid #334155;
-}
-
-body.tema-oscuro .select2-results__option {
-    color: white;
-}
-
-body.tema-oscuro .select2-results__option--highlighted {
-    background-color: #2563eb !important;
-    color: white;
-}
-
-body.tema-oscuro .select2-search__field {
-    background-color: #020617 !important;
-    color: white !important;
-    border: 1px solid #334155 !important;
-}
-
-body.tema-claro .select2-container--default .select2-selection--single {
-    background-color: #ffffff;
-    border: 1px solid #ced4da;
-    height: 38px;
-    display: flex;
-    align-items: center;
-}
-
-body.tema-claro .select2-container--default .select2-selection__rendered {
-    color: #000 !important;
-}
-
-body.tema-claro .select2-container--default .select2-selection__arrow b {
-    border-color: #000 transparent transparent transparent;
-}
-
-body.tema-claro .select2-dropdown {
-    background-color: #ffffff;
-    color: #000;
-    border: 1px solid #ced4da;
-}
-
-body.tema-claro .select2-results__option {
-    color: #000;
-}
-
-body.tema-claro .select2-results__option--highlighted {
-    background-color: #0d6efd !important;
-    color: #fff;
-}
-
-body.tema-claro .select2-search__field {
-    background-color: #ffffff !important;
-    color: #000 !important;
-    border: 1px solid #ced4da !important;
-}
-
-.btn-primary{
-    background: linear-gradient(135deg, #0d6efd, #4f8cff);
-    border: none;
-    color: white;
-    font-weight: 600;
-    padding: 10px 18px;
-    border-radius: 12px;
-
-    box-shadow: 0 0 15px rgba(79, 140, 255, 0.5);
-
-    transition: all 0.3s ease;
-}
-
-.btn-primary:hover{
-    transform: translateY(-2px);
-
-    box-shadow: 
-        0 0 20px rgba(79, 140, 255, 0.8),
-        0 0 40px rgba(79, 140, 255, 0.5);
-}
-
-button,
-.btn-primary{
-    background: linear-gradient(135deg, #0d6efd, #4f8cff);
-    border: none;
-    color: white;
-    font-weight: 600;
-    padding: 10px 18px;
-    border-radius: 12px;
-
-    box-shadow: 0 0 15px rgba(79, 140, 255, 0.5);
-
-    transition: all 0.3s ease;
-}
-
-.mobile-header{
-    display:none;
-}
-
-.overlay{
-    display:none;
-}
-
-@media (max-width: 768px){
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FactuCloud</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="icon" href="/static/FC.ico">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+  <meta name="theme-color" content="#081120">
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#081120;
+      --bg-2:#0b1730;
+      --panel:rgba(255,255,255,.05);
+      --panel-2:rgba(255,255,255,.08);
+      --border:rgba(255,255,255,.09);
+      --border-strong:rgba(255,255,255,.14);
+      --text:#eef2ff;
+      --muted:#98a6c7;
+      --primary:#3b82f6;
+      --primary-2:#60a5fa;
+      --success:#22c55e;
+      --warning:#fbbf24;
+      --danger:#ef4444;
+      --shadow:0 18px 50px rgba(0,0,0,.24);
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    html,
+    body{
+      min-height:100%;
+    }
+
+    body{
+      min-height:100vh;
+      margin:0;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(59,130,246,.16), transparent 26%),
+        radial-gradient(circle at 85% 85%, rgba(34,197,94,.08), transparent 26%),
+        linear-gradient(135deg, var(--bg-2), var(--bg));
+      color:var(--text);
+      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      font-size:14px;
+    }
+
+    a{
+      color:inherit;
+    }
+
+    .app{
+      min-height:100vh;
+      width:100%;
+    }
 
     .sidebar{
-        position: fixed;
-        left: -260px;
-        top: 0;
-        width: 240px;
-        height: 100%;
-        z-index: 1000;
-        transition: 0.3s ease;
+      position:fixed;
+      inset:0 auto 0 0;
+      width:220px;
+      background:rgba(8,17,32,.78);
+      border-right:1px solid var(--border);
+      backdrop-filter:blur(18px);
+      padding:16px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      z-index:1000;
     }
 
-    .sidebar.active{
-        left: 0;
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:6px 8px 8px;
+      text-decoration:none;
     }
 
-    .content{
-        margin-left: 0;
-        width: 100%;
-        padding: 20px;
+    .brand-badge{
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      font-weight:800;
+      color:#fff;
+      background:linear-gradient(135deg, var(--primary), var(--primary-2));
+      box-shadow:0 10px 24px rgba(59,130,246,.28);
+      flex:0 0 auto;
     }
 
-    .mobile-header{
-        display:flex;
-        align-items:center;
-        justify-content: space-between;
-        padding: 14px 16px;
-        background: rgba(15,23,42,0.8);
-        backdrop-filter: blur(12px);
-        position: sticky;
+    .brand h1{
+      margin:0;
+      color:var(--text);
+      font-size:1.02rem;
+      line-height:1.1;
+      font-weight:800;
+    }
+
+    .brand p{
+      margin:2px 0 0;
+      color:var(--muted);
+      font-size:.8rem;
+    }
+
+    .sidebar-nav{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .sidebar-nav a,
+    .sidebar-nav button{
+      width:100%;
+      min-height:40px;
+      padding:9px 11px;
+      border:1px solid transparent;
+      border-radius:14px;
+      background:transparent;
+      color:#e8edff;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      font-weight:600;
+      white-space:nowrap;
+      box-shadow:none;
+      transition:.16s ease;
+    }
+
+    .sidebar-nav a:hover,
+    .sidebar-nav button:hover{
+      background:rgba(255,255,255,.05);
+      border-color:rgba(255,255,255,.06);
+      color:#e8edff;
+    }
+
+    .sidebar-nav a.active,
+    .sidebar-nav button.active{
+      background:linear-gradient(135deg, rgba(59,130,246,.18), rgba(96,165,250,.10));
+      border-color:rgba(96,165,250,.18);
+    }
+
+    .sidebar-nav .dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:rgba(255,255,255,.25);
+      flex:0 0 auto;
+    }
+
+    .sidebar-nav .active .dot{
+      background:#7dd3fc;
+    }
+
+    .sidebar-card{
+      margin-top:auto;
+      border:1px solid var(--border);
+      background:var(--panel);
+      border-radius:16px;
+      padding:14px;
+      box-shadow:var(--shadow);
+    }
+
+    .sidebar-card .title{
+      font-weight:800;
+      margin-bottom:4px;
+    }
+
+    .sidebar-card .small{
+      color:var(--muted);
+      font-size:.84rem;
+      line-height:1.35;
+    }
+
+    .mini-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+      margin-top:10px;
+      padding:9px 12px;
+      border:none;
+      border-radius:12px;
+      background:linear-gradient(135deg, var(--primary), var(--primary-2));
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      transition:.18s ease;
+    }
+
+    .mini-btn:hover{
+      color:#fff;
+      transform:translateY(-1px);
+    }
+
+    .plan-status{
+      cursor:default;
+      background:rgba(34,197,94,.12);
+      color:#bbf7d0;
+      border:1px solid rgba(34,197,94,.18);
+      box-shadow:none;
+    }
+
+    .plan-status:hover{
+      color:#bbf7d0;
+      transform:none;
+    }
+
+    .plan-price{
+      margin-top:8px;
+      font-size:1rem;
+      font-weight:900;
+      color:#fff;
+    }
+
+    .plans-modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(2,6,23,.68);
+      backdrop-filter:blur(10px);
+      z-index:1400;
+    }
+
+    .plans-modal.show{
+      display:flex;
+    }
+
+    .plans-dialog{
+      width:min(1180px, 100%);
+      max-height:90vh;
+      overflow:auto;
+      border:1px solid var(--border);
+      background:linear-gradient(135deg, rgba(11,23,48,.98), rgba(8,17,32,.98));
+      border-radius:22px;
+      box-shadow:0 28px 80px rgba(0,0,0,.46);
+      padding:18px;
+    }
+
+    .plans-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:14px;
+    }
+
+    .plans-head h3{
+      margin:0 0 4px;
+      font-size:1.2rem;
+      font-weight:900;
+    }
+
+    .plans-head p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .plans-close{
+      width:36px;
+      height:36px;
+      border:none;
+      border-radius:12px;
+      background:rgba(255,255,255,.06);
+      color:#eef2ff;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 auto;
+    }
+
+    .plans-grid{
+      display:grid;
+      grid-template-columns:repeat(5, minmax(0, 1fr));
+      gap:12px;
+    }
+
+    .plan-card{
+      border:1px solid rgba(255,255,255,.09);
+      background:rgba(255,255,255,.05);
+      border-radius:18px;
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .plan-card.featured{
+      background:linear-gradient(135deg, rgba(59,130,246,.18), rgba(255,255,255,.06));
+      border-color:rgba(96,165,250,.28);
+    }
+
+    .plan-card.anchor{
+      background:linear-gradient(135deg, rgba(34,197,94,.16), rgba(255,255,255,.06));
+      border-color:rgba(34,197,94,.26);
+    }
+
+    .plan-name{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      font-weight:900;
+      margin-bottom:8px;
+    }
+
+    .plan-tag{
+      padding:5px 8px;
+      border-radius:999px;
+      background:rgba(34,197,94,.12);
+      color:#bbf7d0;
+      font-size:.72rem;
+      font-weight:800;
+      border:1px solid rgba(34,197,94,.18);
+    }
+
+    .plan-amount{
+      font-size:1.55rem;
+      font-weight:900;
+      margin-bottom:10px;
+    }
+
+    .plan-amount span{
+      color:var(--muted);
+      font-size:.85rem;
+      font-weight:700;
+    }
+
+    .plan-benefits{
+      list-style:none;
+      padding:0;
+      margin:0;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      color:#d9e4ff;
+      line-height:1.35;
+      flex:1;
+    }
+
+    .plan-benefits li{
+      display:flex;
+      gap:8px;
+    }
+
+    .plan-benefits i{
+      color:#7dd3fc;
+      margin-top:2px;
+      flex:0 0 auto;
+    }
+
+    .plan-action{
+      margin-top:14px;
+    }
+
+    .plan-current{
+      cursor:default;
+      background:rgba(255,255,255,.06);
+      color:#cbd5e1;
+      border:1px solid rgba(255,255,255,.1);
+    }
+
+    .plan-current:hover{
+      transform:none;
+    }
+
+    .main{
+      min-height:100vh;
+      margin-left:220px;
+      padding:12px;
+      overflow:auto;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:12px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .profile-dropdown{
+      position:relative;
+    }
+
+    .profile-btn{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border:none;
+      border-radius:16px;
+      background:linear-gradient(135deg, #5b63f6, #4f46e5);
+      color:white;
+      padding:10px 14px;
+      cursor:pointer;
+      font-weight:700;
+      box-shadow:0 10px 24px rgba(79,70,229,.28);
+      transition:.18s ease;
+    }
+
+    .profile-btn:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.05);
+    }
+
+    .profile-avatar-img{
+      width:26px;
+      height:26px;
+      border-radius:999px;
+      object-fit:cover;
+      flex:0 0 auto;
+      background:#0f172a;
+    }
+
+    .profile-name{
+      max-width:160px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .profile-menu{
+      position:absolute;
+      top:calc(100% + 10px);
+      right:0;
+      min-width:230px;
+      display:none;
+      z-index:1200;
+      background:#1b1c31;
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:18px;
+      padding:10px;
+      box-shadow:0 18px 40px rgba(0,0,0,.35);
+    }
+
+    .profile-menu.show{
+      display:block;
+    }
+
+    .profile-menu a{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px;
+      border-radius:12px;
+      color:#eef2ff;
+      text-decoration:none;
+      font-weight:500;
+    }
+
+    .profile-menu a:hover{
+      background:rgba(255,255,255,.05);
+    }
+
+    .profile-menu .logout{
+      color:#ff6b6b;
+    }
+
+    .profile-menu .logout:hover{
+      background:rgba(255,107,107,.08);
+    }
+
+    .profile-menu .divider{
+      height:1px;
+      background:rgba(255,255,255,.08);
+      margin:8px 0;
+    }
+
+    .container,
+    .container-fluid,
+    .main-content,
+    .center-container{
+      max-width:1500px;
+      margin-left:auto;
+      margin-right:auto;
+    }
+
+    .container,
+    .container-fluid{
+      padding-left:0;
+      padding-right:0;
+    }
+
+    .page-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+
+    .page-title{
+      margin:0;
+      font-size:1.35rem;
+      font-weight:900;
+      letter-spacing:0;
+      line-height:1.15;
+    }
+
+    .page-subtitle,
+    .hint,
+    .section-subtitle{
+      color:var(--muted);
+      font-size:.9rem;
+      line-height:1.45;
+    }
+
+    .back-btn,
+    .back-link,
+    .perfil-back,
+    a.me-3.text-decoration-none{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-width:36px;
+      min-height:36px;
+      color:#7dd3fc;
+      text-decoration:none;
+      font-weight:700;
+      border-radius:12px;
+      transition:.15s ease;
+    }
+
+    .back-btn:hover,
+    .back-link:hover,
+    .perfil-back:hover,
+    a.me-3.text-decoration-none:hover{
+      background:rgba(125,211,252,.08);
+      color:#bae6fd;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    label,
+    p{
+      color:inherit;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5{
+      letter-spacing:0;
+      font-weight:900;
+    }
+
+    .card,
+    .form-card,
+    .perfil-card,
+    .card-dark{
+      border:1px solid var(--border);
+      background:var(--panel);
+      color:var(--text);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .card{
+      --bs-card-bg:transparent;
+      --bs-card-border-color:transparent;
+    }
+
+    .card.shadow,
+    .shadow{
+      box-shadow:var(--shadow) !important;
+    }
+
+    .card.p-3,
+    .card.p-4,
+    .form-card{
+      padding:16px 18px !important;
+    }
+
+    .card-header{
+      background:transparent;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      color:var(--text);
+    }
+
+    .form-card h1,
+    .card h2,
+    .card h3,
+    .card h4,
+    .card h5{
+      color:var(--text);
+    }
+
+    .form-group{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-bottom:14px;
+    }
+
+    .form-label,
+    .form-group label,
+    label{
+      color:#e8edff;
+      font-size:.9rem;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+
+    .form-control,
+    .form-select,
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+    select,
+    textarea{
+      width:100%;
+      min-height:42px;
+      background:rgba(15,23,42,.84) !important;
+      color:#eef2ff !important;
+      border:1px solid rgba(255,255,255,.11) !important;
+      border-radius:12px !important;
+      padding:10px 12px;
+      box-shadow:none !important;
+      outline:none;
+    }
+
+    textarea{
+      min-height:84px;
+      resize:vertical;
+    }
+
+    .form-control:focus,
+    .form-select:focus,
+    input:focus,
+    select:focus,
+    textarea:focus{
+      border-color:rgba(96,165,250,.58) !important;
+      box-shadow:0 0 0 3px rgba(59,130,246,.18) !important;
+    }
+
+    ::placeholder{
+      color:#7685a8 !important;
+    }
+
+    .table-responsive,
+    .table-wrap{
+      overflow:auto;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.05);
+      max-width:100%;
+    }
+
+    table,
+    .table,
+    .tabla-facturas,
+    .factura-table{
+      width:100%;
+      min-width:720px;
+      border-collapse:collapse;
+      margin:0;
+      background:rgba(255,255,255,.02) !important;
+      color:var(--text) !important;
+    }
+
+    .table > :not(caption) > * > *,
+    table th,
+    table td{
+      background:transparent !important;
+      color:var(--text) !important;
+      border-color:rgba(255,255,255,.06) !important;
+      padding:11px;
+      vertical-align:middle;
+    }
+
+    thead th,
+    .table-dark th,
+    .tabla-facturas thead th,
+    .factura-table th{
+      color:#c9d3f2 !important;
+      font-size:.79rem;
+      font-weight:800;
+      background:rgba(255,255,255,.03) !important;
+      border-bottom:1px solid rgba(255,255,255,.07) !important;
+      white-space:nowrap;
+    }
+
+    tbody tr:hover{
+      background:rgba(255,255,255,.025);
+    }
+
+    .money{
+      font-weight:800;
+    }
+
+    .btn,
+    form button:not(.profile-btn):not(.menu-toggle):not(.nav-toggle):not(.action){
+      border:none;
+      border-radius:12px;
+      padding:10px 14px;
+      font-size:.9rem;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      transition:.18s ease;
+      white-space:nowrap;
+      box-shadow:none;
+    }
+
+    .btn:hover,
+    form button:not(.profile-btn):not(.menu-toggle):not(.nav-toggle):not(.action):hover{
+      transform:translateY(-1px);
+    }
+
+    .btn-primary,
+    form button:not(.profile-btn):not(.menu-toggle):not(.nav-toggle):not(.action){
+      background:linear-gradient(135deg, var(--primary), var(--primary-2)) !important;
+      color:#fff !important;
+      box-shadow:0 12px 26px rgba(59,130,246,.22);
+    }
+
+    .btn-secondary,
+    .btn-dark,
+    .btn-outline-secondary{
+      background:rgba(255,255,255,.06) !important;
+      color:#eef2ff !important;
+      border:1px solid var(--border) !important;
+    }
+
+    .btn-success{
+      background:linear-gradient(135deg, #16a34a, #22c55e) !important;
+      color:#fff !important;
+    }
+
+    .btn-warning{
+      background:rgba(251,191,36,.14) !important;
+      color:#fbbf24 !important;
+      border:1px solid rgba(251,191,36,.18) !important;
+    }
+
+    .btn-danger{
+      background:rgba(239,68,68,.14) !important;
+      color:#fecaca !important;
+      border:1px solid rgba(239,68,68,.18) !important;
+    }
+
+    .btn-sm{
+      padding:7px 10px;
+      font-size:.78rem;
+      border-radius:10px;
+    }
+
+    .action{
+      border:none;
+      border-radius:10px;
+      padding:7px 10px;
+      font-size:.75rem;
+      font-weight:800;
+      cursor:pointer;
+      color:#e9edff;
+      background:rgba(255,255,255,.06);
+      text-decoration:none;
+      transition:.16s ease;
+      line-height:1;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+    }
+
+    .action:hover{
+      background:rgba(255,255,255,.11);
+      color:#fff;
+      transform:translateY(-1px);
+    }
+
+    .action.primary{
+      background:linear-gradient(135deg, #2563eb, #4f8cff);
+      color:#fff;
+    }
+
+    .badge,
+    .status-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.75rem;
+      font-weight:800;
+      line-height:1;
+      border:1px solid transparent;
+    }
+
+    .pending{background:rgba(251,191,36,.12); color:#fbbf24; border-color:rgba(251,191,36,.16);}
+    .approved{background:rgba(59,130,246,.12); color:#60a5fa; border-color:rgba(59,130,246,.16);}
+    .done{background:rgba(34,197,94,.12); color:#4ade80; border-color:rgba(34,197,94,.16);}
+
+    .alert{
+      border:none;
+      border-radius:14px;
+      padding:12px 14px;
+      margin-bottom:12px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(10px);
+      color:#dbeafe;
+      background:rgba(59,130,246,.12);
+      border:1px solid rgba(59,130,246,.18);
+    }
+
+    .alert-success,
+    .alert.success{
+      background:rgba(34,197,94,.12);
+      color:#bbf7d0;
+      border-color:rgba(34,197,94,.18);
+    }
+
+    .alert-danger,
+    .alert-error,
+    .alert.danger,
+    .alert.error{
+      background:rgba(239,68,68,.12);
+      color:#fecaca;
+      border-color:rgba(239,68,68,.18);
+    }
+
+    .select2-container--default .select2-selection--single{
+      background:rgba(15,23,42,.84) !important;
+      border:1px solid rgba(255,255,255,.11) !important;
+      border-radius:12px !important;
+      min-height:42px;
+      display:flex;
+      align-items:center;
+    }
+
+    .select2-container--default .select2-selection__rendered{
+      color:#eef2ff !important;
+      line-height:40px !important;
+    }
+
+    .select2-container--default .select2-selection__arrow{
+      height:40px !important;
+    }
+
+    .select2-dropdown{
+      background:#0f172a !important;
+      border:1px solid rgba(255,255,255,.11) !important;
+      color:#eef2ff !important;
+    }
+
+    .select2-results__option{
+      color:#eef2ff;
+    }
+
+    .select2-results__option--highlighted{
+      background:#2563eb !important;
+      color:#fff !important;
+    }
+
+    .select2-search__field{
+      background:#020617 !important;
+      color:#eef2ff !important;
+      border:1px solid rgba(255,255,255,.11) !important;
+    }
+
+    .mobile-header,
+    .overlay{
+      display:none;
+    }
+
+    @media (max-width:1100px){
+      .plans-grid{
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width:980px){
+      .sidebar{
+        left:-250px;
+        transition:left .25s ease;
+      }
+
+      .sidebar.active{
+        left:0;
+      }
+
+      .main{
+        margin-left:0;
+        padding:10px;
+      }
+
+      .mobile-header{
+        position:sticky;
         top:0;
         z-index:1100;
-    }
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        padding:12px 14px;
+        background:rgba(8,17,32,.78);
+        border-bottom:1px solid var(--border);
+        backdrop-filter:blur(18px);
+      }
 
-    .menu-toggle{
-        background: none;
-        border: none;
-        color: white;
-        font-size: 20px;
-        cursor: pointer;
-    }
+      .menu-toggle{
+        width:40px;
+        height:40px;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        border:none;
+        border-radius:12px;
+        background:rgba(255,255,255,.06);
+        color:#eef2ff;
+      }
 
-    .mobile-title{
-        font-weight: 700;
-        font-size: 16px;
-    }
+      .mobile-title{
+        font-weight:900;
+      }
 
-    .overlay{
-        display:none;
-        position: fixed;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        top:0;
-        left:0;
+      .overlay{
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,.55);
         z-index:900;
-    }
+      }
 
-    .overlay.active{
+      .overlay.active{
         display:block;
-    }
-}
-
-@media (max-width:768px){
-    input, select, textarea{
-        font-size:16px;
+      }
     }
 
-    button{
+    @media (max-width:640px){
+      .topbar{
+        justify-content:stretch;
+      }
+
+      .profile-dropdown,
+      .profile-btn,
+      .btn,
+      form button:not(.profile-btn):not(.menu-toggle):not(.nav-toggle):not(.action){
         width:100%;
+      }
+
+      .profile-menu{
+        width:100%;
+        min-width:unset;
+      }
+
+      .card.p-3,
+      .card.p-4,
+      .form-card{
+        padding:14px !important;
+      }
+
+      .plans-grid{
+        grid-template-columns:1fr;
+      }
     }
-}
-</style>
+  </style>
 </head>
 
-<body>
+<body class="tema-oscuro">
+  {% set path = request.path %}
 
-    <div class="mobile-header">
-    <button class="menu-toggle" onclick="toggleSidebar()">
-        <i class="fa fa-bars"></i>
+  <div class="mobile-header">
+    <button class="menu-toggle" type="button" onclick="toggleSidebar()" aria-label="Abrir menu">
+      <i class="fa fa-bars"></i>
     </button>
     <span class="mobile-title">FactuCloud</span>
-</div>
-
-<div class="overlay" onclick="toggleSidebar()"></div>
-
-<div class="container-fluid">
-<div class="row">
-
-<div class="sidebar">
-
-<div class="logo">
-<h4>FactuCloud</h4>
-</div>
-
-<hr>
-
-<a href="/"><i class="fa fa-chart-line"></i> Dashboard</a>
-<a href="/nueva"><i class="fa fa-plus"></i> Nueva Cotización</a>
-<a href="/configurar_ncf"><i class="fa fa-file-invoice"></i> Configurar NCF</a>
-<a href="/facturas"><i class="fa fa-file"></i> Facturas</a>
-<a href="/clientes"><i class="fa fa-users"></i> Clientes</a>
-
-<a href="javascript:void(0)" onclick="toggleMenu()">
-<i class="fa fa-gear"></i> Configuración <span id="arrow">▸</span>
-</a>
-
-<ul id="submenu-config" class="submenu">
-
-<li class="tema-box">
-    <span><i class="fa fa-palette"></i> Tema</span>
-    <select onchange="cambiarTema(this.value)">
-        <option value="auto">Sistema</option>
-        <option value="claro">Claro</option>
-        <option value="oscuro">Oscuro</option>
-    </select>
-</li>
-
-</ul>
-
-</div>
-
-
-<div class="content">
-
-  <div class="topbar">
-    <div class="profile-dropdown">
-      
-      <button class="profile-btn" onclick="toggleProfileMenu(event)">
-        <img
-          id="topbarProfileImage"
-          class="profile-avatar-img"
-          src="{{ url_for('static', filename='uploads/' + (usuario_foto if usuario_foto else 'default.png')) }}{% if usuario_foto_version %}?v={{ usuario_foto_version }}{% endif %}"
-          alt="Foto de perfil"
-        >
-        <span id="topbarProfileName" class="profile-name">{{ usuario if usuario else "Usuario" }}</span>
-        <i class="fa fa-chevron-down"></i>
-      </button>
-
-      <div class="profile-menu" id="profileMenu">
-        <a href="/usuarios"><i class="fa fa-user"></i> Usuarios</a>
-        <a href="/perfil"><i class="fa fa-gear"></i> Editar Perfil</a>
-
-        <div class="divider"></div>
-
-        <a href="/logout" class="logout">
-          <i class="fa fa-right-from-bracket"></i> Cerrar sesión
-        </a>
-      </div>
-
-    </div>
   </div>
 
-  {% block content %}{% endblock %}
+  <div class="overlay" onclick="toggleSidebar()"></div>
 
-</div>
+  <div class="app">
+    <aside class="sidebar">
+      <a href="/" class="brand">
+        <div class="brand-badge">FC</div>
+        <div>
+          <h1>FactuCloud</h1>
+          <p>Billing SaaS</p>
+        </div>
+      </a>
 
-</div>
-</div>
+      <nav class="sidebar-nav" aria-label="Navegacion principal">
+        <a href="/" class="{{ 'active' if path == '/' else '' }}"><span class="dot"></span> Dashboard</a>
+        <a href="/nueva" class="{{ 'active' if path.startswith('/nueva') else '' }}"><span class="dot"></span> Nueva Cotizacion</a>
+        <a href="/historial" class="{{ 'active' if path.startswith('/historial') or path.startswith('/detalle') or path.startswith('/editar_cotizacion') else '' }}"><span class="dot"></span> Historial</a>
+        <a href="/facturas" class="{{ 'active' if path.startswith('/facturas') or path.startswith('/factura_pdf') or path.startswith('/facturar') else '' }}"><span class="dot"></span> Facturas</a>
+        <a href="/clientes" class="{{ 'active' if path.startswith('/clientes') or path.startswith('/editar_cliente') else '' }}"><span class="dot"></span> Clientes</a>
+        <a href="/configurar_ncf" class="{{ 'active' if path.startswith('/configurar_ncf') else '' }}"><span class="dot"></span> NCF</a>
+        <a href="/usuarios" class="{{ 'active' if path.startswith('/usuarios') else '' }}"><span class="dot"></span> Cuentas</a>
+      </nav>
 
-<script>
+      <div class="sidebar-card">
+        <div class="title">Plan Mensual</div>
+        <div class="small">Plan actual: Profesional</div>
+        <div class="plan-price">US$ 39 / mes</div>
+        <button type="button" class="mini-btn" onclick="openPlansModal()">Ver planes</button>
+      </div>
+    </aside>
 
-function toggleMenu(){
+    <div class="plans-modal" id="plansModal" aria-hidden="true">
+      <div class="plans-dialog" role="dialog" aria-modal="true" aria-labelledby="plansTitle">
+        <div class="plans-head">
+          <div>
+            <h3 id="plansTitle">Planes mensuales</h3>
+            <p>Elige el nivel que mejor encaje con tu volumen de cotizaciones y facturacion.</p>
+          </div>
+          <button type="button" class="plans-close" onclick="closePlansModal()" aria-label="Cerrar planes">
+            <i class="fa fa-xmark"></i>
+          </button>
+        </div>
 
-let menu=document.getElementById("submenu-config")
-let arrow=document.getElementById("arrow")
+        <div class="plans-grid">
+          <div class="plan-card">
+            <div class="plan-name">Gratis</div>
+            <div class="plan-amount">US$ 0 <span>/ mes</span></div>
+            <ul class="plan-benefits">
+              <li><i class="fa fa-check"></i> Para probar sin compromiso</li>
+              <li><i class="fa fa-check"></i> 5 cotizaciones al mes</li>
+              <li><i class="fa fa-check"></i> 3 clientes guardados</li>
+              <li><i class="fa fa-check"></i> Facturas con marca FactuCloud</li>
+              <li><i class="fa fa-check"></i> Soporte por correo</li>
+            </ul>
+            <button type="button" class="mini-btn plan-action" onclick="acquirePlan('Gratis')">Empezar Gratis</button>
+          </div>
 
-if(menu.style.display==="none" || menu.style.display===""){
-menu.style.display="block"
-arrow.innerHTML="▾"
-}else{
-menu.style.display="none"
-arrow.innerHTML="▸"
-}
+          <div class="plan-card">
+            <div class="plan-name">Basico</div>
+            <div class="plan-amount">US$ 9 <span>/ mes</span></div>
+            <ul class="plan-benefits">
+              <li><i class="fa fa-check"></i> Para freelancers y servicios</li>
+              <li><i class="fa fa-check"></i> 100 cotizaciones al mes</li>
+              <li><i class="fa fa-check"></i> 50 clientes guardados</li>
+              <li><i class="fa fa-check"></i> PDF sin marca</li>
+              <li><i class="fa fa-check"></i> Historial basico</li>
+            </ul>
+            <button type="button" class="mini-btn plan-action" onclick="acquirePlan('Basico')">Elegir Basico</button>
+          </div>
 
-}
+          <div class="plan-card featured">
+            <div class="plan-name">Profesional <span class="plan-tag">Mas elegido</span></div>
+            <div class="plan-amount">US$ 39 <span>/ mes</span></div>
+            <ul class="plan-benefits">
+              <li><i class="fa fa-check"></i> Para PYMEs que facturan en serio</li>
+              <li><i class="fa fa-check"></i> Facturas y cotizaciones ilimitadas</li>
+              <li><i class="fa fa-check"></i> Hasta 5 usuarios</li>
+              <li><i class="fa fa-check"></i> NCF E31, E32, E33 y E34</li>
+              <li><i class="fa fa-check"></i> Reportes de ventas y clientes</li>
+            </ul>
+            <button type="button" class="mini-btn plan-action plan-current" disabled>Plan actual</button>
+          </div>
 
-</script>
+          <div class="plan-card">
+            <div class="plan-name">Empresa <span class="plan-tag">Mejor valor</span></div>
+            <div class="plan-amount">US$ 79 <span>/ mes</span></div>
+            <ul class="plan-benefits">
+              <li><i class="fa fa-check"></i> Todo lo del plan Profesional</li>
+              <li><i class="fa fa-check"></i> Hasta 15 usuarios</li>
+              <li><i class="fa fa-check"></i> Multiples sucursales y NCF</li>
+              <li><i class="fa fa-check"></i> Roles y permisos por usuario</li>
+              <li><i class="fa fa-check"></i> API e integraciones</li>
+              <li><i class="fa fa-check"></i> Soporte WhatsApp prioritario</li>
+            </ul>
+            <button type="button" class="mini-btn plan-action" onclick="acquirePlan('Empresa')">Solicitar Demo</button>
+          </div>
 
-<script>
+          <div class="plan-card anchor">
+            <div class="plan-name">Corporativo <span class="plan-tag">Ahorra 40%</span></div>
+            <div class="plan-amount">US$ 199 <span>/ mes</span></div>
+            <ul class="plan-benefits">
+              <li><i class="fa fa-check"></i> Todo lo del plan Empresa</li>
+              <li><i class="fa fa-check"></i> Usuarios ilimitados</li>
+              <li><i class="fa fa-check"></i> Soporte WhatsApp y llamadas</li>
+              <li><i class="fa fa-check"></i> Onboarding inicial incluido</li>
+              <li><i class="fa fa-check"></i> Contabilidad basica y libro de ventas</li>
+              <li><i class="fa fa-check"></i> Seguridad empresarial</li>
+            </ul>
+            <button type="button" class="mini-btn plan-action" onclick="acquirePlan('Corporativo')">Hablar con Ventas</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-function cambiarTema(tema){
+    <main class="main">
+      <div class="topbar">
+        <div class="profile-dropdown">
+          <button class="profile-btn" type="button" onclick="toggleProfileMenu(event)">
+            <img
+              id="topbarProfileImage"
+              class="profile-avatar-img"
+              src="{{ url_for('static', filename='uploads/' + (usuario_foto if usuario_foto else 'default.png')) }}{% if usuario_foto_version %}?v={{ usuario_foto_version }}{% endif %}"
+              alt="Foto de perfil"
+            >
+            <span id="topbarProfileName" class="profile-name">{{ usuario if usuario else "Usuario" }}</span>
+            <i class="fa fa-chevron-down"></i>
+          </button>
 
-localStorage.setItem("tema",tema)
+          <div class="profile-menu" id="profileMenu">
+            <a href="/usuarios"><i class="fa fa-user-group"></i> Cambiar cuenta</a>
+            <a href="/perfil"><i class="fa fa-gear"></i> Editar Perfil</a>
+            <div class="divider"></div>
+            <a href="/logout" class="logout">
+              <i class="fa fa-right-from-bracket"></i> Cerrar sesion
+            </a>
+          </div>
+        </div>
+      </div>
 
-if(tema==="claro"){
-document.body.classList.remove("tema-oscuro")
-document.body.classList.add("tema-claro")
-}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
 
-if(tema==="oscuro"){
-document.body.classList.remove("tema-claro")
-document.body.classList.add("tema-oscuro")
-}
+  <script>
+    function toggleProfileMenu(e){
+      e.stopPropagation();
+      document.getElementById("profileMenu").classList.toggle("show");
+    }
 
-if(tema==="auto"){
-if(window.matchMedia('(prefers-color-scheme: dark)').matches){
-    document.body.classList.remove("tema-claro")
-    document.body.classList.add("tema-oscuro")
-}else{
-    document.body.classList.remove("tema-oscuro")
-    document.body.classList.add("tema-claro")
-}
-}
+    document.addEventListener("click", function(){
+      const menu = document.getElementById("profileMenu");
+      if(menu){
+        menu.classList.remove("show");
+      }
+    });
 
-}
+    function toggleSidebar(){
+      document.querySelector(".sidebar").classList.toggle("active");
+      document.querySelector(".overlay").classList.toggle("active");
+    }
 
-window.onload=function(){
+    function openPlansModal(){
+      const modal = document.getElementById("plansModal");
+      if(!modal) return;
+      modal.classList.add("show");
+      modal.setAttribute("aria-hidden", "false");
+    }
 
-let temaGuardado=localStorage.getItem("tema")
+    function closePlansModal(){
+      const modal = document.getElementById("plansModal");
+      if(!modal) return;
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden", "true");
+    }
 
-if(temaGuardado){
-cambiarTema(temaGuardado)
-}
+    function acquirePlan(plan){
+      alert("Seleccionaste el plan " + plan + ". Aqui se conectaria el pago o la activacion del plan.");
+    }
 
-}
+    document.addEventListener("keydown", function(event){
+      if(event.key === "Escape"){
+        closePlansModal();
+      }
+    });
 
-</script>
-
-<script>
-function toggleProfileMenu(e){
-e.stopPropagation();
-document.getElementById("profileMenu").classList.toggle("show");
-}
-
-document.addEventListener("click", function(){
-document.getElementById("profileMenu").classList.remove("show");
-});
-</script>
-
-<script>
-function toggleSidebar(){
-    document.querySelector(".sidebar").classList.toggle("active");
-    document.querySelector(".overlay").classList.toggle("active");
-}
-</script>
-
+    document.addEventListener("click", function(event){
+      const modal = document.getElementById("plansModal");
+      if(modal && event.target === modal){
+        closePlansModal();
+      }
+    });
+  </script>
 </body>
 </html>

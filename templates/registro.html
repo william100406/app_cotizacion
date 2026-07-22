@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear cuenta | FactuCloud</title>
+  <link rel="icon" href="{{ url_for('static', filename='FC.ico') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root{
+      --bg:#081120;
+      --bg-2:#0b1730;
+      --panel:rgba(14,20,44,.72);
+      --border:rgba(255,255,255,.10);
+      --text:#f4f7fb;
+      --muted:#9ba7c2;
+      --primary:#3b82f6;
+      --primary-2:#2563eb;
+      --shadow:0 30px 80px rgba(0,0,0,.45);
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family:Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:24px;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 20%, rgba(59,130,246,.18), transparent 28%),
+        radial-gradient(circle at 80% 80%, rgba(16,185,129,.12), transparent 30%),
+        linear-gradient(135deg, var(--bg-2), var(--bg));
+    }
+
+    .card{
+      width:100%;
+      max-width:440px;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(18px);
+      padding:34px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:24px;
+    }
+
+    .brand-mark{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      background:linear-gradient(135deg, var(--primary), #60a5fa);
+    }
+
+    h1{
+      font-size:1.8rem;
+      font-weight:900;
+      margin-bottom:8px;
+    }
+
+    p{
+      color:var(--muted);
+      line-height:1.5;
+      margin-bottom:22px;
+    }
+
+    .alert{
+      padding:13px 14px;
+      border-radius:14px;
+      margin-bottom:14px;
+      border:1px solid rgba(239,68,68,.35);
+      background:rgba(239,68,68,.10);
+    }
+
+    form{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .input-wrap{
+      position:relative;
+    }
+
+    .input-wrap i{
+      position:absolute;
+      left:14px;
+      top:50%;
+      transform:translateY(-50%);
+      color:#aab5cc;
+    }
+
+    input{
+      width:100%;
+      min-height:48px;
+      padding:13px 14px 13px 44px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      outline:none;
+      font-size:1rem;
+    }
+
+    input:focus{
+      border-color:rgba(59,130,246,.95);
+      box-shadow:0 0 0 4px rgba(59,130,246,.18);
+    }
+
+    button,
+    .secondary-link{
+      width:100%;
+      min-height:48px;
+      border:none;
+      border-radius:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      text-decoration:none;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    button{
+      background:linear-gradient(135deg, var(--primary), var(--primary-2));
+      color:#fff;
+      box-shadow:0 14px 30px rgba(37,99,235,.32);
+      margin-top:4px;
+    }
+
+    .secondary-link{
+      margin-top:12px;
+      color:#dbeafe;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="brand-mark">FC</div>
+      <div>
+        <strong>FactuCloud</strong>
+        <p style="margin:2px 0 0;">Nueva cuenta</p>
+      </div>
+    </div>
+
+    <h1>Crear cuenta</h1>
+    <p>Agrega una cuenta nueva para iniciar sesion o cambiar entre usuarios desde el panel.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+      <div class="input-wrap">
+        <i class="fa fa-user"></i>
+        <input type="text" name="usuario" placeholder="Usuario" required autocomplete="username">
+      </div>
+
+      <div class="input-wrap">
+        <i class="fa fa-lock"></i>
+        <input type="password" name="password" placeholder="Contrasena" required autocomplete="new-password">
+      </div>
+
+      <div class="input-wrap">
+        <i class="fa fa-check"></i>
+        <input type="password" name="confirmar" placeholder="Confirmar contrasena" required autocomplete="new-password">
+      </div>
+
+      <button type="submit">
+        <i class="fa fa-user-plus"></i>
+        Crear cuenta
+      </button>
+    </form>
+
+    <a href="{{ url_for('login') }}" class="secondary-link">
+      Ya tengo cuenta
+    </a>
+  </div>
+</body>
+</html>
